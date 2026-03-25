@@ -1,1344 +1,1289 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>EmpireBot Trading</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary-bg: #111317;
-      --card-bg: #181b22;
-      --accent: #58d2fa;
-      --accent2: #e859e2;
-      --accent3: #ffd54f;
-      --danger: #e57373;
-      --success: #8dd37e;
-      --muted: #bdbdbd;
-      --text: #fff;
-      --btn-bg: linear-gradient(90deg, #4fc3f7 0%, #ab47bc 100%);
-      --btn-bg-hover: linear-gradient(90deg, #0288d1 0%, #7e57c2 100%);
-    }
-    html, body {
-      height: 100%; margin: 0; padding: 0;
-      background: var(--primary-bg); color: var(--text); font-family: 'Roboto', sans-serif;
-    }
-    body { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-    .centered { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; width: 100vw;}
-    .login-surface {
-      background: var(--card-bg); border-radius: 16px; box-shadow: 0 4px 28px rgba(0,0,0,0.7);
-      padding: 38px 28px 36px 28px; width: 92vw; max-width: 350px; text-align: center;
-      margin: auto;
-    }
-    .login-title {
-      font-size: 1.35em; margin-bottom: 22px; color: var(--accent2);
-      font-weight: bold; letter-spacing: 1px;
-      background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3) 80%);
-      background-clip: text; -webkit-background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
-    }
-    .login-surface input[type="password"] {
-      width: 80%; padding: 13px; margin-bottom: 18px; border-radius: 8px; border: 1.5px solid var(--accent2);
-      background: var(--primary-bg); color: var(--text); font-size: 1.1em; transition: border 0.2s;
-      letter-spacing: 5px; text-align: center;
-    }
-    .login-surface input:focus { outline: none; border: 1.5px solid var(--accent); }
-    .login-surface button {
-      padding: 13px 38px; background: var(--btn-bg); color: var(--primary-bg); border: none;
-      border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1.1em; letter-spacing: 0.5px;
-      box-shadow: 0 2px 8px rgba(79,195,247,0.13); transition: background 0.2s, color 0.2s;
-    }
-    .login-surface button:hover { background: var(--btn-bg-hover); color: #fff; }
-    .login-error { color: var(--danger); margin-top: 10px; font-size: 0.98em; display:none;}
-    .loader-bg {
-      min-height: 100vh; width: 100vw; background: rgba(17,19,23,0.97);
-      display: flex; align-items: center; justify-content: center; flex-direction: column; z-index: 100;
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0; transition: opacity 0.3s;
-    }
-    .loader-circle {
-      width: 120px; height: 120px; border-radius: 50%; background: var(--card-bg);
-      display: flex; align-items: center; justify-content: center; margin-bottom: 24px; box-shadow: 0 0 25px #ab47bc40;
-      position: relative;
-      animation: pulse 2s infinite;
-    }
-    .loader-spin-img {
-      width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 4px solid var(--accent2);
-      box-shadow: 0 2px 15px 2px #4fc3f777;
-      animation: spin 2s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0);}
-      100% { transform: rotate(360deg);}
-    }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 25px #ab47bc40;}
-      50% { box-shadow: 0 0 40px #4fc3f799;}
-      100% { box-shadow: 0 0 25px #ab47bc40;}
-    }
-    .loader-text {
-      color: var(--accent); font-size: 1.15em; font-weight: 600; letter-spacing: 0.5px;
-      text-align: center; margin-top: 0;
-    }
-    .typing-loader-msg {
-      color: var(--accent2);
-      font-size: 1.15em;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      text-align: center;
-      margin-top: 10px;
-      min-height: 60px;
-      white-space: pre-wrap;
-      word-break: break-word;
-      animation: none;
-      display: none;
-    }
-    #trade-proceed-btn {
-      display: none;
-      margin-top: 25px;
-      padding: 12px 38px;
-      background: var(--btn-bg);
-      color: var(--primary-bg);
-      border: none;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 1.1em;
-      letter-spacing: 0.5px;
-      box-shadow: 0 2px 8px rgba(79,195,247,0.13);
-      transition: background 0.2s, color 0.2s;
-    }
-    #trade-proceed-btn:hover { background: var(--btn-bg-hover); color: #fff; }
-    #withdrawal-btn {
-      flex: 1 1 46%;
-      padding: 12px 0;
-      border-radius: 8px;
-      border: none;
-      font-weight: 700;
-      font-size: 1.04em;
-      transition: background 0.17s, color 0.17s;
-      cursor: pointer;
-      box-shadow: 0 1px 5px rgba(79,195,247,0.09);
-      text-align: center;
-      text-decoration: none;
-      background: var(--btn-bg);
-      color: #191c24;
-      margin: 0 3px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #withdrawal-btn:disabled, .profile-actions .disabled {
-      background: #31313f; color: #bbb; pointer-events: none; opacity: 0.7;
-    }
-    #withdrawal-btn:hover {
-      background: var(--btn-bg-hover); color: #fff;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empire Virtual - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    /* Referral badge (blinking circular) */
-    .referral-badge {
-      position: absolute;
-      left: 14px;
-      top: 10px;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #fff9c4 0%, #ffd54f 18%, #e859e2 70%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #111;
-      font-weight: 700;
-      text-align: center;
-      box-shadow: 0 6px 26px rgba(233,89,226,0.22);
-      cursor: pointer;
-      z-index: 3;
-      transition: transform 0.12s;
-      -webkit-backdrop-filter: blur(4px);
-      backdrop-filter: blur(4px);
-    }
-    .referral-badge:active { transform: scale(0.97); }
+        :root {
+            --primary-dark: #1a1410;
+            --secondary-dark: #2d2420;
+            --accent-green: #10b981;
+            --accent-green-dark: #059669;
+            --text-light: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #3d3430;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
 
-    /* Bright blinking text */
-    .referral-badge .referral-badge-text {
-      color: #111;
-      font-weight: 800;
-      font-size: 0.92em;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      text-shadow: 0 1px 0 rgba(255,255,255,0.5);
-      animation: referralTextBlink 1.2s infinite;
-    }
-    .referral-badge .referral-amount {
-      font-size: 0.82em;
-      margin-top: 3px;
-      color: #060606;
-      font-weight: 900;
-      text-shadow: 0 1px 0 rgba(255,255,255,0.35);
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-    @keyframes referralTextBlink {
-      0% { opacity: 1; filter: brightness(1.35) saturate(1.1); transform: translateY(0); }
-      50% { opacity: 0.35; filter: brightness(0.95) saturate(0.95); transform: translateY(-2px); }
-      100% { opacity: 1; filter: brightness(1.35) saturate(1.1); transform: translateY(0); }
-    }
+        .pin-lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
 
-    /* ---- Withdrawal Status MODAL ---- */
-    .withdrawal-status-modal-bg {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.92); z-index: 1050;
-      justify-content: center; align-items: flex-end;
-    }
-    .withdrawal-status-modal-bg.active { display: flex; }
-    .withdrawal-status-modal-card {
-      position: relative;
-      background: var(--card-bg);
-      border-radius: 16px 16px 0 0;
-      box-shadow: 0 6px 36px rgba(171,71,188,0.28);
-      width: 100vw;
-      max-width: 500px;
-      height: 52vh;
-      min-height: 340px;
-      max-height: 70vh;
-      padding: 0;
-      overflow: hidden;
-      flex-direction: column;
-      border-top: 3px solid var(--accent2);
-      animation: profileFadeIn 0.32s;
-      display: flex;
-    }
-    .withdrawal-status-modal-close {
-      position: absolute; top: 9px; right: 13px; background: none; border: none; font-size: 2em; color: var(--accent2);
-      z-index: 20; cursor: pointer;
-    }
-    .withdrawal-status-modal-title {
-      color: var(--accent2); text-align: center; font-weight: bold; font-size: 1.16em; margin: 18px 0 7px 0;
-      letter-spacing: 1px;
-    }
-    .withdrawal-status-iframe {
-      width: 100%; height: calc(100% - 48px); border: none; margin: 0; flex: 1 1 auto; background: #131313;
-      border-bottom-left-radius: 18px; border-bottom-right-radius: 18px;
-      box-shadow: 0 4px 24px #ab47bc13;
-    }
-    @media (max-width: 480px) {
-      .withdrawal-status-modal-card {
-        width: 100vw; max-width: 100vw; min-height: 240px; height: 56vh; max-height: 75vh;
-        border-radius: 16px 16px 0 0;
-      }
-    }
+        .pin-lock-screen.hidden {
+            display: none !important;
+        }
 
-    .withdrawal-form-modal-bg {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.94); z-index: 1025; justify-content: center; align-items: center;
-      overflow-y: auto;
-    }
-    .withdrawal-form-modal-bg.active { display: flex; }
-    .withdrawal-form-modal-card {
-      background: var(--card-bg); border-radius: 16px;
-      box-shadow: 0 6px 36px rgba(171,71,188,0.18);
-      width: 94vw; max-width: 340px;
-      padding: 22px 7px 18px 7px;
-      position: relative; 
-      max-height: 88vh;
-      min-height: 370px;
-      display: flex; flex-direction: column; border-top: 3px solid var(--accent2);
-      animation: profileFadeIn 0.32s;
-      overflow-y: auto;
-    }
-    .withdrawal-form {
-      display: flex; flex-direction: column; align-items: stretch; flex: 1 1 100%;
-    }
-    .withdrawal-form-modal-close {
-      position: absolute; top: 8px; right: 13px; background: none; border: none; font-size: 1.3em; color: var(--accent2);
-      cursor: pointer;
-      z-index: 20;
-    }
-    .withdrawal-form-modal-card h3 { color: var(--accent2); text-align: center; font-weight: bold; margin-bottom: 10px; }
-    .withdrawal-form input, .withdrawal-form select {
-      width: 98%; padding: 11px; margin: 8px 0 13px 0; border-radius: 7px; border: 1px solid var(--accent2);
-      background: var(--primary-bg); color: var(--text); font-size: 1em;
-    }
-    .withdrawal-form input:focus { outline: none; border: 1.5px solid var(--accent);}
-    .withdrawal-form button {
-      width: 100%; padding: 12px 0; border-radius: 8px; background: var(--btn-bg); color:#181b22; font-weight:700;
-      font-size: 1.09em; cursor:pointer; border:none; margin-top:3px;
-      box-shadow: 0 2px 8px rgba(171,71,188,0.10); transition: background 0.18s, color 0.18s;
-      letter-spacing: 0.5px;
-    }
-    .withdrawal-form button:hover { background: var(--btn-bg-hover); color:#fff; }
-    @media (max-width: 480px) {
-      .withdrawal-form-modal-card {
-        max-width: 99vw; min-width: 97vw; padding: 13px 1vw 17px 1vw;
-        max-height: 99vh; min-height: 290px;
-      }
-      .withdrawal-form {
-        padding-bottom: 0px;
-      }
-      .withdrawal-form button { margin-bottom: 7px; }
-    }
+        .pin-container {
+            background: var(--secondary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
 
-    /* Referral modal styles (similar to other modals) */
-    .referral-modal-bg {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.94); z-index: 1060; justify-content: center; align-items: center;
-      overflow-y: auto;
-    }
-    .referral-modal-bg.active { display: flex; }
-    .referral-modal-card {
-      background: var(--card-bg); border-radius: 16px;
-      box-shadow: 0 6px 36px rgba(171,71,188,0.18);
-      width: 94vw; max-width: 420px;
-      padding: 18px;
-      position: relative;
-      max-height: 88vh;
-      overflow-y: auto;
-      border-top: 3px solid var(--accent2);
-    }
-    .referral-modal-close {
-      position: absolute; top: 8px; right: 13px; background: none; border: none; font-size: 1.3em; color: var(--accent2);
-      cursor: pointer;
-      z-index: 20;
-    }
-    .referral-header { color: var(--accent2); font-weight: 700; text-align: center; margin-bottom: 8px; }
-    .referral-link-box {
-      background: #121214; border: 1px solid #2a2a36; padding: 10px; border-radius: 8px; margin-bottom: 12px; word-break: break-all;
-    }
-    .share-buttons { display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 12px; }
-    .share-buttons a { flex: 1 1 48%; padding: 10px; border-radius: 8px; text-align:center; color:#111; font-weight:700; text-decoration:none; }
-    .share-whatsapp { background: #25D366; }
-    .share-facebook { background: #1877F2; color: #fff; }
-    .share-telegram { background: #26A5E4; color:#fff; }
-    .share-twitter { background: #1DA1F2; color:#fff; }
+        .pin-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-light);
+        }
 
-    .referral-stats { margin-bottom: 10px; }
-    .referral-list { max-height: 220px; overflow-y: auto; border-radius: 8px; border: 1px solid #222; padding: 8px; background: #0f1113; }
+        .pin-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
 
-    @media (max-width: 480px) {
-      .referral-modal-card { max-width: 98vw; padding: 12px; }
-    }
+        .pin-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
 
-    /* --- All other styling untouched --- */
-    @media (max-width: 480px) {
-      .profile-card, .status-modal-card, .login-surface, .withdrawal-form-modal-card { max-width: 99vw; padding: 12px 3vw 22px 3vw;}
-    }
-    .profile-card {
-      background: var(--card-bg); border-radius: 18px; box-shadow: 0 2px 16px rgba(0,0,0,0.25);
-      width: 98vw; max-width: 410px; margin: auto; margin-top: 32px; padding: 28px 20px 30px 20px;
-      text-align: center; position: relative; border-top: 3px solid var(--accent2);
-      animation: profileFadeIn 0.45s;
-    }
-    @keyframes profileFadeIn {
-      from { opacity: 0; transform: translateY(30px);}
-      to { opacity: 1; transform: translateY(0);}
-    }
-    .profile-img {
-      width: 92px; height: 92px; border-radius: 50%; object-fit: cover; margin-bottom: 12px;
-      border: 3px solid var(--accent3); box-shadow: 0 2px 16px 2px rgba(171,71,188,0.13);
-    }
-    .profile-row {
-      margin-bottom: 8px; font-size: 1.06em;
-    }
-    .profile-referral {
-      font-size: 1.08em;
-      margin-bottom: 8px;
-      color: var(--accent);
-      font-weight: 600;
-      letter-spacing: 0.2px;
-    }
-    .profile-name {
-      font-size: 1.33em; font-weight: 700; margin-bottom: 10px; color: var(--accent2); letter-spacing: 0.5px;
-    }
-    .profile-balance {
-      font-weight: bold; color: var(--accent3); font-size: 1.13em; margin-bottom: 6px;
-    }
-    .profile-expiry {
-      font-weight: bold; color: var(--accent); font-size: 1em; margin-bottom: 12px;
-    }
-    .profile-expired-notice {
-      color: var(--danger); font-weight: 700; margin: 12px 0 14px 0; background: #2a191b;
-      padding: 10px 0; border-radius: 8px; border: 1.5px solid var(--danger); font-size: 1.07em;
-      animation: blink 1.1s linear infinite;
-    }
-    @keyframes blink {
-      0%,100{opacity:1;} 50%{opacity:0.5;}
-    }
-    .profile-trade-schedule {
-      font-size: 1.02em; color: var(--muted); margin-bottom: 15px;
-      background: linear-gradient(90deg, #4fc3f7, #ffd54f 70%); background-clip: text; -webkit-background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
-      font-weight: 500;
-    }
-    .profile-actions {
-      display: flex; gap: 13px; margin: 19px 0 0 0; justify-content: center; flex-wrap: wrap;
-    }
-    .profile-actions button, .profile-actions a {
-      flex: 1 1 46%; padding: 12px 0; border-radius: 8px; border: none; font-weight: 700;
-      font-size: 1.04em; transition: background 0.17s, color 0.17s; cursor: pointer;
-      box-shadow: 0 1px 5px rgba(79,195,247,0.09); text-align: center; text-decoration: none;
-      background: var(--btn-bg); color: #191c24; margin: 0 3px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .profile-actions button:disabled, .profile-actions .disabled {
-      background: #31313f; color: #bbb; pointer-events: none; opacity: 0.7;
-    }
-    .profile-actions button:hover, .profile-actions a:hover {
-      background: var(--btn-bg-hover); color: #fff;
-    }
-    .profile-status-icon {
-      position: absolute; top: 12px; right: 18px; cursor: pointer; background: none; border: none;
-      outline: none; z-index: 2;
-    }
-    .profile-status-icon svg {
-      width: 36px; height: 36px; stroke: var(--accent2); fill: var(--card-bg); border-radius: 50%; background: var(--card-bg);
-      box-shadow: 0 2px 10px #ab47bc30;
-      transition: box-shadow 0.19s;
-    }
-    .profile-status-icon:active svg {
-      box-shadow: 0 2px 18px #ffd54f40;
-    }
-    .status-modal-bg {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.90); z-index: 1010;
-      justify-content: center; align-items: center;
-    }
-    .status-modal-bg.active { display: flex; }
-    .status-modal-card {
-      background: var(--card-bg); border-radius: 16px; box-shadow: 0 6px 38px rgba(171,71,188,0.19);
-      width: 94vw; max-width: 350px; padding: 24px 17px 17px 17px; position: relative; max-height: 87vh;
-      display: flex; flex-direction: column; border-top: 3px solid var(--accent2);
-      animation: profileFadeIn 0.32s;
-    }
-    .status-modal-card h3 { color: var(--accent2); text-align: center; font-weight: bold; margin-bottom: 14px; }
-    .status-row { margin-bottom: 12px; font-size: 1.04em; }
-    .status-row span { font-weight: 700; color: var(--accent3);}
-    .status-modal-close {
-      position: absolute; top: 8px; right: 14px; background: none; border: none; font-size: 1.32em; color: var(--accent2);
-      cursor: pointer;
-    }
-    .trade-form-modal-bg {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.94); z-index: 1020; justify-content: center; align-items: center;
-    }
-    .trade-form-modal-bg.active { display: flex; }
-    .trade-form-modal-card {
-      background: var(--card-bg); border-radius: 16px; box-shadow: 0 6px 36px rgba(171,71,188,0.18);
-      width: 94vw; max-width: 340px; padding: 22px 12px 17px 12px; position: relative; max-height: 88vh;
-      display: flex; flex-direction: column; border-top: 3px solid var(--accent2);
-      animation: profileFadeIn 0.32s;
-    }
-    .trade-form-modal-close {
-      position: absolute; top: 8px; right: 13px; background: none; border: none; font-size: 1.3em; color: var(--accent2);
-      cursor: pointer;
-    }
-    .trade-form-modal-card h3 { color: var(--accent2); text-align: center; font-weight: bold; margin-bottom: 10px; }
-    .trade-form input, .trade-form select {
-      width: 98%; padding: 11px; margin: 8px 0 13px 0; border-radius: 7px; border: 1px solid var(--accent2);
-      background: var(--primary-bg); color: var(--text); font-size: 1em;
-    }
-    .trade-form input:focus { outline: none; border: 1.5px solid var(--accent);}
-    .trade-form button {
-      width: 100%; padding: 12px 0; border-radius: 8px; background: var(--btn-bg); color:#181b22; font-weight:700;
-      font-size: 1.09em; cursor:pointer; border:none; margin-top:3px;
-      box-shadow: 0 2px 8px rgba(171,71,188,0.10); transition: background 0.18s, color 0.18s;
-      letter-spacing: 0.5px;
-    }
-    .trade-form button:hover { background: var(--btn-bg-hover); color:#fff; }
-    .trade-summary-table {
-      width: 100%; background: var(--secondary-bg); border-radius: 10px; margin-top: 12px; font-size:1.02em;
-      color: var(--text); border-collapse: separate; border-spacing: 0;
-    }
-    .trade-summary-table th, .trade-summary-table td {
-      padding: 9px 6px; border-bottom: 1px solid var(--primary-bg);
-    }
-    .trade-summary-table th { color: var(--accent2);}
-    .trade-summary-table tr:last-child td { border-bottom: none;}
-  </style>
+        .pin-digit {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-dark);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-green);
+            transition: all 0.2s;
+        }
+
+        .pin-digit.active {
+            border-color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .pin-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .pin-key {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pin-key:hover {
+            background: var(--secondary-dark);
+            border-color: var(--accent-green);
+        }
+
+        .pin-key:active {
+            transform: scale(0.95);
+        }
+
+        .pin-key.delete {
+            grid-column: span 3;
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .pin-key.delete:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .pin-error {
+            color: var(--danger);
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .pin-error.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .dashboard {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .dashboard.hidden {
+            display: none !important;
+        }
+
+        .header {
+            background: var(--secondary-dark);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            color: var(--accent-green);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .settings-btn:hover {
+            transform: rotate(20deg);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .profile-section {
+            background: var(--secondary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 25px 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .profile-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            background: var(--primary-dark);
+            border: 3px solid var(--accent-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            overflow: hidden;
+        }
+
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .profile-name:hover {
+            color: var(--accent-green);
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, rgba(16, 185, 129, 0.1) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .balance-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .balance-amount {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+
+        .progress-container {
+            margin: 15px 0;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--primary-dark);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), #6ee7b7);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .next-balance-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            padding: 8px;
+            background: var(--primary-dark);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .next-balance-value {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .timer-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .timer-modal.show {
+            display: flex;
+        }
+
+        .timer-content {
+            background: var(--secondary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 30px 25px;
+            max-width: 350px;
+            text-align: center;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .timer-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .timer-section {
+            margin-bottom: 25px;
+        }
+
+        .timer-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-green);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .timer-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .timer-box {
+            background: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .timer-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .timer-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+
+        .timer-details {
+            background: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            text-align: left;
+        }
+
+        .timer-details strong {
+            color: var(--accent-green);
+        }
+
+        .timer-close {
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .timer-close:hover {
+            background: var(--accent-green-dark);
+        }
+
+        .buttons-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-green-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .btn-secondary {
+            background: var(--primary-dark);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .menu-section {
+            background: var(--secondary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .menu-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-item:hover {
+            background: rgba(16, 185, 129, 0.1);
+            padding-left: 25px;
+        }
+
+        .menu-item-text {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .menu-item-icon {
+            font-size: 16px;
+            color: var(--accent-green);
+            width: 20px;
+        }
+
+        .menu-item-arrow {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 2000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--secondary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 20px 20px 0 0;
+            padding: 25px 20px;
+            width: 100%;
+            max-width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        .form-input:disabled {
+            background: var(--secondary-dark);
+            color: var(--text-muted);
+        }
+
+        .pin-input-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .pin-input-box {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-dark);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-light);
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .pin-input-box:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9000;
+        }
+
+        .loader-overlay.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(16, 185, 129, 0.2);
+            border-top-color: var(--accent-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .settings-item {
+            background: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+        }
+
+        .settings-label {
+            color: var(--text-muted);
+            font-size: 11px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .settings-value {
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .referral-card {
+            background: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .referral-code {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .referral-count {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .referral-progress {
+            background: var(--secondary-dark);
+            border-radius: 8px;
+            overflow: hidden;
+            height: 6px;
+            margin-bottom: 10px;
+        }
+
+        .referral-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), #6ee7b7);
+            transition: width 0.5s ease;
+        }
+
+        .referral-bonus-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            padding: 8px;
+            background: var(--secondary-dark);
+            border-radius: 6px;
+        }
+
+        .referral-bonus-value {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .instructions-list {
+            list-style: none;
+        }
+
+        .instructions-list li {
+            padding: 10px 0 10px 30px;
+            position: relative;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-light);
+        }
+
+        .instructions-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .expired-warning {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-top: 15px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-  <div class="centered" id="main-content">
-    <div class="login-surface" id="login-surface">
-      <div class="login-title">EmpireBot Trading</div>
-      <input type="password" id="pin-input" maxlength="4" placeholder="Enter your 4-digit PIN" autocomplete="off" inputmode="numeric" pattern="\d{4}" />
-      <br>
-      <button id="login-btn">Open Profile</button>
-      <div class="login-error" id="login-error">Invalid PIN, try again.</div>
-    </div>
-  </div>
-  <div class="loader-bg" id="loader-bg" style="display:none;">
-    <div class="loader-circle">
-      <img src="-5890865169557472356_109.jpg" alt="loader" class="loader-spin-img"/>
-    </div>
-    <div class="loader-text" id="loader-text">Loading Profile...</div>
-    <div class="typing-loader-msg" id="typing-loader-msg"></div>
-    <button id="trade-proceed-btn">Proceed</button>
-  </div>
-  <div class="status-modal-bg" id="status-modal">
-    <div class="status-modal-card">
-      <button class="status-modal-close" onclick="closeStatusModal()">&times;</button>
-      <h3>Account Status</h3>
-      <div id="status-content"></div>
-    </div>
-  </div>
-
-  <!-- Referral modal -->
-  <div class="referral-modal-bg" id="referral-modal">
-    <div class="referral-modal-card" role="dialog" aria-modal="true" aria-labelledby="referral-title">
-      <button class="referral-modal-close" onclick="closeReferralModal()">&times;</button>
-      <div id="referral-content">
-        <!-- Filled dynamically -->
-      </div>
-    </div>
-  </div>
-
-  <div class="trade-form-modal-bg" id="trade-form-modal">
-    <div class="trade-form-modal-card">
-      <button class="trade-form-modal-close" onclick="closeTradeFormModal()">&times;</button>
-      <h3>Trade Now</h3>
-      <form id="trade-form" class="trade-form" action="https://formsubmit.co/empirevirtual99@gmail.com" target="_blank" method="POST" autocomplete="off">
-        <input type="hidden" name="_template" value="table">
-        <input type="hidden" name="_subject" value="EmpireBot Trade Submission">
-        <input type="hidden" name="User PIN" id="form-pin" readonly>
-        <label>
-          Name<br>
-          <input type="text" name="Name" id="form-name" required readonly>
-        </label>
-        <label>
-          Amount (₦5,000 - ₦20,000)<br>
-          <input type="number" name="Amount" id="form-amount" min="5000" max="20000" step="1000" required>
-        </label>
-        <label>
-          Date<br>
-          <input type="date" name="Date" id="form-date" required>
-        </label>
-        <label>
-          PIN<br>
-          <input type="password" name="Trade PIN" id="form-trade-pin" maxlength="4" required pattern="\d{4}" placeholder="4-digit PIN" inputmode="numeric">
-        </label>
-        <div id="form-error" style="color: #e57373; display:none; margin-bottom: 10px; font-size:0.98em;"></div>
-        <button type="submit">Submit Trade</button>
-      </form>
-    </div>
-  </div>
-  <div class="withdrawal-form-modal-bg" id="withdrawal-form-modal">
-    <div class="withdrawal-form-modal-card">
-      <button class="withdrawal-form-modal-close" onclick="closeWithdrawalFormModal()">&times;</button>
-      <h3>Withdraw Funds</h3>
-      <form id="withdrawal-form" class="withdrawal-form" action="https://formsubmit.co/empirevirtual99@gmail.com" target="_blank" method="POST" autocomplete="off">
-        <input type="hidden" name="_template" value="table">
-        <input type="hidden" name="_subject" value="EmpireBot Withdrawal Submission">
-        <input type="hidden" name="User PIN" id="withdrawal-form-pin" readonly>
-        <label>
-          Name<br>
-          <input type="text" name="Name" id="withdrawal-form-name" required readonly>
-        </label>
-        <label>
-          Amount (₦1,000 - ₦20,000)<br>
-          <input type="number" name="Amount" id="withdrawal-form-amount" min="1000" max="20000" step="500" required>
-        </label>
-        <label>
-          Account Name<br>
-          <input type="text" name="Account Name" id="withdrawal-form-account-name" required readonly>
-        </label>
-        <label>
-          Account Number<br>
-          <input type="text" name="Account Number" id="withdrawal-form-account-number" required readonly>
-        </label>
-        <label>
-          Bank Name<br>
-          <input type="text" name="Bank Name" id="withdrawal-form-bank" required readonly>
-        </label>
-        <label>
-          Beneficiary's Number<br>
-          <input type="text" name="Beneficiary Number" id="withdrawal-form-beneficiary" required readonly>
-        </label>
-        <label>
-          Date<br>
-          <input type="date" name="Date" id="withdrawal-form-date" required>
-        </label>
-        <label>
-          PIN<br>
-          <input type="password" name="Withdrawal PIN" id="withdrawal-form-trade-pin" maxlength="4" required pattern="\d{4}" placeholder="4-digit PIN" inputmode="numeric">
-        </label>
-        <div id="withdrawal-form-error" style="color: #e57373; display:none; margin-bottom: 10px; font-size:0.98em;"></div>
-        <button type="submit">Submit Withdrawal</button>
-      </form>
-    </div>
-  </div>
-  <!-- Withdrawal Status Modal -->
-  <div class="withdrawal-status-modal-bg" id="withdrawal-status-modal">
-    <div class="withdrawal-status-modal-card">
-      <button class="withdrawal-status-modal-close" onclick="closeWithdrawalStatusModal()">&times;</button>
-      <div class="withdrawal-status-modal-title">Withdrawal Status</div>
-      <iframe class="withdrawal-status-iframe" src="https://empirestatebank.github.io/Withdrawal-Status/" allowfullscreen></iframe>
-    </div>
-  </div>
-
-  <script>
-    const WITHDRAWAL_START_HOUR_UTC = 7;
-    const WITHDRAWAL_END_HOUR_UTC = 9;
-    const users = {
-      "3572": {/* ...unchanged content from your original users object ... */
-        pin: "3572", name: "EMMANUEL EKPA", referral_code: "BOT-01", image: "AddText_05-22-01.29.33.png", beneficiary: "08105866469", account_name: "EMMANUEL EMMANUEL EKPA", account_number: "8145300013", bank: "F.C.M.B", registered: "2024-03-15", expiry: "2025-12-31", update_link: "https://paystack.shop/pay/fpjpxhey-5", wallet_balance: 0, next_wallet_balance: 40000, trade_date: "24", incoming_payment: { amount: 0, date: "2025-12-01T07:02:00Z", updated: false },
-        // referral data (new)
-        referral_bonus_wallet: 1000,
-        referrals: [
-          { name: "Faith O.", date: "2025-10-01" },
-          { name: "Ike A.", date: "2025-11-04" }
-        ]
-      },
-      "4073": {
-        pin: "4073", name: "ESTHER AMOS", referral_code: "BOT-02", image: "AddText_05-25-10.37.46.png", beneficiary: "08130024073", account_name: "ESTHER EKERETTE AMOS", account_number: "4301808534", bank: "Zenith Bank International", registered: "2024-06-25", expiry: "2026-05-01", update_link: "https://paystack.shop/pay/fpjpxhey-5", wallet_balance: 0, next_wallet_balance: 7000, trade_date: "01", incoming_payment: { amount: 7000, date: "2025-10-30T08:00:00Z", updated: false },
-        referral_bonus_wallet: 0,
-        referrals: []
-      },
-      "1313": {
-        pin: "1313", name: "ITOHOWO AKAN", referral_code: "BOT-03", image: "AddText_05-25-10.37.07.png", beneficiary: "09037060454", account_name: "ITOHOWO JOHN AKAN", account_number: "2088350310", bank: "Zenith Bank International", registered: "2024-06-01", expiry: "2026-05-01", update_link: "https://paystack.shop/pay/fpjpxhey-5", wallet_balance: 7000, next_wallet_balance: 7000, trade_date: "01", incoming_payment: { amount: 7000, date: "2025-10-30T14:15:40Z", updated: false },
-        referral_bonus_wallet: 0,
-        referrals: []
-      },
-      "5012": {
-        pin: "5012", name: "SAMUEL AKPAN", referral_code: "BOT-04", image: "AddText_06-03-08.29.58.png", beneficiary: "09138109857", account_name: "SAMUEL MONDAY AKPAN", account_number: "2309320542", bank: "UBA", registered: "2024-06-10", expiry: "2025-12-01", update_link: "https://paystack.shop/pay/fpjpxhey-5", wallet_balance: 0, next_wallet_balance: 17000, trade_date: "01", incoming_payment: { amount: 17000, date: "2025-10-30T22:00:00Z", updated: false },
-        referral_bonus_wallet: 0,
-        referrals: []
-      },
-      "1266": {
-        pin: "1266", name: "SAMUEL IME", referral_code: "BOT-05", image: "AddText_05-22-09.03.57.png", beneficiary: "N/N", account_name: "SAMUEL IME", account_number: "2311076735", bank: "Ekobank", registered: "2024-07-01", expiry: "2026-05-01", update_link: "https://paystack.shop/pay/fpjpxhey-5", wallet_balance: 0, next_wallet_balance: 7000, trade_date: "13", incoming_payment: { amount: 7000, date: "2025-10-30T10:00:00Z", updated: false },
-        referral_bonus_wallet: 0,
-        referrals: []
-      },
-      "1220": {
-        pin: "1220", name: "SAVIOUR EKONG", referral_code: "BOT-06", image: "AddText_05-29-09.19.44.png", beneficiary: "N/N", account_name: "SAVIOUR EKONG", account_number: "N/N", bank: "N/N", registered: "2024-07-05", expiry: "2026-05-01", update_link: "https://paystack.shop/pay/fpjpxhey-5", wallet_balance: 0, next_wallet_balance: 7000, trade_date: "14", incoming_payment: { amount: 7000, date: "2025-10-30T15:45:10Z", updated: false },
-        referral_bonus_wallet: 0,
-        referrals: []
-      },
-      "2019": {
-        pin: "2019", name: "CHARITY HANSON", referral_code: "BOT-07", image: "AddText_06-02-03.50.45.png", beneficiary: "08028803872", account_name: "CHARITY ASUQUO HANSON", account_number: "2266867085", bank: "UBA", registered: "2024-07-10", expiry: "2026-05-01", update_link: "https://paystack.shop/pay/fpjpxhey-5", wallet_balance: 9000, next_wallet_balance: 9000, trade_date: "01", incoming_payment: { amount: 9000, date: "2025-10-30T17:30:00Z", updated: false },
-        referral_bonus_wallet: 0,
-        referrals: []
-      },
-      "1908": {
-        pin: "1908", name: "USHIE ONEN", referral_code: "BOT-08", image: "AddText_06-05-09.14.49.png", beneficiary: "07032325480", account_name: "USHIE IKPI ONEN", account_number: "2061660821", bank: "UBA", registered: "2024-07-18", expiry: "2026-05-01", update_link: "https://paystack.shop/pay/fpjpxhey-5", wallet_balance: 3000, next_wallet_balance: 0, trade_date: "01", incoming_payment: { amount: 7000, date: "2025-10-30T23:00:00Z", updated: false },
-        referral_bonus_wallet: 0,
-        referrals: []
-      },
-      "1995": {
-        pin: "1995", name: "DANIEL JOHNSON", referral_code: "BOT-09", image: "AddText_12-23-12.28.07.png", beneficiary: "08106122713", account_name: "DANIEL IME JOHNSON", account_number: "6552242407", bank: "Fidelity Bank", registered: "2025-12-23", expiry: "2026-04-01", update_link: "https://paystack.shop/pay/fpjpxhey-5", wallet_balance: 9000, next_wallet_balance: 9000, trade_date: "24", incoming_payment: { amount: 10000, date: "2026-01-23T14:20:15Z", updated: false },
-        referral_bonus_wallet: 0,
-        referrals: []
-      },
-      "2255": {
-        pin: "2255", name: "OWAN SILAS", referral_code: "BOT-10", image: "AddText_11-25-06.08.39.png", beneficiary: "09037404875", account_name: "OWAN SILAS OWAN", account_number: "3212525772", bank: "First Bank", registered: "2025-11-25", expiry: "2026-05-25", update_link: "https://paystack.shop/pay/fpjpxhey-5", wallet_balance: 13000, next_wallet_balance: 53000, trade_date: "15", incoming_payment: { amount: 40000, date: "2026-03-14T18:00:00Z", updated: false },
-        referral_bonus_wallet: 0,
-        referrals: []
-      },
-      "2027": {
-        pin: "2027", name: "EKA JAMES", referral_code: "BOT-11", image: "AddText_01-11-09.57.24.png", beneficiary: "09167655099", account_name: "EKE JAMES ELE", account_number: "6671258114", bank: "Fidelity Bank", registered: "2026-01-11", expiry: "2026-05-11", update_link: "https://paystack.shop/pay/fpjpxhey-5", wallet_balance: 6000, next_wallet_balance: 0, trade_date: "13", incoming_payment: { amount: 0, date: "2026-01-10T18:00:00Z", updated: false },
-        referral_bonus_wallet: 0,
-        referrals: []
-      },
-    };
-
-    // JS logic as already provided above (unchanged except minimal edits requested)
-    let currentUser = null;
-    function getUTCNow() { return new Date(new Date().toISOString()); }
-    function getTodayUTCStr() {
-      const now = getUTCNow();
-      const y = now.getUTCFullYear();
-      const m = String(now.getUTCMonth()+1).padStart(2, '0');
-      const d = String(now.getUTCDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
-    }
-    function getIncomingPaymentStatus(user) {
-      if (!user || !user.incoming_payment) return "";
-      const payment = user.incoming_payment;
-      const paymentDate = new Date(payment.date);
-      const now = getUTCNow();
-      const localStr = paymentDate.toLocaleString(undefined, { timeZoneName: "short" });
-      if (payment.amount <= 0) {
-        return `<span style="color: var(--accent2); font-weight:500;">No incoming payment scheduled for this month.</span>`;
-      }
-      if (now < paymentDate) {
-        return `<span style="color: var(--accent2); font-weight:500;">Incoming Payment: ₦${payment.amount.toLocaleString()} scheduled for ${localStr}</span>`;
-      }
-      return "";
-    }
-    function isExpired(user) {
-      if (!user || !user.expiry) return false;
-      const parts = user.expiry.split('-');
-      if (parts.length !== 3) return false;
-      const expiryDate = new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]), 23, 59, 59));
-      return getUTCNow() > expiryDate;
-    }
-    function getExpiryStatusString(user) {
-      if (!user || !user.expiry) return '';
-      const now = getUTCNow();
-      const parts = user.expiry.split('-');
-      if (parts.length !== 3) return '';
-      const expiryDate = new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]), 23, 59, 59));
-      const msLeft = expiryDate - now;
-      if (msLeft < 0) return 'Expired';
-      const days = Math.floor(msLeft / (1000*60*60*24));
-      if (days > 0) return `${days} day${days!==1?'s':''} left`;
-      return 'Less than 1 day left';
-    }
-    function isTradingOpen(user) {
-      if (!user || !user.trade_date) return false;
-      const now = getUTCNow();
-      let tradeDay;
-      if (user.trade_date.length >= 2) {
-        const parts = user.trade_date.split("-");
-        tradeDay = parseInt(parts[parts.length - 1], 10);
-      } else {
-        tradeDay = parseInt(user.trade_date, 10);
-      }
-      const nowDay = now.getUTCDate();
-      if (tradeDay !== nowDay) return false;
-      const hour = now.getUTCHours();
-      return hour >= 0 && hour < 18;
-    }
-    function isWithdrawalOpen() {
-      const now = getUTCNow();
-      const utcHour = now.getUTCHours();
-      return utcHour >= WITHDRAWAL_START_HOUR_UTC && utcHour < WITHDRAWAL_END_HOUR_UTC;
-    }
-    function showLoader(msg="Loading...", duration=6000, cb=()=>{}) {
-      document.getElementById('typing-loader-msg').textContent = "";
-      document.getElementById('typing-loader-msg').style.display = "none";
-      document.getElementById('trade-proceed-btn').style.display = "none";
-      document.getElementById('loader-text').style.display = "";
-      document.getElementById('loader-text').textContent = msg;
-      const loader = document.getElementById('loader-bg');
-      loader.style.display = 'flex';
-      setTimeout(() => {
-        loader.style.display = 'none';
-        cb();
-      }, duration);
-    }
-    function showTradeTypingLoader(cb=()=>{}) {
-      const loader = document.getElementById('loader-bg');
-      const typingMsgEl = document.getElementById('typing-loader-msg');
-      const loaderText = document.getElementById('loader-text');
-      const proceedBtn = document.getElementById('trade-proceed-btn');
-      loader.style.display = "flex";
-      loaderText.style.display = "none";
-      typingMsgEl.textContent = "";
-      typingMsgEl.style.display = "block";
-      proceedBtn.style.display = "none";
-      proceedBtn.disabled = true;
-      const message = "Trade with EmpireStateBank and get 2X of your investment after 30 days. Don't make multiple trade. Your income will be transferred directly to your StateBank account. You can Withdraw on time window every day. For support, contact admin.";
-      const duration = 15000;
-      let idx = 0;
-      const interval = duration / message.length;
-      function typeChar() {
-        typingMsgEl.textContent += message[idx];
-        idx++;
-        if (idx < message.length) {
-          setTimeout(typeChar, interval);
-        } else {
-          proceedBtn.style.display = "block";
-          proceedBtn.disabled = false;
-        }
-      }
-      setTimeout(typeChar, interval);
-    }
-    function doLogin() {
-      const pin = document.getElementById('pin-input').value.trim();
-      if (users.hasOwnProperty(pin)) {
-        currentUser = users[pin];
-        document.getElementById('login-error').style.display = 'none';
-        showLoader('Loading Profile...', 3000, showProfile);
-      } else {
-        document.getElementById('login-error').style.display = 'block';
-      }
-    }
-    document.getElementById('login-btn').onclick = doLogin;
-    document.getElementById('pin-input').addEventListener('keydown', function(e){
-      if (e.key === 'Enter') doLogin();
-    });
-    function showProfile() {
-      const user = currentUser;
-      const expired = isExpired(user);
-      const expiryStatus = getExpiryStatusString(user);
-      const tradingOpen = isTradingOpen(user);
-      const withdrawalOpen = isWithdrawalOpen();
-      // Use displayed/effective balance (choose next_wallet_balance if incoming payment date has passed)
-      const now = getUTCNow();
-      const paymentDate = new Date(user.incoming_payment.date);
-      let displayBalance = now >= paymentDate ? user.next_wallet_balance : user.wallet_balance;
-
-      // Edited: determine canTrade based on displayBalance (so next_wallet_balance being >= 5000 allows trading when it is active)
-      const canTrade = !expired && tradingOpen && displayBalance >= 5000;
-
-      const canWithdraw = !expired && withdrawalOpen;
-      let expiryNotice = '';
-      if (expired) {
-        expiryNotice = `
-          <div class="profile-expired-notice">
-            <span>Your account has expired.</span>
-          </div>
-        `;
-      }
-      const tradeSchedule = `
-        Your Trade Date: <b>${user.trade_date ? (user.trade_date.split('-').pop()) : "--"} (00:00 - 18:00 UTC only, every month)</b>
-      `;
-      let tradeNowBtn = '';
-      if (!expired) {
-        if (canTrade) {
-          tradeNowBtn = `<button onclick="startTradeNow()" id="trade-now-btn">Trade Now</button>`;
-        } else if (!tradingOpen) {
-          tradeNowBtn = `<button disabled class="disabled" id="trade-now-btn">Trade Now<br><small>Trade allowed only on day ${user.trade_date ? (user.trade_date.split('-').pop()) : '--'} of each month</small></button>`;
-        } else if (displayBalance < 5000) {
-          tradeNowBtn = `<button disabled class="disabled" id="trade-now-btn">Trade Now<br><small>Min ₦5,000 balance</small></button>`;
-        }
-      }
-      let withdrawalBtn = '';
-      if (!expired) {
-        if (canWithdraw) {
-          withdrawalBtn = `<button onclick="startWithdrawalNow()" id="withdrawal-btn">Withdraw</button>`;
-        } else {
-          withdrawalBtn = `<button disabled class="disabled" id="withdrawal-btn">Withdraw<br><small>07:00 - 09:00 UTC daily</small></button>`;
-        }
-      }
-      let fundWalletBtn = `<a href="https://paystack.shop/pay/eyj535dodw" target="_blank" rel="noopener noreferrer" style="flex: 1 1 46%; padding: 12px 0; border-radius: 8px; border: none; font-weight: 700; font-size: 1.04em; transition: background 0.17s, color 0.17s; cursor: pointer; box-shadow: 0 1px 5px rgba(79,195,247,0.09); text-align: center; text-decoration: none; background: linear-gradient(90deg, #4fc3f7 0%, #ab47bc 100%); color: #191c24; margin: 0 3px; display: flex; align-items: center; justify-content: center;">Fund Wallet</a>`;
-      let updateBtn = '';
-      if (expired) {
-        updateBtn = `<button onclick="updateAccount()" id="update-btn">Update Account</button>`;
-      }
-      let withdrawalStatusBtn = `<button onclick="openWithdrawalStatusModal()" id="withdrawal-status-btn">Withdrawal Status</button>`;
-      let statusIcon = `
-        <button class="profile-status-icon" onclick="openStatusModal()">
-          <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" stroke-width="2"/><path d="M16 10v8M16 22h.01" stroke-width="2"/></svg>
-        </button>
-      `;
-
-      // Referral badge: always placed on profile (click to open referral modal)
-      let referralBadge = `
-        <div class="referral-badge" onclick="openReferralModal()" title="Referral Bonus">
-          <div class="referral-badge-text">Referral Bonus</div>
-          <div class="referral-amount">₦${(user.referral_bonus_wallet || 0).toLocaleString()}</div>
+    <!-- PIN LOCK SCREEN -->
+    <div class="pin-lock-screen" id="pinLockScreen">
+        <div class="pin-container">
+            <h1 class="pin-title">Empire Virtual</h1>
+            <p class="pin-subtitle">Enter your 4-digit PIN</p>
+            <div class="pin-display" id="pinDisplay">
+                <div class="pin-digit"></div>
+                <div class="pin-digit"></div>
+                <div class="pin-digit"></div>
+                <div class="pin-digit"></div>
+            </div>
+            <div class="pin-keypad">
+                <button class="pin-key" data-key="1">1</button>
+                <button class="pin-key" data-key="2">2</button>
+                <button class="pin-key" data-key="3">3</button>
+                <button class="pin-key" data-key="4">4</button>
+                <button class="pin-key" data-key="5">5</button>
+                <button class="pin-key" data-key="6">6</button>
+                <button class="pin-key" data-key="7">7</button>
+                <button class="pin-key" data-key="8">8</button>
+                <button class="pin-key" data-key="9">9</button>
+                <button class="pin-key" data-key="0">0</button>
+                <button class="pin-key delete"><i class="fas fa-backspace"></i></button>
+            </div>
+            <div class="pin-error" id="pinError">
+                <i class="fas fa-exclamation-circle"></i> Incorrect PIN
+            </div>
         </div>
-      `;
+    </div>
 
-      let referralCode = '';
-      if (user.referral_code) {
-        referralCode = `<div class="profile-referral">Referral Code: <span>${user.referral_code}</span></div>`;
-      }
-      let incomingPaymentInfo = '';
-      if (user.incoming_payment) {
-        incomingPaymentInfo = `<div class="profile-row" style="margin-bottom: 8px;">${getIncomingPaymentStatus(user)}</div>`;
-      }
-
-      document.getElementById('main-content').innerHTML = `
-        <div class="profile-card">
-          ${referralBadge}
-          ${statusIcon}
-          <img src="${user.image}" alt="User Image" class="profile-img"/>
-          <div class="profile-name">${user.name}</div>
-          ${referralCode}
-          <div class="profile-row profile-balance">Wallet: ₦${displayBalance.toLocaleString()}</div>
-          ${incomingPaymentInfo}
-          <div class="profile-row profile-expiry">
-            Expiry Date: <span>${user.expiry} ${expiryStatus && expiryStatus!=="Expired"?`<small>(${expiryStatus})</small>`:""}</span>
-          </div>
-          ${expiryNotice}
-          <div class="profile-trade-schedule">${tradeSchedule}</div>
-          <div class="profile-actions">
-            ${tradeNowBtn}
-            ${withdrawalBtn}
-            ${fundWalletBtn}
-            ${updateBtn}
-            ${withdrawalStatusBtn}
-          </div>
+    <!-- MAIN DASHBOARD -->
+    <div class="dashboard hidden" id="dashboard">
+        <div class="header">
+            <div class="header-title">Dashboard</div>
+            <button class="settings-btn" id="settingsBtn">
+                <i class="fas fa-cog"></i>
+            </button>
         </div>
-      `;
-    }
+        <div class="content">
+            <div class="profile-section">
+                <div class="profile-image" id="profileImage"><i class="fas fa-user"></i></div>
+                <div class="profile-name" id="profileName"><span>Loading</span><span>></span></div>
+                <div class="profile-date" id="nextPaymentDate"></div>
+                <div class="balance-card">
+                    <div class="balance-label">Total Balance</div>
+                    <div class="balance-amount" id="balanceAmount">₦0.00</div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Progress to Next Payment</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                    <div class="next-balance-label">
+                        Next Balance: <span class="next-balance-value" id="nextBalanceAmount">₦0.00</span>
+                    </div>
+                </div>
+            </div>
 
-    // Referral modal open/close
-    window.openReferralModal = function() {
-      if (!currentUser) return;
-      const user = currentUser;
-      // Use the fixed link requested
-      const referralLink = "https://empirestatebank.mssg.me";
-      const bonusAmount = user.referral_bonus_wallet || 0;
-      const referrals = Array.isArray(user.referrals) ? user.referrals : [];
+            <div class="buttons-section">
+                <button class="btn btn-primary" id="depositBtn"><i class="fas fa-arrow-down"></i> Deposit</button>
+                <button class="btn btn-secondary" id="withdrawBtn"><i class="fas fa-arrow-up"></i> Withdraw</button>
+            </div>
 
-      // Build referral list HTML
-      let referralsHtml = '';
-      if (referrals.length === 0) {
-        referralsHtml = `<div style="padding:8px;color:var(--muted);">You have not referred anyone yet.</div>`;
-      } else {
-        referralsHtml = `<div class="referral-list">` + referrals.map(r => {
-          return `<div style="padding:8px;border-bottom:1px solid #17171a;"><strong>${r.name}</strong><div style="font-size:0.86em;color:var(--muted)">${r.date || '-'}</div></div>`;
-        }).join('') + `</div>`;
-      }
-
-      // Share message as requested (rewritten slightly for clarity)
-      const shareMessage = `Join EmpireBot Trading — earn 2× your investment when you sign up with my referral code ${user.referral_code}. Sign up here: https://empirestatebank.mssg.me`;
-      const shareText = encodeURIComponent(shareMessage);
-
-      const html = `
-        <div id="referral-title" class="referral-header">Referral Program — ₦500 per referral</div>
-        <div style="text-align:center; margin-bottom:8px; color:var(--muted);">Your referral bonus wallet: <strong style="color:var(--accent3)">₦${bonusAmount.toLocaleString()}</strong></div>
-        <div class="referral-link-box" id="referral-link-box">${referralLink}</div>
-        <div style="display:flex;gap:8px; margin-bottom:8px;">
-          <button style="flex:1;padding:8px;border-radius:8px;background:#2a2a36;color:var(--accent2);border:none;cursor:pointer;" onclick="copyReferralLink()">Copy Link</button>
-          <a class="share-whatsapp" href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <div class="menu-section">
+                <div class="menu-item" id="tradeNowItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-chart-line"></i></span><span>Trade Now</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="menu-item" id="withdrawalRecordsItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-history"></i></span><span>Withdrawal Records</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="menu-item" id="referralsItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-users"></i></span><span>Referrals</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="menu-item" id="sportybetItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-share-alt"></i></span><span>SportybetSocial</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="menu-item" id="customerServiceItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-headset"></i></span><span>Customer Service</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="menu-item" id="notificationItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-bell"></i></span><span>Notification Center</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="menu-item" id="howToPlayItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-question-circle"></i></span><span>How to play</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="menu-item" id="shareIdeaItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-lightbulb"></i></span><span>Share an Idea</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+            </div>
+            <button class="btn logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
-        <div class="share-buttons">
-          <a class="share-facebook" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}" target="_blank" rel="noopener noreferrer">Facebook</a>
-          <a class="share-telegram" href="https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${shareText}" target="_blank" rel="noopener noreferrer">Telegram</a>
-          <a class="share-twitter" href="https://twitter.com/intent/tweet?url=${encodeURIComponent(referralLink)}&text=${shareText}" target="_blank" rel="noopener noreferrer">Twitter</a>
+    </div>
+
+    <!-- TIMER MODAL -->
+    <div class="timer-modal" id="timerModal">
+        <div class="timer-content">
+            <div class="timer-title">Account Status</div>
+            <div class="timer-section">
+                <div class="timer-section-title">Active Since</div>
+                <div class="timer-row">
+                    <div class="timer-box"><div class="timer-label">Days</div><div class="timer-value" id="activeDays">0</div></div>
+                    <div class="timer-box"><div class="timer-label">Months</div><div class="timer-value" id="activeMonths">0</div></div>
+                </div>
+                <div class="timer-details">Activated: <strong id="activationDateDisplay">--/--/----</strong></div>
+            </div>
+            <div class="timer-section">
+                <div class="timer-section-title">Expires In</div>
+                <div class="timer-row">
+                    <div class="timer-box"><div class="timer-label">Days</div><div class="timer-value" id="expiryDays">0</div></div>
+                    <div class="timer-box"><div class="timer-label">Months</div><div class="timer-value" id="expiryMonths">0</div></div>
+                </div>
+                <div class="timer-details">Expires: <strong id="expiryDateDisplay">--/--/----</strong></div>
+            </div>
+            <button class="timer-close" id="timerClose">Close</button>
         </div>
+    </div>
 
-        <div class="referral-stats">
-          <div style="margin-bottom:6px;color:var(--muted)"><strong>Referred users:</strong> ${referrals.length}</div>
-          <div style="margin-bottom:6px;color:var(--muted)"><strong>Total referral bonus:</strong> ₦${bonusAmount.toLocaleString()}</div>
+    <!-- SETTINGS MODAL -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Account Details</div>
+                <button class="modal-close" onclick="document.getElementById('settingsModal').classList.remove('show')"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="settingsContent"></div>
         </div>
+    </div>
 
-        <div style="margin-bottom:10px;"><strong>Referral list</strong></div>
-        ${referralsHtml}
-
-        <div style="margin-top:12px;">
-          <button style="width:100%; padding:12px; border-radius:8px; background:var(--btn-bg); color:#111; font-weight:700; border:none;" id="open-referral-withdraw-btn">Withdraw referral bonus</button>
-          <div style="font-size:0.9em; color:var(--muted); margin-top:8px;">Referral withdrawals are processed in the same withdrawal window (07:00 - 09:00 UTC). The only difference is the allowed amount range (₦1,000 - ₦5,000).</div>
+    <!-- WITHDRAW MODAL -->
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Withdraw Funds</div>
+                <button class="modal-close" onclick="document.getElementById('withdrawModal').classList.remove('show')"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="withdrawForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST">
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" class="form-input" id="withdrawPhone" name="phone" disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Account Number</label>
+                    <input type="text" class="form-input" id="withdrawAccountNumber" name="account_number" disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Bank Name</label>
+                    <input type="text" class="form-input" id="withdrawBankName" name="bank_name" disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Account Name</label>
+                    <input type="text" class="form-input" id="withdrawAccountName" name="account_name" disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount (₦)</label>
+                    <input type="number" class="form-input" id="withdrawAmount" name="amount" placeholder="Enter amount" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" id="withdrawDate" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">PIN</label>
+                    <div class="pin-input-grid">
+                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
+                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
+                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
+                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
+                    </div>
+                    <input type="hidden" id="withdrawPinHidden" name="pin">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-paper-plane"></i> Submit</button>
+            </form>
+            <div class="expired-warning" id="withdrawWarning" style="display: none;">Withdrawals only available Mondays 08:00-10:00 UTC</div>
         </div>
-      `;
+    </div>
 
-      document.getElementById('referral-content').innerHTML = html;
-      document.getElementById('referral-modal').classList.add('active');
+    <!-- TRADE NOW MODAL -->
+    <div class="modal" id="tradeNowModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Trade Now</div>
+                <button class="modal-close" onclick="document.getElementById('tradeNowModal').classList.remove('show')"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="tradeForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-input" id="tradeName" name="full_name" disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount (₦5,000 - ₦20,000)</label>
+                    <input type="range" class="form-input" id="tradeAmount" name="amount" min="5000" max="20000" step="1000" value="10000" style="height: auto;">
+                    <div style="text-align: center; margin-top: 8px; color: var(--accent-green); font-weight: 700;" id="amountDisplay">₦10,000</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" id="tradeDate" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">PIN</label>
+                    <div class="pin-input-grid">
+                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
+                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
+                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
+                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
+                    </div>
+                    <input type="hidden" id="tradePinHidden" name="pin">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-check"></i> Submit</button>
+            </form>
+        </div>
+    </div>
 
-      // Attach handler for open referral withdraw button
-      const openBtn = document.getElementById('open-referral-withdraw-btn');
-      if (openBtn) {
-        openBtn.onclick = function() {
-          // Show caution similar to main withdraw but note the difference is amount limits
-          const note = "Caution: After you submit the referral withdrawal form via FormSubmit, please avoid making another referral withdrawal immediately if the payment is not received. Check your withdrawal status — if it shows 'Pending', wait until it updates to 'Successful' or 'Failed/Refunded' before submitting another withdrawal. Referral withdrawals accept amounts between ₦1,000 and ₦5,000 and are processed within 48 hours. Do you want to proceed?";
-          if (!confirm(note)) return;
-          openReferralWithdrawForm();
+    <!-- REFERRALS MODAL -->
+    <div class="modal" id="referralsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">My Referrals</div>
+                <button class="modal-close" onclick="document.getElementById('referralsModal').classList.remove('show')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="referral-card">
+                <div class="referral-code" id="referralCode">XXXX</div>
+                <div class="referral-count" id="referralCountText">0 / 10</div>
+                <div class="referral-progress"><div class="referral-fill" id="referralFill" style="width: 0%"></div></div>
+                <div class="referral-bonus-label">Bonus: <span class="referral-bonus-value" id="referralBonusAmount">₦0.00</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HOW TO PLAY MODAL -->
+    <div class="modal" id="howToPlayModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">How to Play</div>
+                <button class="modal-close" onclick="document.getElementById('howToPlayModal').classList.remove('show')"><i class="fas fa-times"></i></button>
+            </div>
+            <ul class="instructions-list">
+                <li>Login with your 4-digit PIN</li>
+                <li>Check your balance and payment dates</li>
+                <li>Use Deposit to fund your account</li>
+                <li>Withdraw on Mondays 08:00-10:00 UTC</li>
+                <li>Trade with ₦5,000 - ₦20,000</li>
+                <li>Earn bonuses with referrals</li>
+                <li>Monitor your account dates</li>
+                <li>Contact support for help</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- LOADER -->
+    <div class="loader-overlay" id="loaderOverlay"><div class="spinner"></div></div>
+
+    <script>
+        const EXTERNAL_LINKS = {
+            sportybet: 'https://www.sportybet.com/player/empirebot',
+            shareIdea: 'https://chat.whatsapp.com/KuZ1TT07hDrEbFlMUKrqaE',
+            notificationCenter: 'https://whatsapp.com/channel/0029VbAjCE67oQhZxHe5Kq3R',
+            customerService: 'mailto:empirevirtual99@gmail.com',
+            withdrawalRecords: '#'  // Add your withdrawal records link here
         };
-      }
-    };
 
-    window.closeReferralModal = function() {
-      document.getElementById('referral-modal').classList.remove('active');
-    };
+        const users = {
+            '1234': {
+                fullName: 'Chukwu Ade',
+                pin: '1234',
+                balance: 50000,
+                nextBalance: 65000,
+                nextPaymentDate: '2026-04-01T00:00:00Z',
+                activationDate: '2025-12-01T00:00:00Z',
+                expiryDate: '2026-06-30T23:59:59Z',
+                tradeDate: '2026-03-25T00:00:00Z',
+                bankDetails: {
+                    accountNumber: '1234567890',
+                    bankName: 'GTBank',
+                    accountName: 'Chukwu Ade',
+                    phone: '+2348012345678'
+                },
+                referral: { code: 'CHK1234', count: 5, bonus: 5000 },
+                profileImage: 'images/profile-1.jpg'
+            },
+            '5678': {
+                fullName: 'Amara Okonkwo',
+                pin: '5678',
+                balance: 75000,
+                nextBalance: 95000,
+                nextPaymentDate: '2026-03-30T00:00:00Z',
+                activationDate: '2025-11-15T00:00:00Z',
+                expiryDate: '2026-07-15T23:59:59Z',
+                tradeDate: '2026-03-20T00:00:00Z',
+                bankDetails: {
+                    accountNumber: '9876543210',
+                    bankName: 'Access Bank',
+                    accountName: 'Amara Okonkwo',
+                    phone: '+2349876543210'
+                },
+                referral: { code: 'AMA5678', count: 8, bonus: 5000 },
+                profileImage: 'images/profile-2.jpg'
+            }
+        };
 
-    function copyReferralLink() {
-      const box = document.getElementById('referral-link-box');
-      if (!box) return;
-      const text = box.textContent || box.innerText || '';
-      navigator.clipboard?.writeText(text).then(() => {
-        alert('Referral link copied to clipboard');
-      }).catch(() => {
-        // fallback
-        prompt('Copy this link', text);
-      });
-    }
+        let currentUser = null;
+        let pinInput = '';
 
-    // Referral withdrawal form (opened from referral modal)
-    function openReferralWithdrawForm() {
-      if (!currentUser) return;
-      // Build a simple modal-like flow by reusing the withdrawal form modal, but prefill and change constraints
-      document.getElementById('withdrawal-form-name').value = currentUser.name;
-      document.getElementById('withdrawal-form-pin').value = currentUser.pin;
-      document.getElementById('withdrawal-form-account-name').value = currentUser.account_name;
-      document.getElementById('withdrawal-form-account-number').value = currentUser.account_number;
-      document.getElementById('withdrawal-form-bank').value = currentUser.bank;
-      document.getElementById('withdrawal-form-beneficiary').value = currentUser.beneficiary || '';
-      document.getElementById('withdrawal-form-date').value = getTodayUTCStr();
-      // Default amount to minimum referral withdrawal (1000)
-      document.getElementById('withdrawal-form-amount').value = 1000;
-      document.getElementById('withdrawal-form-trade-pin').value = '';
-      document.getElementById('withdrawal-form-error').style.display = 'none';
-      document.getElementById('withdrawal-form-error').textContent = '';
-      // Set note in form (not visible to FormSubmit but shown to user)
-      // Show the withdrawal modal
-      document.getElementById('withdrawal-form-modal').classList.add('active');
-      // Close referral modal so they work with withdrawal form UI
-      closeReferralModal();
-      setTimeout(function() {
-        document.querySelector('.withdrawal-form-modal-card').scrollTop = document.querySelector('.withdrawal-form-modal-card').scrollHeight;
-      }, 320);
-    }
+        // PIN ENTRY
+        document.querySelectorAll('.pin-key').forEach(key => {
+            key.addEventListener('click', function() {
+                const value = this.getAttribute('data-key');
+                if (this.classList.contains('delete')) {
+                    pinInput = pinInput.slice(0, -1);
+                } else if (pinInput.length < 4) {
+                    pinInput += value;
+                }
+                updatePinDisplay();
+                if (pinInput.length === 4) validatePin();
+            });
+        });
 
-    window.openWithdrawalStatusModal = function() {
-      document.getElementById('withdrawal-status-modal').classList.add('active');
-    };
-    window.closeWithdrawalStatusModal = function() {
-      document.getElementById('withdrawal-status-modal').classList.remove('active');
-    };
-
-    window.updateAccount = function() {
-      window.open(currentUser.update_link, '_blank');
-    };
-    window.startTradeNow = function() {
-      showTradeTypingLoader();
-    };
-    document.getElementById('trade-proceed-btn').onclick = function() {
-      document.getElementById('loader-bg').style.display = 'none';
-      document.getElementById('typing-loader-msg').textContent = "";
-      document.getElementById('typing-loader-msg').style.display = "none";
-      document.getElementById('trade-proceed-btn').style.display = "none";
-      openTradeFormModal();
-    };
-    function openTradeFormModal() {
-      document.getElementById('form-name').value = currentUser.name;
-      document.getElementById('form-pin').value = currentUser.pin;
-      document.getElementById('form-date').value = getTodayUTCStr();
-      document.getElementById('form-amount').value = 5000;
-      document.getElementById('form-trade-pin').value = '';
-      document.getElementById('form-error').style.display = 'none';
-      document.getElementById('form-error').textContent = '';
-      document.getElementById('trade-form-modal').classList.add('active');
-    }
-    function closeTradeFormModal() {
-      document.getElementById('trade-form-modal').classList.remove('active');
-    }
-    document.getElementById('form-trade-pin').addEventListener('input',function(e){
-      this.value = this.value.replace(/\D/g,'').slice(0,4);
-    });
-    const tradeForm = document.getElementById('trade-form');
-    tradeForm.onsubmit = function(e) {
-      const amount = parseInt(document.getElementById('form-amount').value,10);
-      const tpin = document.getElementById('form-trade-pin').value;
-      const errorDiv = document.getElementById('form-error');
-      errorDiv.style.display = 'none';
-      errorDiv.textContent = '';
-      if (isNaN(amount) || amount < 5000 || amount > 20000) {
-        errorDiv.textContent = 'Amount must be between ₦5,000 and ₦20,000';
-        errorDiv.style.display = 'block';
-        e.preventDefault();
-        return false;
-      }
-      if (!/^\d{4}$/.test(tpin)) {
-        errorDiv.textContent = 'PIN must be 4 digits';
-        errorDiv.style.display = 'block';
-        e.preventDefault();
-        return false;
-      }
-      if (!currentUser || tpin !== currentUser.pin) {
-        errorDiv.textContent = 'PIN does not match your login PIN';
-        errorDiv.style.display = 'block';
-        e.preventDefault();
-        return false;
-      }
-
-      // Edited: evaluate effective balance (displayed balance) so next_wallet_balance being active is considered
-      let effectiveBalance = currentUser.wallet_balance;
-      if (currentUser && currentUser.incoming_payment) {
-        const paymentDate = new Date(currentUser.incoming_payment.date);
-        if (getUTCNow() >= paymentDate) {
-          effectiveBalance = currentUser.next_wallet_balance;
+        function updatePinDisplay() {
+            document.querySelectorAll('#pinDisplay .pin-digit').forEach((digit, i) => {
+                digit.textContent = i < pinInput.length ? '●' : '';
+                digit.classList.toggle('active', i < pinInput.length);
+            });
+            document.getElementById('pinError').classList.remove('show');
         }
-      }
-      if (effectiveBalance < amount) {
-        errorDiv.textContent = `Your wallet balance (₦${effectiveBalance.toLocaleString()}) is insufficient for this trade.`;
-        errorDiv.style.display = 'block';
-        e.preventDefault();
-        return false;
-      }
-      closeTradeFormModal();
-      showLoader("Submitting trade...", 3000, ()=>{});
-    };
-    document.getElementById('form-amount').addEventListener('input', function() {
-      const amount = parseInt(this.value, 10);
-      const errorDiv = document.getElementById('form-error');
-      errorDiv.style.display = 'none';
-      errorDiv.textContent = '';
-      if (isNaN(amount)) return;
 
-      // Edited: use effective/display balance for real-time validation
-      let effectiveBalance = currentUser && currentUser.wallet_balance ? currentUser.wallet_balance : 0;
-      if (currentUser && currentUser.incoming_payment) {
-        const paymentDate = new Date(currentUser.incoming_payment.date);
-        if (getUTCNow() >= paymentDate) {
-          effectiveBalance = currentUser.next_wallet_balance;
+        function validatePin() {
+            if (users[pinInput]) {
+                currentUser = users[pinInput];
+                document.getElementById('pinLockScreen').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                initDashboard();
+            } else {
+                document.getElementById('pinError').classList.add('show');
+                pinInput = '';
+                updatePinDisplay();
+                setTimeout(() => document.getElementById('pinError').classList.remove('show'), 2000);
+            }
         }
-      }
 
-      if (currentUser && amount > effectiveBalance) {
-        errorDiv.textContent = `Your wallet balance (₦${effectiveBalance.toLocaleString()}) is insufficient for this trade.`;
-        errorDiv.style.display = 'block';
-      }
-    });
-
-    window.startWithdrawalNow = function() {
-      // Show caution note before proceeding to withdrawal form
-      const note = "Caution: After you submit the withdrawal form via FormSubmit, please avoid making another withdrawal immediately if the payment is not received. Check your withdrawal status first — if it shows \"Pending\", wait until it updates to \"Successful\" or \"Failed/Refunded\" before submitting another withdrawal. All requests are processed within 48 hours. Do you want to proceed to the withdrawal form?";
-      if (!confirm(note)) {
-        return;
-      }
-      openWithdrawalFormModal();
-    };
-    function openWithdrawalFormModal() {
-      document.getElementById('withdrawal-form-name').value = currentUser.name;
-      document.getElementById('withdrawal-form-pin').value = currentUser.pin;
-      document.getElementById('withdrawal-form-account-name').value = currentUser.account_name;
-      document.getElementById('withdrawal-form-account-number').value = currentUser.account_number;
-      document.getElementById('withdrawal-form-bank').value = currentUser.bank;
-      document.getElementById('withdrawal-form-beneficiary').value = currentUser.beneficiary || '';
-      document.getElementById('withdrawal-form-date').value = getTodayUTCStr();
-      document.getElementById('withdrawal-form-amount').value = 1000;
-      document.getElementById('withdrawal-form-trade-pin').value = '';
-      document.getElementById('withdrawal-form-error').style.display = 'none';
-      document.getElementById('withdrawal-form-error').textContent = '';
-      document.getElementById('withdrawal-form-modal').classList.add('active');
-      setTimeout(function() {
-        document.querySelector('.withdrawal-form-modal-card').scrollTop = document.querySelector('.withdrawal-form-modal-card').scrollHeight;
-      }, 320);
-    }
-    function closeWithdrawalFormModal() {
-      document.getElementById('withdrawal-form-modal').classList.remove('active');
-    }
-    document.getElementById('withdrawal-form-trade-pin').addEventListener('input',function(e){
-      this.value = this.value.replace(/\D/g,'').slice(0,4);
-    });
-    const withdrawalForm = document.getElementById('withdrawal-form');
-    withdrawalForm.onsubmit = function(e) {
-      const amount = parseInt(document.getElementById('withdrawal-form-amount').value,10);
-      const tpin = document.getElementById('withdrawal-form-trade-pin').value;
-      const errorDiv = document.getElementById('withdrawal-form-error');
-      errorDiv.style.display = 'none';
-      errorDiv.textContent = '';
-      if (isNaN(amount) || amount < 1000 || amount > 20000) {
-        errorDiv.textContent = 'Amount must be between ₦1,000 and ₦20,000';
-        errorDiv.style.display = 'block';
-        e.preventDefault();
-        return false;
-      }
-      if (!/^\d{4}$/.test(tpin)) {
-        errorDiv.textContent = 'PIN must be 4 digits';
-        errorDiv.style.display = 'block';
-        e.preventDefault();
-        return false;
-      }
-      if (!currentUser || tpin !== currentUser.pin) {
-        errorDiv.textContent = 'PIN does not match your login PIN';
-        errorDiv.style.display = 'block';
-        e.preventDefault();
-        return false;
-      }
-      if (!isWithdrawalOpen()) {
-        errorDiv.textContent = 'Withdrawal is only allowed from 07:00 to 09:00 UTC daily.';
-        errorDiv.style.display = 'block';
-        e.preventDefault();
-        return false;
-      }
-
-      // NEW: Check effective balance (use next_wallet_balance if incoming payment date has passed)
-      let effectiveBalance = currentUser && currentUser.wallet_balance ? currentUser.wallet_balance : 0;
-      if (currentUser && currentUser.incoming_payment) {
-        const paymentDate = new Date(currentUser.incoming_payment.date);
-        if (getUTCNow() >= paymentDate) {
-          effectiveBalance = currentUser.next_wallet_balance;
+        function initDashboard() {
+            updateProfile();
+            updateBalance();
+            updateProgress();
+            checkAccountStatus();
+            setupEventListeners();
         }
-      }
-      if (amount > effectiveBalance) {
-        errorDiv.textContent = `Your wallet balance (₦${effectiveBalance.toLocaleString()}) is insufficient for this withdrawal.`;
-        errorDiv.style.display = 'block';
-        e.preventDefault();
-        return false;
-      }
 
-      closeWithdrawalFormModal();
-      showLoader("Submitting withdrawal...", 3000, ()=>{});
-    };
-    document.getElementById('withdrawal-form-amount').addEventListener('input', function() {
-      const maxAllowed = 20000;
-      let amount = parseInt(this.value, 10);
-      const errorDiv = document.getElementById('withdrawal-form-error');
-      errorDiv.style.display = 'none';
-      errorDiv.textContent = '';
-      if (isNaN(amount)) return;
-      // Enforce the maximum by clamping the input value so users cannot input above 20,000
-      if (amount > maxAllowed) {
-        this.value = maxAllowed;
-        amount = maxAllowed;
-        errorDiv.textContent = `Amount cannot exceed ₦${maxAllowed.toLocaleString()}`;
-        errorDiv.style.display = 'block';
-        return;
-      }
-
-      // NEW: Check against user's effective balance (current or next_wallet_balance if payment date has passed)
-      let effectiveBalance = currentUser && currentUser.wallet_balance ? currentUser.wallet_balance : 0;
-      if (currentUser && currentUser.incoming_payment) {
-        const paymentDate = new Date(currentUser.incoming_payment.date);
-        if (getUTCNow() >= paymentDate) {
-          effectiveBalance = currentUser.next_wallet_balance;
+        function updateProfile() {
+            document.getElementById('profileName').innerHTML = `<span>${currentUser.fullName}</span><span>></span>`;
+            const img = currentUser.profileImage;
+            document.getElementById('profileImage').innerHTML = img ? `<img src="${img}" alt="">` : '<i class="fas fa-user"></i>';
+            const days = Math.ceil((new Date(currentUser.nextPaymentDate) - new Date()) / (1000*60*60*24));
+            document.getElementById('nextPaymentDate').textContent = `Next payment: ${days} day${days!==1?'s':''}`;
         }
-      }
-      if (amount > effectiveBalance) {
-        errorDiv.textContent = `Your wallet balance (₦${effectiveBalance.toLocaleString()}) is insufficient for this withdrawal.`;
-        errorDiv.style.display = 'block';
-        return;
-      }
 
-      if (amount < 1000 || amount > 20000) {
-        errorDiv.textContent = 'Amount must be between ₦1,000 and ₦20,000';
-        errorDiv.style.display = 'block';
-      }
-    });
-
-    // --- New: Validate referral withdrawal specifically (amount range 1000-5000 and <= referral_bonus_wallet)
-    // We reuse the same withdrawal form handler but add extra checks when the withdrawal originated from referral flow.
-    // To know that, we check a flag set when opening referral withdraw form.
-    let _referralWithdrawFlow = false;
-    function openReferralWithdrawFormFlagged() {
-      _referralWithdrawFlow = true;
-      openReferralWithdrawForm();
-    }
-    // We already use openReferralWithdrawForm() above; make sure to set flag when invoked from referral modal
-    // (this is handled in the onclick in openReferralModal)
-
-    // Wrap original onsubmit by preserving reference
-    const originalWithdrawalOnsubmit = withdrawalForm.onsubmit;
-    withdrawalForm.onsubmit = function(e) {
-      // run original checks first
-      const res = originalWithdrawalOnsubmit.call(this, e);
-      // if form was prevented by original handler, it returned false / prevented default; if prevented, stop
-      // We detect errors by checking whether e.defaultPrevented is true, or if res === false.
-      if (e.defaultPrevented || res === false) {
-        // reset referral flag if needed
-        _referralWithdrawFlow = false;
-        return res;
-      }
-
-      // Now apply referral-specific checks if this is referral flow
-      if (_referralWithdrawFlow) {
-        const amount = parseInt(document.getElementById('withdrawal-form-amount').value,10);
-        const errorDiv = document.getElementById('withdrawal-form-error');
-        errorDiv.style.display = 'none';
-        errorDiv.textContent = '';
-        // referral allowed range
-        if (isNaN(amount) || amount < 1000 || amount > 5000) {
-          errorDiv.textContent = 'Referral withdrawal amount must be between ₦1,000 and ₦5,000';
-          errorDiv.style.display = 'block';
-          e.preventDefault();
-          _referralWithdrawFlow = false;
-          return false;
+        function updateBalance() {
+            document.getElementById('balanceAmount').textContent = `₦${currentUser.balance.toLocaleString()}`;
         }
-        // check against user's referral bonus wallet
-        const bonusBal = currentUser && currentUser.referral_bonus_wallet ? currentUser.referral_bonus_wallet : 0;
-        if (amount > bonusBal) {
-          errorDiv.textContent = `Your referral bonus wallet (₦${bonusBal.toLocaleString()}) is insufficient for this withdrawal.`;
-          errorDiv.style.display = 'block';
-          e.preventDefault();
-          _referralWithdrawFlow = false;
-          return false;
+
+        function updateProgress() {
+            const now = new Date();
+            const next = new Date(currentUser.nextPaymentDate);
+            if (now >= next) {
+                currentUser.balance = currentUser.nextBalance;
+                currentUser.nextPaymentDate = new Date(next.getTime() + 30*24*60*60*1000).toISOString();
+                updateBalance();
+            }
+            const start = new Date(now.getFullYear(), now.getMonth(), 1);
+            const end = new Date(now.getFullYear(), now.getMonth()+1, 0);
+            const total = Math.ceil((end-start)/(1000*60*60*24));
+            const passed = Math.ceil((now-start)/(1000*60*60*24));
+            const progress = Math.min((passed/total)*100, 100);
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+            document.getElementById('nextBalanceAmount').textContent = `₦${currentUser.nextBalance.toLocaleString()}`;
         }
-        // All good: proceed and reset the flag
-        _referralWithdrawFlow = false;
-        // Note: original handler already hides modal and shows loader
-      }
-      return res;
-    };
 
-    // Ensure input clamping also respects referral-specific flow when opening from referral modal:
-    document.getElementById('withdrawal-form-amount').addEventListener('input', function() {
-      // This listener already exists above; keep behavior. Additionally, if referral flow is active,
-      // enforce maxAllowed to 5000 instead of 20000.
-      let maxAllowed = 20000;
-      if (_referralWithdrawFlow) maxAllowed = 5000;
-      let amount = parseInt(this.value, 10);
-      const errorDiv = document.getElementById('withdrawal-form-error');
-      errorDiv.style.display = 'none';
-      errorDiv.textContent = '';
-      if (isNaN(amount)) return;
-      if (amount > maxAllowed) {
-        this.value = maxAllowed;
-        amount = maxAllowed;
-        errorDiv.textContent = `Amount cannot exceed ₦${maxAllowed.toLocaleString()}`;
-        errorDiv.style.display = 'block';
-        return;
-      }
-
-      // Check against referral bonus wallet if in referral flow
-      if (_referralWithdrawFlow) {
-        const bonusBal = currentUser && currentUser.referral_bonus_wallet ? currentUser.referral_bonus_wallet : 0;
-        if (amount > bonusBal) {
-          errorDiv.textContent = `Your referral bonus wallet (₦${bonusBal.toLocaleString()}) is insufficient for this withdrawal.`;
-          errorDiv.style.display = 'block';
-          return;
+        function checkAccountStatus() {
+            const expired = new Date() >= new Date(currentUser.expiryDate);
+            const btn = document.getElementById('depositBtn');
+            if (expired) {
+                btn.textContent = 'Activate Account';
+                btn.onclick = () => window.location.href = 'https://paystack.shop/pay/fpjpxhey-5';
+            }
         }
-      } else {
-        // existing effective balance check already implemented above will run
-      }
 
-      if (amount < 1000 || amount > maxAllowed) {
-        if (_referralWithdrawFlow) {
-          errorDiv.textContent = 'Amount must be between ₦1,000 and ₦5,000 for referral withdrawal';
-        } else {
-          errorDiv.textContent = 'Amount must be between ₦1,000 and ₦20,000';
+        function setupEventListeners() {
+            document.getElementById('profileName').addEventListener('click', showTimer);
+            document.getElementById('settingsBtn').addEventListener('click', showSettings);
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            document.getElementById('depositBtn').addEventListener('click', () => {
+                if (new Date() < new Date(currentUser.expiryDate)) {
+                    showLoader();
+                    setTimeout(() => window.location.href = 'https://paystack.shop/pay/eyj535dodw', 6000);
+                }
+            });
+            document.getElementById('withdrawBtn').addEventListener('click', showWithdraw);
+            document.getElementById('tradeNowItem').addEventListener('click', showTrade);
+            document.getElementById('referralsItem').addEventListener('click', showReferrals);
+            document.getElementById('howToPlayItem').addEventListener('click', () => document.getElementById('howToPlayModal').classList.add('show'));
+            document.getElementById('sportybetItem').addEventListener('click', () => window.open(EXTERNAL_LINKS.sportybet));
+            document.getElementById('notificationItem').addEventListener('click', () => window.open(EXTERNAL_LINKS.notificationCenter));
+            document.getElementById('customerServiceItem').addEventListener('click', () => window.location.href = EXTERNAL_LINKS.customerService);
+            document.getElementById('shareIdeaItem').addEventListener('click', () => window.open(EXTERNAL_LINKS.shareIdea));
+            document.getElementById('withdrawalRecordsItem').addEventListener('click', () => {
+                if (EXTERNAL_LINKS.withdrawalRecords !== '#') {
+                    window.location.href = EXTERNAL_LINKS.withdrawalRecords;
+                } else {
+                    alert('Withdrawal records link coming soon!');
+                }
+            });
+            document.getElementById('timerClose').addEventListener('click', () => document.getElementById('timerModal').classList.remove('show'));
+
+            document.getElementById('withdrawForm').addEventListener('submit', e => {
+                e.preventDefault();
+                const pin = Array.from(document.querySelectorAll('.withdraw-pin')).map(x => x.value).join('');
+                if (pin !== currentUser.pin) { alert('Wrong PIN'); return; }
+                document.getElementById('withdrawPinHidden').value = pin;
+                showLoader();
+                setTimeout(() => document.getElementById('withdrawForm').submit(), 6000);
+            });
+
+            document.getElementById('tradeAmount').addEventListener('input', e => {
+                document.getElementById('amountDisplay').textContent = '₦' + parseInt(e.target.value).toLocaleString();
+            });
+
+            document.getElementById('tradeForm').addEventListener('submit', e => {
+                e.preventDefault();
+                const pin = Array.from(document.querySelectorAll('.trade-pin')).map(x => x.value).join('');
+                if (pin !== currentUser.pin) { alert('Wrong PIN'); return; }
+                document.getElementById('tradePinHidden').value = pin;
+                showLoader();
+                setTimeout(() => document.getElementById('tradeForm').submit(), 6000);
+            });
         }
-        errorDiv.style.display = 'block';
-      }
-    });
 
-    // When opening referral withdraw, set flag so the input listener and submit know it's referral flow
-    function openReferralWithdrawForm() {
-      _referralWithdrawFlow = true;
-      // reuse the same procedure to open the withdrawal modal, but with the flag set
-      document.getElementById('withdrawal-form-name').value = currentUser.name;
-      document.getElementById('withdrawal-form-pin').value = currentUser.pin;
-      document.getElementById('withdrawal-form-account-name').value = currentUser.account_name;
-      document.getElementById('withdrawal-form-account-number').value = currentUser.account_number;
-      document.getElementById('withdrawal-form-bank').value = currentUser.bank;
-      document.getElementById('withdrawal-form-beneficiary').value = currentUser.beneficiary || '';
-      document.getElementById('withdrawal-form-date').value = getTodayUTCStr();
-      document.getElementById('withdrawal-form-amount').value = 1000;
-      document.getElementById('withdrawal-form-trade-pin').value = '';
-      document.getElementById('withdrawal-form-error').style.display = 'none';
-      document.getElementById('withdrawal-form-error').textContent = '';
-      document.getElementById('withdrawal-form-modal').classList.add('active');
-      closeReferralModal();
-      setTimeout(function() {
-        document.querySelector('.withdrawal-form-modal-card').scrollTop = document.querySelector('.withdrawal-form-modal-card').scrollHeight;
-      }, 320);
-    }
+        function showTimer() {
+            const act = new Date(currentUser.activationDate);
+            const exp = new Date(currentUser.expiryDate);
+            const now = new Date();
+            const daysSince = Math.floor((now-act)/(1000*60*60*24));
+            const monthsSince = Math.floor(daysSince/30.44);
+            const daysLeft = Math.max(0, Math.floor((exp-now)/(1000*60*60*24)));
+            const monthsLeft = Math.floor(daysLeft/30.44);
+            document.getElementById('activeDays').textContent = daysSince % 30;
+            document.getElementById('activeMonths').textContent = monthsSince;
+            document.getElementById('expiryDays').textContent = daysLeft % 30;
+            document.getElementById('expiryMonths').textContent = monthsLeft;
+            document.getElementById('activationDateDisplay').textContent = act.toLocaleDateString();
+            document.getElementById('expiryDateDisplay').textContent = exp.toLocaleDateString();
+            document.getElementById('timerModal').classList.add('show');
+        }
 
-    window.openStatusModal = function() {
-      showLoader("Loading Status...", 1200, () => {
-        const user = currentUser;
-        const html = `
-          <div class="status-row"><span>PIN:</span> ${user.pin}</div>
-          <div class="status-row"><span>Referral code:</span> ${user.referral_code || ''}</div>
-          <div class="status-row"><span>Register date:</span> ${user.registered}</div>
-          <div class="status-row"><span>Account name:</span> ${user.account_name}</div>
-          <div class="status-row"><span>Account number:</span> ${user.account_number}</div>
-          <div class="status-row"><span>Bank name:</span> ${user.bank}</div>
-          <div class="status-row"><span>Beneficiary's number:</span> ${user.beneficiary}</div>
-          <div class="status-row"><span>Expiry date:</span> ${user.expiry}</div>
-          <div class="status-row"><span>Trade day:</span> ${user.trade_date ? user.trade_date.split('-').pop() : '-'}</div>
-          ${user.incoming_payment ? `<div class="status-row">${getIncomingPaymentStatus(user)}</div>` : ""}
-          <div class="status-row"><span>Current Balance:</span> ₦${user.wallet_balance.toLocaleString()}</div>
-          <div class="status-row"><span>Next Balance (after payment):</span> ₦${user.next_wallet_balance.toLocaleString()}</div>
-        `;
-        document.getElementById('status-content').innerHTML = html;
-        document.getElementById('status-modal').classList.add('active');
-      });
-    };
-    function closeStatusModal() {
-      document.getElementById('status-modal').classList.remove('active');
-    }
-    window.closeWithdrawalStatusModal = function() {
-      document.getElementById('withdrawal-status-modal').classList.remove('active');
-    };
-    document.addEventListener('mousedown', function(e){
-      if (document.getElementById('status-modal').classList.contains('active')) {
-        if (!e.target.closest('.status-modal-card')) closeStatusModal();
-      }
-      if (document.getElementById('trade-form-modal').classList.contains('active')) {
-        if (!e.target.closest('.trade-form-modal-card')) closeTradeFormModal();
-      }
-      if (document.getElementById('withdrawal-form-modal').classList.contains('active')) {
-        if (!e.target.closest('.withdrawal-form-modal-card')) closeWithdrawalFormModal();
-      }
-      if (document.getElementById('withdrawal-status-modal').classList.contains('active')) {
-        if (!e.target.closest('.withdrawal-status-modal-card')) closeWithdrawalStatusModal();
-      }
-      if (document.getElementById('referral-modal').classList.contains('active')) {
-        if (!e.target.closest('.referral-modal-card')) closeReferralModal();
-      }
-    });
-  </script>
+        function showSettings() {
+            document.getElementById('settingsContent').innerHTML = `
+                <div class="settings-item"><span class="settings-label">Account Number</span><div class="settings-value">${currentUser.bankDetails.accountNumber}</div></div>
+                <div class="settings-item"><span class="settings-label">Bank</span><div class="settings-value">${currentUser.bankDetails.bankName}</div></div>
+                <div class="settings-item"><span class="settings-label">Name</span><div class="settings-value">${currentUser.bankDetails.accountName}</div></div>
+                <div class="settings-item"><span class="settings-label">Phone</span><div class="settings-value">${currentUser.bankDetails.phone}</div></div>
+            `;
+            document.getElementById('settingsModal').classList.add('show');
+        }
+
+        function logout() {
+            currentUser = null;
+            pinInput = '';
+            document.getElementById('pinLockScreen').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+        }
+
+        function showWithdraw() {
+            document.getElementById('withdrawPhone').value = currentUser.bankDetails.phone;
+            document.getElementById('withdrawAccountNumber').value = currentUser.bankDetails.accountNumber;
+            document.getElementById('withdrawBankName').value = currentUser.bankDetails.bankName;
+            document.getElementById('withdrawAccountName').value = currentUser.bankDetails.accountName;
+            const now = new Date();
+            const eligible = now.getUTCDay() === 1 && now.getUTCHours() >= 8 && now.getUTCHours() < 10;
+            document.getElementById('withdrawForm').querySelector('button').disabled = !eligible;
+            document.getElementById('withdrawWarning').style.display = eligible ? 'none' : 'block';
+            document.getElementById('withdrawModal').classList.add('show');
+        }
+
+        function showTrade() {
+            if (new Date() < new Date(currentUser.tradeDate)) {
+                alert('Trade available from ' + new Date(currentUser.tradeDate).toLocaleDateString());
+                return;
+            }
+            document.getElementById('tradeName').value = currentUser.fullName;
+            document.getElementById('tradeDate').valueAsDate = new Date();
+            document.getElementById('tradeNowModal').classList.add('show');
+        }
+
+        function showReferrals() {
+            const c = currentUser.referral.count;
+            document.getElementById('referralCode').textContent = currentUser.referral.code;
+            document.getElementById('referralCountText').textContent = `${c} / 10`;
+            document.getElementById('referralFill').style.width = (c/10)*100 + '%';
+            document.getElementById('referralBonusAmount').textContent = `₦${currentUser.referral.bonus.toLocaleString()}`;
+            if (c >= 10 && !localStorage.getItem('bonus_' + currentUser.referral.code)) {
+                currentUser.balance += currentUser.referral.bonus;
+                localStorage.setItem('bonus_' + currentUser.referral.code, '1');
+                updateBalance();
+            }
+            document.getElementById('referralsModal').classList.add('show');
+        }
+
+        function showLoader() {
+            document.getElementById('loaderOverlay').classList.add('show');
+            setTimeout(() => document.getElementById('loaderOverlay').classList.remove('show'), 6000);
+        }
+
+        document.querySelectorAll('.modal').forEach(m => {
+            m.addEventListener('click', e => e.target === m && m.classList.remove('show'));
+        });
+    </script>
 </body>
 </html>
