@@ -248,6 +248,17 @@
             color: var(--accent-green);
         }
 
+        .profile-date {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            height: 18px;
+        }
+
+        .profile-date.hidden {
+            display: none !important;
+        }
+
         .balance-card {
             background: linear-gradient(135deg, var(--primary-dark) 0%, rgba(16, 185, 129, 0.1) 100%);
             border: 1px solid var(--border-color);
@@ -271,6 +282,10 @@
 
         .progress-container {
             margin: 15px 0;
+        }
+
+        .progress-container.hidden {
+            display: none !important;
         }
 
         .progress-label {
@@ -306,6 +321,11 @@
             background: var(--primary-dark);
             border-radius: 6px;
             border: 1px solid var(--border-color);
+            display: block;
+        }
+
+        .next-balance-label.hidden {
+            display: none !important;
         }
 
         .next-balance-value {
@@ -335,20 +355,21 @@
             border: 1px solid var(--border-color);
             border-radius: 15px;
             padding: 30px 25px;
-            max-width: 350px;
+            max-width: 380px;
             text-align: center;
-            max-height: 80vh;
+            max-height: 90vh;
             overflow-y: auto;
         }
 
         .timer-title {
             font-size: 18px;
             font-weight: 700;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            color: var(--accent-green);
         }
 
         .timer-section {
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
 
         .timer-section-title {
@@ -357,20 +378,18 @@
             color: var(--accent-green);
             margin-bottom: 12px;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .timer-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
+        .timer-row.full {
+            grid-template-columns: 1fr;
         }
 
         .timer-box {
             background: var(--primary-dark);
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            padding: 12px;
+            padding: 15px;
         }
 
         .timer-label {
@@ -381,24 +400,47 @@
         }
 
         .timer-value {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 700;
             color: var(--accent-green);
         }
 
-        .timer-details {
-            background: var(--primary-dark);
+        .countdown-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .countdown-item {
+            background: rgba(16, 185, 129, 0.1);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 10px;
-            font-size: 11px;
-            color: var(--text-muted);
-            line-height: 1.6;
-            text-align: left;
         }
 
-        .timer-details strong {
+        .countdown-value {
+            font-size: 18px;
+            font-weight: 700;
             color: var(--accent-green);
+        }
+
+        .countdown-unit {
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .expiry-warning {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: 11px;
+            color: var(--danger);
+            text-align: center;
         }
 
         .timer-close {
@@ -410,7 +452,7 @@
             cursor: pointer;
             font-weight: 600;
             width: 100%;
-            margin-top: 15px;
+            margin-top: 20px;
         }
 
         .timer-close:hover {
@@ -757,6 +799,31 @@
             margin-top: 15px;
             text-align: center;
         }
+
+        .trade-time-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .trade-info-box {
+            background: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .trade-info-box strong {
+            color: var(--accent-green);
+        }
     </style>
 </head>
 <body>
@@ -807,7 +874,7 @@
                     <div class="balance-label">Total Balance</div>
                     <div class="balance-amount" id="balanceAmount">₦0.00</div>
                 </div>
-                <div class="progress-container">
+                <div class="progress-container" id="progressContainer">
                     <div class="progress-label">
                         <span>Progress to Next Payment</span>
                         <span id="progressPercent">0%</span>
@@ -815,7 +882,7 @@
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill" style="width: 0%"></div>
                     </div>
-                    <div class="next-balance-label">
+                    <div class="next-balance-label" id="nextBalanceContainer">
                         Next Balance: <span class="next-balance-value" id="nextBalanceAmount">₦0.00</span>
                     </div>
                 </div>
@@ -867,23 +934,68 @@
     <!-- TIMER MODAL -->
     <div class="timer-modal" id="timerModal">
         <div class="timer-content">
-            <div class="timer-title">Account Status</div>
+            <div class="timer-title">⏳ Account Status</div>
+            
             <div class="timer-section">
-                <div class="timer-section-title">Active Since</div>
-                <div class="timer-row">
-                    <div class="timer-box"><div class="timer-label">Days</div><div class="timer-value" id="activeDays">0</div></div>
-                    <div class="timer-box"><div class="timer-label">Months</div><div class="timer-value" id="activeMonths">0</div></div>
+                <div class="timer-section-title">🚀 Activated On</div>
+                <div class="timer-box">
+                    <div class="timer-label">Activation Date & Time</div>
+                    <div class="timer-value" id="activationDateTimeDisplay">-- -- ----</div>
                 </div>
-                <div class="timer-details">Activated: <strong id="activationDateDisplay">--/--/----</strong></div>
             </div>
+
             <div class="timer-section">
-                <div class="timer-section-title">Expires In</div>
-                <div class="timer-row">
-                    <div class="timer-box"><div class="timer-label">Days</div><div class="timer-value" id="expiryDays">0</div></div>
-                    <div class="timer-box"><div class="timer-label">Months</div><div class="timer-value" id="expiryMonths">0</div></div>
+                <div class="timer-section-title">⏱️ Active Duration</div>
+                <div class="countdown-grid">
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="activeDays">0</div>
+                        <div class="countdown-unit">Days</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="activeHours">0</div>
+                        <div class="countdown-unit">Hours</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="activeMinutes">0</div>
+                        <div class="countdown-unit">Minutes</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="activeSeconds">0</div>
+                        <div class="countdown-unit">Seconds</div>
+                    </div>
                 </div>
-                <div class="timer-details">Expires: <strong id="expiryDateDisplay">--/--/----</strong></div>
             </div>
+
+            <div class="timer-section">
+                <div class="timer-section-title">⏳ Countdown to Expiry</div>
+                <div class="timer-box">
+                    <div class="timer-label">Expiry Date & Time</div>
+                    <div class="timer-value" id="expiryDateTimeDisplay">-- -- ----</div>
+                </div>
+                <div class="countdown-grid">
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="expiryDays">0</div>
+                        <div class="countdown-unit">Days</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="expiryHours">0</div>
+                        <div class="countdown-unit">Hours</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="expiryMinutes">0</div>
+                        <div class="countdown-unit">Minutes</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="expirySeconds">0</div>
+                        <div class="countdown-unit">Seconds</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="expiry-warning" id="expiryWarning" style="display: none;">
+                ⚠️ Your account will expire soon. Please renew your subscription.
+            </div>
+
             <button class="timer-close" id="timerClose">Close</button>
         </div>
     </div>
@@ -893,7 +1005,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">Account Details</div>
-                <button class="modal-close" onclick="document.getElementById('settingsModal').classList.remove('show')"><i class="fas fa-times"></i></button>
+                <button class="modal-close" onclick="closeModal('settingsModal')"><i class="fas fa-times"></i></button>
             </div>
             <div id="settingsContent"></div>
         </div>
@@ -904,7 +1016,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">Withdraw Funds</div>
-                <button class="modal-close" onclick="document.getElementById('withdrawModal').classList.remove('show')"><i class="fas fa-times"></i></button>
+                <button class="modal-close" onclick="closeModal('withdrawModal')"><i class="fas fa-times"></i></button>
             </div>
             <form id="withdrawForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST">
                 <div class="form-group">
@@ -952,7 +1064,13 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">Trade Now</div>
-                <button class="modal-close" onclick="document.getElementById('tradeNowModal').classList.remove('show')"><i class="fas fa-times"></i></button>
+                <button class="modal-close" onclick="closeModal('tradeNowModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="trade-time-warning" id="tradeTimeWarning" style="display: none;">
+                <i class="fas fa-clock"></i> Trading is only available on your assigned day between 08:00-10:00 UTC
+            </div>
+            <div class="trade-info-box" id="tradeInfoBox">
+                Trading available: <strong id="tradeAvailableDay">--</strong>, <strong>08:00-10:00 UTC</strong>
             </div>
             <form id="tradeForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST">
                 <div class="form-group">
@@ -961,7 +1079,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Amount (₦5,000 - ₦20,000)</label>
-                    <input type="range" class="form-input" id="tradeAmount" name="amount" min="5000" max="20000" step="1000" value="10000" style="height: auto;">
+                    <input type="range" class="form-input" id="tradeAmount" name="amount" min="5000" max="20000" step="1000" value="10000">
                     <div style="text-align: center; margin-top: 8px; color: var(--accent-green); font-weight: 700;" id="amountDisplay">₦10,000</div>
                 </div>
                 <div class="form-group">
@@ -978,7 +1096,7 @@
                     </div>
                     <input type="hidden" id="tradePinHidden" name="pin">
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-check"></i> Submit</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%;" id="tradeSubmitBtn"><i class="fas fa-check"></i> Submit</button>
             </form>
         </div>
     </div>
@@ -988,7 +1106,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">My Referrals</div>
-                <button class="modal-close" onclick="document.getElementById('referralsModal').classList.remove('show')"><i class="fas fa-times"></i></button>
+                <button class="modal-close" onclick="closeModal('referralsModal')"><i class="fas fa-times"></i></button>
             </div>
             <div class="referral-card">
                 <div class="referral-code" id="referralCode">XXXX</div>
@@ -1004,16 +1122,16 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">How to Play</div>
-                <button class="modal-close" onclick="document.getElementById('howToPlayModal').classList.remove('show')"><i class="fas fa-times"></i></button>
+                <button class="modal-close" onclick="closeModal('howToPlayModal')"><i class="fas fa-times"></i></button>
             </div>
             <ul class="instructions-list">
                 <li>Login with your 4-digit PIN</li>
                 <li>Check your balance and payment dates</li>
                 <li>Use Deposit to fund your account</li>
                 <li>Withdraw on Mondays 08:00-10:00 UTC</li>
-                <li>Trade with ₦5,000 - ₦20,000</li>
+                <li>Trade on your assigned day 08:00-10:00 UTC</li>
+                <li>Trade amounts: ₦5,000 - ₦20,000</li>
                 <li>Earn bonuses with referrals</li>
-                <li>Monitor your account dates</li>
                 <li>Contact support for help</li>
             </ul>
         </div>
@@ -1028,7 +1146,7 @@
             shareIdea: 'https://chat.whatsapp.com/KuZ1TT07hDrEbFlMUKrqaE',
             notificationCenter: 'https://whatsapp.com/channel/0029VbAjCE67oQhZxHe5Kq3R',
             customerService: 'mailto:empirevirtual99@gmail.com',
-            withdrawalRecords: '#'  // Add your withdrawal records link here
+            withdrawalRecords: '#'
         };
 
         const users = {
@@ -1038,15 +1156,10 @@
                 balance: 50000,
                 nextBalance: 50000,
                 nextPaymentDate: '2026-03-14T00:00:00Z',
-                activationDate: '2025-11-25T00:00:00Z',
+                activationDate: '2025-11-25T08:30:00Z',
                 expiryDate: '2026-05-25T23:59:59Z',
-                tradeDate: '2026-03-15T00:00:00Z',
-                bankDetails: {
-                    accountNumber: '3212525772',
-                    bankName: 'First Bank',
-                    accountName: 'OWAN SILAS OWAN',
-                    phone: '09037404875'
-                },
+                tradeDate: 15,
+                bankDetails: { accountNumber: '3212525772', bankName: 'First Bank', accountName: 'OWAN SILAS OWAN', phone: '09037404875' },
                 referral: { code: 'SILAS1241', count: 0, bonus: 5000 },
                 profileImage: 'AddText_11-25-06.08.39.png'
             },
@@ -1056,15 +1169,10 @@
                 balance: 7000,
                 nextBalance: 7000,
                 nextPaymentDate: '2025-03-30T00:00:00Z',
-                activationDate: '2024-11-15T00:00:00Z',
+                activationDate: '2024-11-15T14:20:00Z',
                 expiryDate: '2025-07-15T23:59:59Z',
-                tradeDate: '2026-03-20T00:00:00Z',
-                bankDetails: {
-                    accountNumber: '',
-                    bankName: '',
-                    accountName: '',
-                    phone: ''
-                },
+                tradeDate: 20,
+                bankDetails: { accountNumber: '', bankName: '', accountName: '', phone: '' },
                 referral: { code: 'EKONG5410', count: 0, bonus: 5000 },
                 profileImage: 'AddText_05-29-09.19.44.png'
             },
@@ -1074,15 +1182,10 @@
                 balance: 45000,
                 nextBalance: 50000,
                 nextPaymentDate: '2026-03-25T17:10:00Z',
-                activationDate: '2024-11-15T00:00:00Z',
+                activationDate: '2024-11-15T10:15:30Z',
                 expiryDate: '2026-07-15T23:59:59Z',
-                tradeDate: '2026-03-20T00:00:00Z',
-                bankDetails: {
-                    accountNumber: '8145300013',
-                    bankName: 'F.C.M.B',
-                    accountName: 'EMMANUEL EMMANUEL EKPA',
-                    phone: '08105866469'
-                },
+                tradeDate: 1,
+                bankDetails: { accountNumber: '8145300013', bankName: 'F.C.M.B', accountName: 'EMMANUEL EMMANUEL EKPA', phone: '08105866469' },
                 referral: { code: 'EKPA9014', count: 5, bonus: 5000 },
                 profileImage: 'AddText_05-22-01.29.33.png'
             }
@@ -1090,8 +1193,9 @@
 
         let currentUser = null;
         let pinInput = '';
+        let timerInterval = null;
 
-        // PIN ENTRY
+        // PIN ENTRY EVENT LISTENERS
         document.querySelectorAll('.pin-key').forEach(key => {
             key.addEventListener('click', function() {
                 const value = this.getAttribute('data-key');
@@ -1139,8 +1243,17 @@
             document.getElementById('profileName').innerHTML = `<span>${currentUser.fullName}</span><span>></span>`;
             const img = currentUser.profileImage;
             document.getElementById('profileImage').innerHTML = img ? `<img src="${img}" alt="">` : '<i class="fas fa-user"></i>';
-            const days = Math.ceil((new Date(currentUser.nextPaymentDate) - new Date()) / (1000*60*60*24));
-            document.getElementById('nextPaymentDate').textContent = `Next payment: ${days} day${days!==1?'s':''}`;
+            
+            const now = new Date();
+            const nextPayment = new Date(currentUser.nextPaymentDate);
+            
+            if (now >= nextPayment) {
+                document.getElementById('nextPaymentDate').classList.add('hidden');
+            } else {
+                document.getElementById('nextPaymentDate').classList.remove('hidden');
+                const days = Math.ceil((nextPayment - now) / (1000*60*60*24));
+                document.getElementById('nextPaymentDate').textContent = `Next payment: ${days} day${days!==1?'s':''}`;
+            }
         }
 
         function updateBalance() {
@@ -1149,17 +1262,25 @@
 
         function updateProgress() {
             const now = new Date();
-            const next = new Date(currentUser.nextPaymentDate);
-            if (now >= next) {
+            const nextPayment = new Date(currentUser.nextPaymentDate);
+
+            if (now >= nextPayment) {
                 currentUser.balance = currentUser.nextBalance;
-                currentUser.nextPaymentDate = new Date(next.getTime() + 30*24*60*60*1000).toISOString();
                 updateBalance();
+                document.getElementById('nextBalanceContainer').classList.add('hidden');
+                document.getElementById('progressContainer').classList.add('hidden');
+                return;
             }
+
+            document.getElementById('nextBalanceContainer').classList.remove('hidden');
+            document.getElementById('progressContainer').classList.remove('hidden');
+
             const start = new Date(now.getFullYear(), now.getMonth(), 1);
             const end = new Date(now.getFullYear(), now.getMonth()+1, 0);
             const total = Math.ceil((end-start)/(1000*60*60*24));
             const passed = Math.ceil((now-start)/(1000*60*60*24));
             const progress = Math.min((passed/total)*100, 100);
+            
             document.getElementById('progressFill').style.width = progress + '%';
             document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
             document.getElementById('nextBalanceAmount').textContent = `₦${currentUser.nextBalance.toLocaleString()}`;
@@ -1174,24 +1295,140 @@
             }
         }
 
+        function isTradeTimeAllowed() {
+            const now = new Date();
+            const userTradeDay = currentUser.tradeDate;
+            const currentDay = now.getUTCDate();
+            const currentHour = now.getUTCHours();
+            return currentDay === userTradeDay && currentHour >= 8 && currentHour < 10;
+        }
+
+        function updateTimerDisplay() {
+            const now = new Date();
+            const activationDate = new Date(currentUser.activationDate);
+            const expiryDate = new Date(currentUser.expiryDate);
+
+            const activationFormatted = activationDate.toLocaleString('en-US', {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+            document.getElementById('activationDateTimeDisplay').textContent = activationFormatted;
+
+            const expiryFormatted = expiryDate.toLocaleString('en-US', {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+            document.getElementById('expiryDateTimeDisplay').textContent = expiryFormatted;
+
+            const activeDiff = now - activationDate;
+            document.getElementById('activeDays').textContent = Math.floor(activeDiff / (1000*60*60*24));
+            document.getElementById('activeHours').textContent = Math.floor((activeDiff % (1000*60*60*24)) / (1000*60*60));
+            document.getElementById('activeMinutes').textContent = Math.floor((activeDiff % (1000*60*60)) / (1000*60));
+            document.getElementById('activeSeconds').textContent = Math.floor((activeDiff % (1000*60)) / 1000);
+
+            const expiryDiff = expiryDate - now;
+            if (expiryDiff > 0) {
+                document.getElementById('expiryDays').textContent = Math.floor(expiryDiff / (1000*60*60*24));
+                document.getElementById('expiryHours').textContent = Math.floor((expiryDiff % (1000*60*60*24)) / (1000*60*60));
+                document.getElementById('expiryMinutes').textContent = Math.floor((expiryDiff % (1000*60*60)) / (1000*60));
+                document.getElementById('expirySeconds').textContent = Math.floor((expiryDiff % (1000*60)) / 1000);
+                document.getElementById('expiryWarning').style.display = Math.floor(expiryDiff / (1000*60*60*24)) <= 7 ? 'block' : 'none';
+            } else {
+                document.getElementById('expiryDays').textContent = '0';
+                document.getElementById('expiryHours').textContent = '0';
+                document.getElementById('expiryMinutes').textContent = '0';
+                document.getElementById('expirySeconds').textContent = '0';
+                document.getElementById('expiryWarning').style.display = 'block';
+            }
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
         function setupEventListeners() {
-            document.getElementById('profileName').addEventListener('click', showTimer);
-            document.getElementById('settingsBtn').addEventListener('click', showSettings);
-            document.getElementById('logoutBtn').addEventListener('click', logout);
+            document.getElementById('profileName').addEventListener('click', () => {
+                updateTimerDisplay();
+                if (timerInterval) clearInterval(timerInterval);
+                timerInterval = setInterval(updateTimerDisplay, 1000);
+                document.getElementById('timerModal').classList.add('show');
+            });
+
+            document.getElementById('timerClose').addEventListener('click', () => {
+                document.getElementById('timerModal').classList.remove('show');
+                if (timerInterval) clearInterval(timerInterval);
+            });
+
+            document.getElementById('settingsBtn').addEventListener('click', () => {
+                document.getElementById('settingsContent').innerHTML = `
+                    <div class="settings-item"><span class="settings-label">Account Number</span><div class="settings-value">${currentUser.bankDetails.accountNumber || 'N/A'}</div></div>
+                    <div class="settings-item"><span class="settings-label">Bank</span><div class="settings-value">${currentUser.bankDetails.bankName || 'N/A'}</div></div>
+                    <div class="settings-item"><span class="settings-label">Name</span><div class="settings-value">${currentUser.bankDetails.accountName || 'N/A'}</div></div>
+                    <div class="settings-item"><span class="settings-label">Phone</span><div class="settings-value">${currentUser.bankDetails.phone || 'N/A'}</div></div>
+                `;
+                document.getElementById('settingsModal').classList.add('show');
+            });
+
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                currentUser = null;
+                pinInput = '';
+                if (timerInterval) clearInterval(timerInterval);
+                document.getElementById('pinLockScreen').classList.remove('hidden');
+                document.getElementById('dashboard').classList.add('hidden');
+            });
+
             document.getElementById('depositBtn').addEventListener('click', () => {
                 if (new Date() < new Date(currentUser.expiryDate)) {
-                    showLoader();
-                    setTimeout(() => window.location.href = 'https://paystack.shop/pay/eyj535dodw', 6000);
+                    document.getElementById('loaderOverlay').classList.add('show');
+                    setTimeout(() => { document.getElementById('loaderOverlay').classList.remove('show'); }, 6000);
                 }
             });
-            document.getElementById('withdrawBtn').addEventListener('click', showWithdraw);
-            document.getElementById('tradeNowItem').addEventListener('click', showTrade);
-            document.getElementById('referralsItem').addEventListener('click', showReferrals);
-            document.getElementById('howToPlayItem').addEventListener('click', () => document.getElementById('howToPlayModal').classList.add('show'));
+
+            document.getElementById('withdrawBtn').addEventListener('click', () => {
+                document.getElementById('withdrawPhone').value = currentUser.bankDetails.phone;
+                document.getElementById('withdrawAccountNumber').value = currentUser.bankDetails.accountNumber;
+                document.getElementById('withdrawBankName').value = currentUser.bankDetails.bankName;
+                document.getElementById('withdrawAccountName').value = currentUser.bankDetails.accountName;
+                const now = new Date();
+                const eligible = now.getUTCDay() === 1 && now.getUTCHours() >= 8 && now.getUTCHours() < 10;
+                document.getElementById('withdrawForm').querySelector('button').disabled = !eligible;
+                document.getElementById('withdrawWarning').style.display = eligible ? 'none' : 'block';
+                document.getElementById('withdrawModal').classList.add('show');
+            });
+
+            document.getElementById('tradeNowItem').addEventListener('click', () => {
+                document.getElementById('tradeAvailableDay').textContent = 'Day ' + currentUser.tradeDate;
+                const isAllowed = isTradeTimeAllowed();
+                document.getElementById('tradeTimeWarning').style.display = isAllowed ? 'none' : 'block';
+                document.getElementById('tradeSubmitBtn').disabled = !isAllowed;
+                document.getElementById('tradeName').value = currentUser.fullName;
+                document.getElementById('tradeDate').valueAsDate = new Date();
+                document.getElementById('tradeNowModal').classList.add('show');
+            });
+
+            document.getElementById('referralsItem').addEventListener('click', () => {
+                const c = currentUser.referral.count;
+                document.getElementById('referralCode').textContent = currentUser.referral.code;
+                document.getElementById('referralCountText').textContent = `${c} / 10`;
+                document.getElementById('referralFill').style.width = (c/10)*100 + '%';
+                document.getElementById('referralBonusAmount').textContent = `₦${currentUser.referral.bonus.toLocaleString()}`;
+                if (c >= 10 && !localStorage.getItem('bonus_' + currentUser.referral.code)) {
+                    currentUser.balance += currentUser.referral.bonus;
+                    localStorage.setItem('bonus_' + currentUser.referral.code, '1');
+                    updateBalance();
+                }
+                document.getElementById('referralsModal').classList.add('show');
+            });
+
+            document.getElementById('howToPlayItem').addEventListener('click', () => {
+                document.getElementById('howToPlayModal').classList.add('show');
+            });
+
             document.getElementById('sportybetItem').addEventListener('click', () => window.open(EXTERNAL_LINKS.sportybet));
             document.getElementById('notificationItem').addEventListener('click', () => window.open(EXTERNAL_LINKS.notificationCenter));
             document.getElementById('customerServiceItem').addEventListener('click', () => window.location.href = EXTERNAL_LINKS.customerService);
             document.getElementById('shareIdeaItem').addEventListener('click', () => window.open(EXTERNAL_LINKS.shareIdea));
+
             document.getElementById('withdrawalRecordsItem').addEventListener('click', () => {
                 if (EXTERNAL_LINKS.withdrawalRecords !== '#') {
                     window.location.href = EXTERNAL_LINKS.withdrawalRecords;
@@ -1199,109 +1436,39 @@
                     alert('Withdrawal records link coming soon!');
                 }
             });
-            document.getElementById('timerClose').addEventListener('click', () => document.getElementById('timerModal').classList.remove('show'));
 
-            document.getElementById('withdrawForm').addEventListener('submit', e => {
+            document.getElementById('tradeAmount').addEventListener('input', (e) => {
+                document.getElementById('amountDisplay').textContent = '₦' + parseInt(e.target.value).toLocaleString();
+            });
+
+            document.getElementById('withdrawForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const pin = Array.from(document.querySelectorAll('.withdraw-pin')).map(x => x.value).join('');
                 if (pin !== currentUser.pin) { alert('Wrong PIN'); return; }
                 document.getElementById('withdrawPinHidden').value = pin;
-                showLoader();
+                document.getElementById('loaderOverlay').classList.add('show');
                 setTimeout(() => document.getElementById('withdrawForm').submit(), 6000);
             });
 
-            document.getElementById('tradeAmount').addEventListener('input', e => {
-                document.getElementById('amountDisplay').textContent = '₦' + parseInt(e.target.value).toLocaleString();
-            });
-
-            document.getElementById('tradeForm').addEventListener('submit', e => {
+            document.getElementById('tradeForm').addEventListener('submit', (e) => {
                 e.preventDefault();
+                if (!isTradeTimeAllowed()) {
+                    alert('Trading is only available on day ' + currentUser.tradeDate + ' between 08:00-10:00 UTC');
+                    return;
+                }
                 const pin = Array.from(document.querySelectorAll('.trade-pin')).map(x => x.value).join('');
                 if (pin !== currentUser.pin) { alert('Wrong PIN'); return; }
                 document.getElementById('tradePinHidden').value = pin;
-                showLoader();
+                document.getElementById('loaderOverlay').classList.add('show');
                 setTimeout(() => document.getElementById('tradeForm').submit(), 6000);
             });
-        }
 
-        function showTimer() {
-            const act = new Date(currentUser.activationDate);
-            const exp = new Date(currentUser.expiryDate);
-            const now = new Date();
-            const daysSince = Math.floor((now-act)/(1000*60*60*24));
-            const monthsSince = Math.floor(daysSince/30.44);
-            const daysLeft = Math.max(0, Math.floor((exp-now)/(1000*60*60*24)));
-            const monthsLeft = Math.floor(daysLeft/30.44);
-            document.getElementById('activeDays').textContent = daysSince % 30;
-            document.getElementById('activeMonths').textContent = monthsSince;
-            document.getElementById('expiryDays').textContent = daysLeft % 30;
-            document.getElementById('expiryMonths').textContent = monthsLeft;
-            document.getElementById('activationDateDisplay').textContent = act.toLocaleDateString();
-            document.getElementById('expiryDateDisplay').textContent = exp.toLocaleDateString();
-            document.getElementById('timerModal').classList.add('show');
+            document.querySelectorAll('.modal').forEach(m => {
+                m.addEventListener('click', (e) => {
+                    if (e.target === m) m.classList.remove('show');
+                });
+            });
         }
-
-        function showSettings() {
-            document.getElementById('settingsContent').innerHTML = `
-                <div class="settings-item"><span class="settings-label">Account Number</span><div class="settings-value">${currentUser.bankDetails.accountNumber}</div></div>
-                <div class="settings-item"><span class="settings-label">Bank</span><div class="settings-value">${currentUser.bankDetails.bankName}</div></div>
-                <div class="settings-item"><span class="settings-label">Name</span><div class="settings-value">${currentUser.bankDetails.accountName}</div></div>
-                <div class="settings-item"><span class="settings-label">Phone</span><div class="settings-value">${currentUser.bankDetails.phone}</div></div>
-            `;
-            document.getElementById('settingsModal').classList.add('show');
-        }
-
-        function logout() {
-            currentUser = null;
-            pinInput = '';
-            document.getElementById('pinLockScreen').classList.remove('hidden');
-            document.getElementById('dashboard').classList.add('hidden');
-        }
-
-        function showWithdraw() {
-            document.getElementById('withdrawPhone').value = currentUser.bankDetails.phone;
-            document.getElementById('withdrawAccountNumber').value = currentUser.bankDetails.accountNumber;
-            document.getElementById('withdrawBankName').value = currentUser.bankDetails.bankName;
-            document.getElementById('withdrawAccountName').value = currentUser.bankDetails.accountName;
-            const now = new Date();
-            const eligible = now.getUTCDay() === 1 && now.getUTCHours() >= 8 && now.getUTCHours() < 10;
-            document.getElementById('withdrawForm').querySelector('button').disabled = !eligible;
-            document.getElementById('withdrawWarning').style.display = eligible ? 'none' : 'block';
-            document.getElementById('withdrawModal').classList.add('show');
-        }
-
-        function showTrade() {
-            if (new Date() < new Date(currentUser.tradeDate)) {
-                alert('Trade available from ' + new Date(currentUser.tradeDate).toLocaleDateString());
-                return;
-            }
-            document.getElementById('tradeName').value = currentUser.fullName;
-            document.getElementById('tradeDate').valueAsDate = new Date();
-            document.getElementById('tradeNowModal').classList.add('show');
-        }
-
-        function showReferrals() {
-            const c = currentUser.referral.count;
-            document.getElementById('referralCode').textContent = currentUser.referral.code;
-            document.getElementById('referralCountText').textContent = `${c} / 10`;
-            document.getElementById('referralFill').style.width = (c/10)*100 + '%';
-            document.getElementById('referralBonusAmount').textContent = `₦${currentUser.referral.bonus.toLocaleString()}`;
-            if (c >= 10 && !localStorage.getItem('bonus_' + currentUser.referral.code)) {
-                currentUser.balance += currentUser.referral.bonus;
-                localStorage.setItem('bonus_' + currentUser.referral.code, '1');
-                updateBalance();
-            }
-            document.getElementById('referralsModal').classList.add('show');
-        }
-
-        function showLoader() {
-            document.getElementById('loaderOverlay').classList.add('show');
-            setTimeout(() => document.getElementById('loaderOverlay').classList.remove('show'), 6000);
-        }
-
-        document.querySelectorAll('.modal').forEach(m => {
-            m.addEventListener('click', e => e.target === m && m.classList.remove('show'));
-        });
     </script>
 </body>
 </html>
