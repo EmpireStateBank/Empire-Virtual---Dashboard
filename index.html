@@ -34,6 +34,18 @@
             flex-direction: column;
         }
 
+        .form-type-header {
+            background: var(--accent-green);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        /* PIN Lock Screen Styles */
         .pin-lock-screen {
             position: fixed;
             top: 0;
@@ -160,6 +172,7 @@
             75% { transform: translateX(10px); }
         }
 
+        /* Dashboard Styles */
         .dashboard {
             flex: 1;
             display: flex;
@@ -333,6 +346,7 @@
             font-weight: 600;
         }
 
+        /* Timer Modal Styles */
         .timer-modal {
             position: fixed;
             top: 0;
@@ -379,10 +393,6 @@
             margin-bottom: 12px;
             text-transform: uppercase;
             letter-spacing: 1px;
-        }
-
-        .timer-row.full {
-            grid-template-columns: 1fr;
         }
 
         .timer-box {
@@ -459,6 +469,7 @@
             background: var(--accent-green-dark);
         }
 
+        /* Buttons */
         .buttons-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -506,6 +517,7 @@
             background: rgba(16, 185, 129, 0.1);
         }
 
+        /* Menu */
         .menu-section {
             background: var(--secondary-dark);
             border: 1px solid var(--border-color);
@@ -552,6 +564,7 @@
             font-size: 16px;
         }
 
+        /* Modal */
         .modal {
             position: fixed;
             top: 0;
@@ -606,6 +619,7 @@
             cursor: pointer;
         }
 
+        /* Forms */
         .form-group {
             margin-bottom: 15px;
         }
@@ -662,6 +676,7 @@
             border-color: var(--accent-green);
         }
 
+        /* Loader */
         .loader-overlay {
             position: fixed;
             top: 0;
@@ -692,6 +707,7 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Settings */
         .settings-item {
             background: var(--primary-dark);
             border: 1px solid var(--border-color);
@@ -712,6 +728,7 @@
             font-weight: 600;
         }
 
+        /* Referral */
         .referral-card {
             background: var(--primary-dark);
             border: 1px solid var(--border-color);
@@ -761,6 +778,7 @@
             font-weight: 600;
         }
 
+        /* Instructions */
         .instructions-list {
             list-style: none;
         }
@@ -1018,7 +1036,9 @@
                 <div class="modal-title">Withdraw Funds</div>
                 <button class="modal-close" onclick="closeModal('withdrawModal')"><i class="fas fa-times"></i></button>
             </div>
+            <div class="form-type-header">📋 WITHDRAWAL FORM</div>
             <form id="withdrawForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST">
+                <input type="hidden" name="_subject" value="Withdrawal Form Submission">
                 <div class="form-group">
                     <label class="form-label">Phone Number</label>
                     <input type="text" class="form-input" id="withdrawPhone" name="phone" disabled>
@@ -1066,13 +1086,15 @@
                 <div class="modal-title">Trade Now</div>
                 <button class="modal-close" onclick="closeModal('tradeNowModal')"><i class="fas fa-times"></i></button>
             </div>
+            <div class="form-type-header">📊 TRADE FORM</div>
             <div class="trade-time-warning" id="tradeTimeWarning" style="display: none;">
-                <i class="fas fa-clock"></i> Trading is only available on your assigned day between 08:00-10:00 UTC and can only be process if your account has been activated
+                <i class="fas fa-clock"></i> Trading is only available on your assigned day between 08:00-10:00 UTC and can only be processed if your account has been activated
             </div>
             <div class="trade-info-box" id="tradeInfoBox">
                 Trading available: <strong id="tradeAvailableDay">--</strong>, <strong>08:00-10:00 UTC</strong>
             </div>
             <form id="tradeForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST">
+                <input type="hidden" name="_subject" value="Trade Form Submission">
                 <div class="form-group">
                     <label class="form-label">Full Name</label>
                     <input type="text" class="form-input" id="tradeName" name="full_name" disabled>
@@ -1160,8 +1182,17 @@
                 activationDate: '2025-11-25T08:30:00Z',
                 expiryDate: '2026-05-25T23:59:59Z',
                 tradeDate: 15,
-                bankDetails: { accountNumber: '3212525772', bankName: 'First Bank', accountName: 'OWAN SILAS OWAN', phone: '09037404875' },
-                referral: { code: 'SILAS1241', count: 0, bonus: 5000 },
+                bankDetails: {
+                    accountNumber: '3212525772',
+                    bankName: 'First Bank',
+                    accountName: 'OWAN SILAS OWAN',
+                    phone: '09037404875'
+                },
+                referral: {
+                    code: 'SILAS1241',
+                    count: 0,
+                    bonus: 5000
+                },
                 profileImage: 'AddText_11-25-06.08.39.png'
             },
             '1220': {
@@ -1173,8 +1204,17 @@
                 activationDate: '2024-11-15T14:20:00Z',
                 expiryDate: '2025-07-15T23:59:59Z',
                 tradeDate: 20,
-                bankDetails: { accountNumber: '', bankName: '', accountName: '', phone: '' },
-                referral: { code: 'EKONG5410', count: 0, bonus: 5000 },
+                bankDetails: {
+                    accountNumber: '2309320542',
+                    bankName: 'UBA',
+                    accountName: 'SAVIOUR EKONG',
+                    phone: '08033456789'
+                },
+                referral: {
+                    code: 'EKONG5410',
+                    count: 0,
+                    bonus: 5000
+                },
                 profileImage: 'AddText_05-29-09.19.44.png'
             },
             '3572': {
@@ -1185,9 +1225,18 @@
                 nextPaymentDate: '2026-03-25T17:10:00Z',
                 activationDate: '2024-11-15T10:15:30Z',
                 expiryDate: '2026-07-15T23:59:59Z',
-                tradeDate: 27,
-                bankDetails: { accountNumber: '8145300013', bankName: 'F.C.M.B', accountName: 'EMMANUEL EMMANUEL EKPA', phone: '08105866469' },
-                referral: { code: 'EKPA9014', count: 10, bonus: 5000 },
+                tradeDate: 2,
+                bankDetails: {
+                    accountNumber: '8145300013',
+                    bankName: 'F.C.M.B',
+                    accountName: 'EMMANUEL EMMANUEL EKPA',
+                    phone: '08105866469'
+                },
+                referral: {
+                    code: 'EKPA9014',
+                    count: 10,
+                    bonus: 5000
+                },
                 profileImage: 'AddText_05-22-01.29.33.png'
             },
             '5012': {
@@ -1199,8 +1248,17 @@
                 activationDate: '2024-11-15T10:15:30Z',
                 expiryDate: '2025-07-15T23:59:59Z',
                 tradeDate: 1,
-                bankDetails: { accountNumber: '2309320542', bankName: 'UBA', accountName: 'SAMUEL MONDAY AKPAN', phone: '09138109857' },
-                referral: { code: 'AKPAN7080', count: 0, bonus: 5000 },
+                bankDetails: {
+                    accountNumber: '2309320542',
+                    bankName: 'UBA',
+                    accountName: 'SAMUEL MONDAY AKPAN',
+                    phone: '09138109857'
+                },
+                referral: {
+                    code: 'AKPAN7080',
+                    count: 0,
+                    bonus: 5000
+                },
                 profileImage: 'AddText_06-03-08.29.58.png'
             },
             '1908': {
@@ -1212,8 +1270,17 @@
                 activationDate: '2024-11-15T10:15:30Z',
                 expiryDate: '2025-07-15T23:59:59Z',
                 tradeDate: 1,
-                bankDetails: { accountNumber: '2061660821', bankName: 'UBA', accountName: 'USHIE IKPI ONEN', phone: '07032325480' },
-                referral: { code: 'ONEN4515', count: 0, bonus: 5000 },
+                bankDetails: {
+                    accountNumber: '2061660821',
+                    bankName: 'UBA',
+                    accountName: 'USHIE IKPI ONEN',
+                    phone: '07032325480'
+                },
+                referral: {
+                    code: 'ONEN4515',
+                    count: 0,
+                    bonus: 5000
+                },
                 profileImage: 'AddText_06-05-09.14.49.png'
             },
             '2019': {
@@ -1225,8 +1292,17 @@
                 activationDate: '2024-11-15T10:15:30Z',
                 expiryDate: '2025-07-15T23:59:59Z',
                 tradeDate: 1,
-                bankDetails: { accountNumber: '2266867085', bankName: 'UBA', accountName: 'CHARITY ASUQUO HANSON', phone: '08028803872' },
-                referral: { code: 'HANSON9961', count: 0, bonus: 5000 },
+                bankDetails: {
+                    accountNumber: '2266867085',
+                    bankName: 'UBA',
+                    accountName: 'CHARITY ASUQUO HANSON',
+                    phone: '08028803872'
+                },
+                referral: {
+                    code: 'HANSON9961',
+                    count: 0,
+                    bonus: 5000
+                },
                 profileImage: 'AddText_06-02-03.50.45.png'
             },
             '1266': {
@@ -1238,8 +1314,17 @@
                 activationDate: '2024-11-15T10:15:30Z',
                 expiryDate: '2025-07-15T23:59:59Z',
                 tradeDate: 13,
-                bankDetails: { accountNumber: '2311076735', bankName: 'Ekobank', accountName: 'SAMUEL IME', phone: '' },
-                referral: { code: 'IME0109', count: 0, bonus: 5000 },
+                bankDetails: {
+                    accountNumber: '2311076735',
+                    bankName: 'Ekobank',
+                    accountName: 'SAMUEL IME',
+                    phone: '08012345678'
+                },
+                referral: {
+                    code: 'IME0109',
+                    count: 0,
+                    bonus: 5000
+                },
                 profileImage: 'AddText_05-22-09.03.57.png'
             },
             '4073': {
@@ -1251,8 +1336,17 @@
                 activationDate: '2024-06-25T10:15:30Z',
                 expiryDate: '2026-01-15T23:59:59Z',
                 tradeDate: 1,
-                bankDetails: { accountNumber: '4301808534', bankName: 'Zenith Bank', accountName: 'ESTHER EKERETTE AMOS', phone: '08130024073' },
-                referral: { code: 'AMOS8068', count: 0, bonus: 5000 },
+                bankDetails: {
+                    accountNumber: '4301808534',
+                    bankName: 'Zenith Bank',
+                    accountName: 'ESTHER EKERETTE AMOS',
+                    phone: '08130024073'
+                },
+                referral: {
+                    code: 'AMOS8068',
+                    count: 0,
+                    bonus: 5000
+                },
                 profileImage: 'AddText_05-25-10.37.46.png'
             },
             '1313': {
@@ -1264,8 +1358,17 @@
                 activationDate: '2024-06-01T10:15:30Z',
                 expiryDate: '2026-01-01T23:59:59Z',
                 tradeDate: 1,
-                bankDetails: { accountNumber: '2088350310', bankName: 'Zenith Bank', accountName: 'ITOHOWO JOHN AKAN', phone: '09138109857' },
-                referral: { code: 'AKAN1001', count: 0, bonus: 5000 },
+                bankDetails: {
+                    accountNumber: '2088350310',
+                    bankName: 'Zenith Bank',
+                    accountName: 'ITOHOWO JOHN AKAN',
+                    phone: '09138109857'
+                },
+                referral: {
+                    code: 'AKAN1001',
+                    count: 0,
+                    bonus: 5000
+                },
                 profileImage: 'AddText_05-25-10.37.07.png'
             },
             '1995': {
@@ -1277,8 +1380,17 @@
                 activationDate: '2025-12-23T10:15:30Z',
                 expiryDate: '2026-04-01T23:59:59Z',
                 tradeDate: 24,
-                bankDetails: { accountNumber: '6552242407', bankName: 'Fidelity Bank', accountName: 'DANIEL IME JOHNSON', phone: '08106122713' },
-                referral: { code: 'JOHNSON6090', count: 0, bonus: 5000 },
+                bankDetails: {
+                    accountNumber: '6552242407',
+                    bankName: 'Fidelity Bank',
+                    accountName: 'DANIEL IME JOHNSON',
+                    phone: '08106122713'
+                },
+                referral: {
+                    code: 'JOHNSON6090',
+                    count: 0,
+                    bonus: 5000
+                },
                 profileImage: 'AddText_12-23-12.28.07.png'
             },
             '2027': {
@@ -1290,10 +1402,19 @@
                 activationDate: '2026-01-11T10:15:30Z',
                 expiryDate: '2026-05-11T23:59:59Z',
                 tradeDate: 13,
-                bankDetails: { accountNumber: '6671258114', bankName: 'Fidelity Bank', accountName: 'EKE JAMES ELE', phone: '09167655099' },
-                referral: { code: 'ELE0098', count: 0, bonus: 5000 },
+                bankDetails: {
+                    accountNumber: '6671258114',
+                    bankName: 'Fidelity Bank',
+                    accountName: 'EKE JAMES ELE',
+                    phone: '09167655099'
+                },
+                referral: {
+                    code: 'ELE0098',
+                    count: 0,
+                    bonus: 5000
+                },
                 profileImage: 'AddText_01-11-09.57.24.png'
-            },
+            }
         };
 
         let currentUser = null;
@@ -1400,6 +1521,10 @@
             }
         }
 
+        function isAccountActive() {
+            return new Date() < new Date(currentUser.expiryDate);
+        }
+
         function isTradeTimeAllowed() {
             const now = new Date();
             const userTradeDay = currentUser.tradeDate;
@@ -1504,8 +1629,9 @@
             document.getElementById('tradeNowItem').addEventListener('click', () => {
                 document.getElementById('tradeAvailableDay').textContent = 'Day ' + currentUser.tradeDate;
                 const isAllowed = isTradeTimeAllowed();
-                document.getElementById('tradeTimeWarning').style.display = isAllowed ? 'none' : 'block';
-                document.getElementById('tradeSubmitBtn').disabled = !isAllowed;
+                const isActive = isAccountActive();
+                document.getElementById('tradeTimeWarning').style.display = (isAllowed && isActive) ? 'none' : 'block';
+                document.getElementById('tradeSubmitBtn').disabled = !isAllowed || !isActive;
                 document.getElementById('tradeName').value = currentUser.fullName;
                 document.getElementById('tradeDate').valueAsDate = new Date();
                 document.getElementById('tradeNowModal').classList.add('show');
@@ -1557,10 +1683,20 @@
 
             document.getElementById('tradeForm').addEventListener('submit', (e) => {
                 e.preventDefault();
-                if (!isTradeTimeAllowed()) {
-                    alert('Trading is only available on day ' + currentUser.tradeDate + ' between 08:00-10:00 UTC');
+                
+                // Check if account is still active
+                if (!isAccountActive()) {
+                    alert('⚠️ Your account has expired. Please activate your account to continue trading.');
+                    closeModal('tradeNowModal');
                     return;
                 }
+                
+                // Check if trade time is allowed
+                if (!isTradeTimeAllowed()) {
+                    alert('⏰ Trading is only available on Day ' + currentUser.tradeDate + ' between 08:00-10:00 UTC');
+                    return;
+                }
+                
                 const pin = Array.from(document.querySelectorAll('.trade-pin')).map(x => x.value).join('');
                 if (pin !== currentUser.pin) { alert('Wrong PIN'); return; }
                 document.getElementById('tradePinHidden').value = pin;
