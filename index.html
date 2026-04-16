@@ -469,6 +469,43 @@
             background: var(--accent-green-dark);
         }
 
+        /* Hourglass Countdown Styles */
+        .hourglass-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            gap: 15px;
+        }
+
+        .hourglass-icon {
+            font-size: 48px;
+            color: var(--accent-green);
+            animation: hourglassFlip 3s infinite;
+        }
+
+        @keyframes hourglassFlip {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(-1); }
+        }
+
+        .countdown-display {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .countdown-time {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent-green);
+            min-width: 150px;
+        }
+
         /* Buttons */
         .buttons-section {
             display: grid;
@@ -676,35 +713,84 @@
             border-color: var(--accent-green);
         }
 
-        /* Loader */
+        /* GLOBAL LOADER - PNG IMAGE CIRCULAR DESIGN */
         .loader-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 9000;
+            z-index: 9500;
         }
 
         .loader-overlay.show {
             display: flex;
         }
 
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(16, 185, 129, 0.2);
-            border-top-color: var(--accent-green);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .loader-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        @keyframes spin {
+        .loader-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
+            animation: loaderSpin 2s linear infinite;
+        }
+
+        @keyframes loaderSpin {
+            from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
+        }
+
+        /* PIN Loader Styles */
+        .pin-loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9998;
+        }
+
+        .pin-loader-overlay.show {
+            display: flex;
+        }
+
+        .pin-loader-container {
+            text-align: center;
+        }
+
+        .pin-loader-image {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+            animation: loaderSpin 2s linear infinite;
+        }
+
+        .pin-loader-text {
+            font-size: 16px;
+            color: var(--text-light);
+            font-weight: 600;
         }
 
         /* Settings */
@@ -845,6 +931,14 @@
     </style>
 </head>
 <body>
+    <!-- PIN LOADER OVERLAY -->
+    <div class="pin-loader-overlay" id="pinLoaderOverlay">
+        <div class="pin-loader-container">
+            <div class="pin-loader-image" id="pinLoaderImage"></div>
+            <div class="pin-loader-text">Processing PIN...</div>
+        </div>
+    </div>
+
     <!-- PIN LOCK SCREEN -->
     <div class="pin-lock-screen" id="pinLockScreen">
         <div class="pin-container">
@@ -963,49 +1057,15 @@
             </div>
 
             <div class="timer-section">
-                <div class="timer-section-title">⏱️ Active Duration</div>
-                <div class="countdown-grid">
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="activeDays">0</div>
-                        <div class="countdown-unit">Days</div>
-                    </div>
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="activeHours">0</div>
-                        <div class="countdown-unit">Hours</div>
-                    </div>
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="activeMinutes">0</div>
-                        <div class="countdown-unit">Minutes</div>
-                    </div>
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="activeSeconds">0</div>
-                        <div class="countdown-unit">Seconds</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="timer-section">
                 <div class="timer-section-title">⏳ Countdown to Expiry</div>
-                <div class="timer-box">
-                    <div class="timer-label">Expiry Date & Time</div>
-                    <div class="timer-value" id="expiryDateTimeDisplay">-- -- ----</div>
-                </div>
-                <div class="countdown-grid">
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="expiryDays">0</div>
-                        <div class="countdown-unit">Days</div>
-                    </div>
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="expiryHours">0</div>
-                        <div class="countdown-unit">Hours</div>
-                    </div>
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="expiryMinutes">0</div>
-                        <div class="countdown-unit">Minutes</div>
-                    </div>
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="expirySeconds">0</div>
-                        <div class="countdown-unit">Seconds</div>
+                <div class="hourglass-container">
+                    <i class="fas fa-hourglass-end hourglass-icon"></i>
+                    <div class="countdown-display">
+                        <div class="timer-box" style="margin: 0;">
+                            <div class="timer-label">Expiry Date & Time</div>
+                            <div class="timer-value" id="expiryDateTimeDisplay">-- -- ----</div>
+                        </div>
+                        <div class="countdown-time" id="expiryCountdownTime">0d 0h 0m 0s</div>
                     </div>
                 </div>
             </div>
@@ -1037,28 +1097,33 @@
                 <button class="modal-close" onclick="closeModal('withdrawModal')"><i class="fas fa-times"></i></button>
             </div>
             <div class="form-type-header">📋 WITHDRAWAL FORM</div>
-            <form id="withdrawForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST">
+            <form id="withdrawForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST" novalidate>
                 <input type="hidden" name="_subject" value="Withdrawal Form Submission">
                 <input type="hidden" name="_template" value="table">
+                <input type="hidden" name="_captcha" value="false">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-input" id="withdrawFullName" name="Full_Name" readonly required>
+                </div>
                 <div class="form-group">
                     <label class="form-label">Phone Number</label>
-                    <input type="text" class="form-input" id="withdrawPhone" name="Phone_No" disabled>
+                    <input type="text" class="form-input" id="withdrawPhone" name="Phone_No" readonly required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Account Number</label>
-                    <input type="text" class="form-input" id="withdrawAccountNumber" name="Account_No" disabled>
+                    <input type="text" class="form-input" id="withdrawAccountNumber" name="Account_No" readonly required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Bank Name</label>
-                    <input type="text" class="form-input" id="withdrawBankName" name="Bank_Name" disabled>
+                    <input type="text" class="form-input" id="withdrawBankName" name="Bank_Name" readonly required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Account Name</label>
-                    <input type="text" class="form-input" id="withdrawAccountName" name="Account_Name" disabled>
+                    <input type="text" class="form-input" id="withdrawAccountName" name="Account_Name" readonly required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Amount (₦)</label>
-                    <input type="number" class="form-input" id="withdrawAmount" name="Amount" placeholder="Enter amount" required>
+                    <input type="number" class="form-input" id="withdrawAmount" name="Amount" placeholder="Enter amount" min="1" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Date</label>
@@ -1072,7 +1137,7 @@
                         <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
                         <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
                     </div>
-                    <input type="hidden" id="withdrawPinHidden" name="PIN">
+                    <input type="hidden" id="withdrawPinHidden" name="PIN" required>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-paper-plane"></i> Submit</button>
             </form>
@@ -1094,16 +1159,17 @@
             <div class="trade-info-box" id="tradeInfoBox">
                 Trading available: <strong id="tradeAvailableDay">--</strong>, <strong>08:00-10:00 UTC</strong>
             </div>
-            <form id="tradeForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST">
+            <form id="tradeForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST" novalidate>
                 <input type="hidden" name="_subject" value="Trade Form Submission">
                 <input type="hidden" name="_template" value="table">
+                <input type="hidden" name="_captcha" value="false">
                 <div class="form-group">
                     <label class="form-label">Full Name</label>
-                    <input type="text" class="form-input" id="tradeName" name="Full_Name" disabled>
+                    <input type="text" class="form-input" id="tradeName" name="Full_Name" readonly required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Amount (₦5,000 - ₦20,000)</label>
-                    <input type="range" class="form-input" id="tradeAmount" name="Amount" min="5000" max="20000" step="1000" value="10000">
+                    <input type="range" class="form-input" id="tradeAmount" name="Amount" min="5000" max="20000" step="1000" value="10000" required>
                     <div style="text-align: center; margin-top: 8px; color: var(--accent-green); font-weight: 700;" id="amountDisplay">₦10,000</div>
                 </div>
                 <div class="form-group">
@@ -1118,7 +1184,7 @@
                         <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
                         <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
                     </div>
-                    <input type="hidden" id="tradePinHidden" name="Trade_PIN">
+                    <input type="hidden" id="tradePinHidden" name="Trade_PIN" required>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;" id="tradeSubmitBtn"><i class="fas fa-check"></i> Submit</button>
             </form>
@@ -1173,165 +1239,26 @@
         </div>
     </div>
 
-    <!-- LOADER -->
-    <div class="loader-overlay" id="loaderOverlay"><div class="spinner"></div></div>
+    <!-- GLOBAL LOADER -->
+    <div class="loader-overlay" id="loaderOverlay">
+        <div class="loader-container">
+            <div class="loader-image" id="loaderImage"></div>
+        </div>
+    </div>
 
     <script>
+        // LOADER IMAGE PATH - Change this to your PNG file path
+        const LOADER_IMAGE_PATH = 'loader.png'; // Change to your actual PNG file path in project folder
+
         const EXTERNAL_LINKS = {
             sportybet: 'https://www.sportybet.com/player/empirebot',
             shareIdea: 'https://chat.whatsapp.com/KuZ1TT07hDrEbFlMUKrqaE',
             notificationCenter: 'https://whatsapp.com/channel/0029VbAjCE67oQhZxHe5Kq3R',
-            customerService: 'mailto:empirevirtual99@gmail.com'
+            customerService: 'mailto:empirevirtual99@gmail.com',
+            deposit: 'https://paystack.shop/pay/eyj535dodw'
         };
 
         const users = {
-            '2255': {
-                fullName: 'OWAN SILAS',
-                pin: '2255',
-                balance: 50000,
-                nextBalance: 50000,
-                nextPaymentDate: '2026-03-14T00:00:00Z',
-                activationDate: '2025-11-25T08:30:00Z',
-                expiryDate: '2026-05-25T23:59:59Z',
-                tradeDate: 15,
-                bankDetails: {
-                    accountNumber: '3212525772',
-                    bankName: 'First Bank',
-                    accountName: 'OWAN SILAS OWAN',
-                    phone: '09037404875'
-                },
-                referral: {
-                    code: 'SILAS1241',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_11-25-06.08.39.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260408-5001',
-                    amount: 25000,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-04-08T19:21:22Z')
-                }
-            },
-            '1220': {
-                fullName: 'SAVIOUR EKONG',
-                pin: '1220',
-                balance: 7000,
-                nextBalance: 7000,
-                nextPaymentDate: '2025-03-30T00:00:00Z',
-                activationDate: '2024-11-15T14:20:00Z',
-                expiryDate: '2025-07-15T23:59:59Z',
-                tradeDate: 20,
-                bankDetails: {
-                    accountNumber: '2309320542',
-                    bankName: 'UBA',
-                    accountName: 'SAVIOUR EKONG',
-                    phone: '08033456789'
-                },
-                referral: {
-                    code: 'EKONG5410',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_05-29-09.19.44.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260407-1220',
-                    amount: 3500,
-                    status: 'pending',
-                    method: 'Wallet',
-                    date: new Date('2026-04-07T09:45:00Z')
-                }
-            },
-            '3572': {
-                fullName: 'EMMANUEL EKPA',
-                pin: '3572',
-                balance: 10000,
-                nextBalance: 20000,
-                nextPaymentDate: '2026-05-25T20:10:00Z',
-                activationDate: '2024-11-15T10:15:30Z',
-                expiryDate: '2026-07-15T23:59:59Z',
-                tradeDate: 15,
-                bankDetails: {
-                    accountNumber: '8145300013',
-                    bankName: 'F.C.M.B',
-                    accountName: 'EMMANUEL EMMANUEL EKPA',
-                    phone: '08105866469'
-                },
-                referral: {
-                    code: 'EKPA9014',
-                    count: 5,
-                    bonus: 2500
-                },
-                profileImage: 'AddText_05-22-01.29.33.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260405-3572',
-                    amount: 5000,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-04-05T14:30:15Z'),
-                    failureReason: 'Insufficient funds'
-                }
-            },
-            '5012': {
-                fullName: 'SAMUEL AKPAN',
-                pin: '5012',
-                balance: 17000,
-                nextBalance: 17000,
-                nextPaymentDate: '2025-03-25T17:10:00Z',
-                activationDate: '2024-11-15T10:15:30Z',
-                expiryDate: '2025-07-15T23:59:59Z',
-                tradeDate: 1,
-                bankDetails: {
-                    accountNumber: '2309320542',
-                    bankName: 'UBA',
-                    accountName: 'SAMUEL MONDAY AKPAN',
-                    phone: '09138109857'
-                },
-                referral: {
-                    code: 'AKPAN7080',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_06-03-08.29.58.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260403-5012',
-                    amount: 8500,
-                    status: 'failed',
-                    method: 'Wallet',
-                    date: new Date('2026-04-03T11:20:00Z'),
-                    failureReason: 'Insufficient funds'
-                }
-            },
-            '1908': {
-                fullName: 'USHIE ONEN',
-                pin: '1908',
-                balance: 3000,
-                nextBalance: 3000,
-                nextPaymentDate: '2025-03-25T17:10:00Z',
-                activationDate: '2024-11-15T10:15:30Z',
-                expiryDate: '2025-07-15T23:59:59Z',
-                tradeDate: 1,
-                bankDetails: {
-                    accountNumber: '2061660821',
-                    bankName: 'UBA',
-                    accountName: 'USHIE IKPI ONEN',
-                    phone: '07032325480'
-                },
-                referral: {
-                    code: 'ONEN4515',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_06-05-09.14.49.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260402-1908',
-                    amount: 1500,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-04-02T16:45:30Z')
-                }
-            },
             '2019': {
                 fullName: 'CHARITY HANSON',
                 pin: '2019',
@@ -1359,93 +1286,6 @@
                     status: 'pending',
                     method: 'Wallet',
                     date: new Date('2026-04-01T10:15:00Z')
-                }
-            },
-            '1266': {
-                fullName: 'SAMUEL IME',
-                pin: '1266',
-                balance: 7000,
-                nextBalance: 7000,
-                nextPaymentDate: '2025-10-25T17:10:00Z',
-                activationDate: '2024-11-15T10:15:30Z',
-                expiryDate: '2025-07-15T23:59:59Z',
-                tradeDate: 13,
-                bankDetails: {
-                    accountNumber: '2311076735',
-                    bankName: 'Ekobank',
-                    accountName: 'SAMUEL IME',
-                    phone: '08012345678'
-                },
-                referral: {
-                    code: 'IME0109',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_05-22-09.03.57.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260331-1266',
-                    amount: 3500,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-03-31T13:25:45Z')
-                }
-            },
-            '4073': {
-                fullName: 'ESTHER AMOS',
-                pin: '4073',
-                balance: 7000,
-                nextBalance: 7000,
-                nextPaymentDate: '2025-10-30T17:10:00Z',
-                activationDate: '2024-06-25T10:15:30Z',
-                expiryDate: '2026-01-15T23:59:59Z',
-                tradeDate: 1,
-                bankDetails: {
-                    accountNumber: '4301808534',
-                    bankName: 'Zenith Bank',
-                    accountName: 'ESTHER EKERETTE AMOS',
-                    phone: '08130024073'
-                },
-                referral: {
-                    code: 'AMOS8068',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_05-25-10.37.46.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260330-4073',
-                    amount: 2000,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-03-30T08:50:12Z')
-                }
-            },
-            '1313': {
-                fullName: 'ITOHOWO AKAN',
-                pin: '1313',
-                balance: 7000,
-                nextBalance: 7000,
-                nextPaymentDate: '2025-10-30T17:10:00Z',
-                activationDate: '2024-06-01T10:15:30Z',
-                expiryDate: '2026-01-01T23:59:59Z',
-                tradeDate: 3,
-                bankDetails: {
-                    accountNumber: '2088350310',
-                    bankName: 'Zenith Bank',
-                    accountName: 'ITOHOWO JOHN AKAN',
-                    phone: '08036241336'
-                },
-                referral: {
-                    code: 'AKAN1001',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_05-25-10.37.07.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260329-1313',
-                    amount: 5500,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-03-29T15:35:28Z')
                 }
             },
             '1995': {
@@ -1505,12 +1345,270 @@
                     method: 'Wallet',
                     date: new Date('2026-03-27T09:30:45Z')
                 }
-            }
+            },
+            '4073': {
+                fullName: 'ESTHER AMOS',
+                pin: '4073',
+                balance: 7000,
+                nextBalance: 7000,
+                nextPaymentDate: '2025-10-30T17:10:00Z',
+                activationDate: '2024-06-25T10:15:30Z',
+                expiryDate: '2026-01-15T23:59:59Z',
+                tradeDate: 1,
+                bankDetails: {
+                    accountNumber: '4301808534',
+                    bankName: 'Zenith Bank',
+                    accountName: 'ESTHER EKERETTE AMOS',
+                    phone: '08130024073'
+                },
+                referral: {
+                    code: 'AMOS8068',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_05-25-10.37.46.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260330-4073',
+                    amount: 2000,
+                    status: 'successful',
+                    method: 'Wallet',
+                    date: new Date('2026-03-30T08:50:12Z')
+                }
+            },
+            '3572': {
+                fullName: 'EMMANUEL EKPA',
+                pin: '3572',
+                balance: 10000,
+                nextBalance: 20000,
+                nextPaymentDate: '2026-05-25T20:10:00Z',
+                activationDate: '2025-11-15T10:15:30Z',
+                expiryDate: '2026-07-15T23:59:59Z',
+                tradeDate: 15,
+                bankDetails: {
+                    accountNumber: '8145300013',
+                    bankName: 'F.C.M.B',
+                    accountName: 'EMMANUEL EMMANUEL EKPA',
+                    phone: '08105866469'
+                },
+                referral: {
+                    code: 'EKPA9014',
+                    count: 5,
+                    bonus: 2500
+                },
+                profileImage: 'AddText_05-22-01.29.33.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260405-3572',
+                    amount: 5000,
+                    status: 'successful',
+                    method: 'Wallet',
+                    date: new Date('2026-04-05T14:30:15Z'),
+                    failureReason: 'Insufficient funds'
+                }
+            },
+            '1313': {
+                fullName: 'ITOHOWO AKAN',
+                pin: '1313',
+                balance: 7000,
+                nextBalance: 7000,
+                nextPaymentDate: '2025-10-30T17:10:00Z',
+                activationDate: '2024-06-01T10:15:30Z',
+                expiryDate: '2026-01-01T23:59:59Z',
+                tradeDate: 3,
+                bankDetails: {
+                    accountNumber: '2088350310',
+                    bankName: 'Zenith Bank',
+                    accountName: 'ITOHOWO JOHN AKAN',
+                    phone: '08036241336'
+                },
+                referral: {
+                    code: 'AKAN1001',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_05-25-10.37.07.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260329-1313',
+                    amount: 5500,
+                    status: 'successful',
+                    method: 'Wallet',
+                    date: new Date('2026-03-29T15:35:28Z')
+                }
+            },
+            '2255': {
+                fullName: 'OWAN SILAS',
+                pin: '2255',
+                balance: 50000,
+                nextBalance: 50000,
+                nextPaymentDate: '2026-03-14T00:00:00Z',
+                activationDate: '2025-11-25T08:30:00Z',
+                expiryDate: '2026-05-25T23:59:59Z',
+                tradeDate: 15,
+                bankDetails: {
+                    accountNumber: '3212525772',
+                    bankName: 'First Bank',
+                    accountName: 'OWAN SILAS OWAN',
+                    phone: '09037404875'
+                },
+                referral: {
+                    code: 'SILAS1241',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_11-25-06.08.39.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260408-5001',
+                    amount: 25000,
+                    status: 'successful',
+                    method: 'Wallet',
+                    date: new Date('2026-04-08T19:21:22Z')
+                }
+            },
+            '1220': {
+                fullName: 'SAVIOUR EKONG',
+                pin: '1220',
+                balance: 7000,
+                nextBalance: 7000,
+                nextPaymentDate: '2025-03-30T00:00:00Z',
+                activationDate: '2024-11-15T14:20:00Z',
+                expiryDate: '2025-07-15T23:59:59Z',
+                tradeDate: 20,
+                bankDetails: {
+                    accountNumber: '2309320542',
+                    bankName: 'UBA',
+                    accountName: 'SAVIOUR EKONG',
+                    phone: '08033456789'
+                },
+                referral: {
+                    code: 'EKONG5410',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_05-29-09.19.44.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260407-1220',
+                    amount: 3500,
+                    status: 'pending',
+                    method: 'Wallet',
+                    date: new Date('2026-04-07T09:45:00Z')
+                }
+            },
+            '5012': {
+                fullName: 'SAMUEL AKPAN',
+                pin: '5012',
+                balance: 17000,
+                nextBalance: 17000,
+                nextPaymentDate: '2025-03-25T17:10:00Z',
+                activationDate: '2024-11-15T10:15:30Z',
+                expiryDate: '2025-07-15T23:59:59Z',
+                tradeDate: 1,
+                bankDetails: {
+                    accountNumber: '2309320542',
+                    bankName: 'UBA',
+                    accountName: 'SAMUEL MONDAY AKPAN',
+                    phone: '09138109857'
+                },
+                referral: {
+                    code: 'AKPAN7080',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_06-03-08.29.58.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260403-5012',
+                    amount: 8500,
+                    status: 'failed',
+                    method: 'Wallet',
+                    date: new Date('2026-04-03T11:20:00Z'),
+                    failureReason: 'Insufficient funds'
+                }
+            },
+            '1266': {
+                fullName: 'SAMUEL IME',
+                pin: '1266',
+                balance: 7000,
+                nextBalance: 7000,
+                nextPaymentDate: '2025-10-25T17:10:00Z',
+                activationDate: '2024-11-15T10:15:30Z',
+                expiryDate: '2025-07-15T23:59:59Z',
+                tradeDate: 13,
+                bankDetails: {
+                    accountNumber: '2311076735',
+                    bankName: 'Ekobank',
+                    accountName: 'SAMUEL IME',
+                    phone: '08012345678'
+                },
+                referral: {
+                    code: 'IME0109',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_05-22-09.03.57.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260331-1266',
+                    amount: 3500,
+                    status: 'successful',
+                    method: 'Wallet',
+                    date: new Date('2026-03-31T13:25:45Z')
+                }
+            },
+            '1908': {
+                fullName: 'USHIE ONEN',
+                pin: '1908',
+                balance: 3000,
+                nextBalance: 3000,
+                nextPaymentDate: '2025-03-25T17:10:00Z',
+                activationDate: '2024-11-15T10:15:30Z',
+                expiryDate: '2025-07-15T23:59:59Z',
+                tradeDate: 1,
+                bankDetails: {
+                    accountNumber: '2061660821',
+                    bankName: 'UBA',
+                    accountName: 'USHIE IKPI ONEN',
+                    phone: '07032325480'
+                },
+                referral: {
+                    code: 'ONEN4515',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_06-05-09.14.49.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260402-1908',
+                    amount: 1500,
+                    status: 'successful',
+                    method: 'Wallet',
+                    date: new Date('2026-04-02T16:45:30Z')
+                }
+            },
         };
 
         let currentUser = null;
         let pinInput = '';
         let timerInterval = null;
+
+        // Initialize loader images
+        function initializeLoaders() {
+            document.getElementById('loaderImage').style.backgroundImage = `url('${LOADER_IMAGE_PATH}')`;
+            document.getElementById('pinLoaderImage').style.backgroundImage = `url('${LOADER_IMAGE_PATH}')`;
+        }
+
+        // GLOBAL LOADER FUNCTION
+        function showLoader(duration = 6000) {
+            const loader = document.getElementById('loaderOverlay');
+            loader.classList.add('show');
+            setTimeout(() => {
+                loader.classList.remove('show');
+            }, duration);
+        }
+
+        // PIN LOADER FUNCTION
+        function showPinLoader(duration = 6000) {
+            const pinLoader = document.getElementById('pinLoaderOverlay');
+            pinLoader.classList.add('show');
+            setTimeout(() => {
+                pinLoader.classList.remove('show');
+            }, duration);
+        }
 
         // PIN ENTRY EVENT LISTENERS
         document.querySelectorAll('.pin-key').forEach(key => {
@@ -1536,10 +1634,13 @@
 
         function validatePin() {
             if (users[pinInput]) {
-                currentUser = users[pinInput];
-                document.getElementById('pinLockScreen').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                initDashboard();
+                showPinLoader(6000);
+                setTimeout(() => {
+                    currentUser = users[pinInput];
+                    document.getElementById('pinLockScreen').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    initDashboard();
+                }, 6000);
             } else {
                 document.getElementById('pinError').classList.add('show');
                 pinInput = '';
@@ -1608,7 +1709,9 @@
             const btn = document.getElementById('depositBtn');
             if (expired) {
                 btn.textContent = 'Activate Account';
-                btn.onclick = () => window.location.href = 'https://paystack.shop/pay/fpjpxhey-5';
+                btn.style.cursor = 'pointer';
+            } else {
+                btn.textContent = '₦ Deposit';
             }
         }
 
@@ -1641,24 +1744,16 @@
             });
             document.getElementById('expiryDateTimeDisplay').textContent = expiryFormatted;
 
-            const activeDiff = now - activationDate;
-            document.getElementById('activeDays').textContent = Math.floor(activeDiff / (1000*60*60*24));
-            document.getElementById('activeHours').textContent = Math.floor((activeDiff % (1000*60*60*24)) / (1000*60*60));
-            document.getElementById('activeMinutes').textContent = Math.floor((activeDiff % (1000*60*60)) / (1000*60));
-            document.getElementById('activeSeconds').textContent = Math.floor((activeDiff % (1000*60)) / 1000);
-
             const expiryDiff = expiryDate - now;
             if (expiryDiff > 0) {
-                document.getElementById('expiryDays').textContent = Math.floor(expiryDiff / (1000*60*60*24));
-                document.getElementById('expiryHours').textContent = Math.floor((expiryDiff % (1000*60*60*24)) / (1000*60*60));
-                document.getElementById('expiryMinutes').textContent = Math.floor((expiryDiff % (1000*60*60)) / (1000*60));
-                document.getElementById('expirySeconds').textContent = Math.floor((expiryDiff % (1000*60)) / 1000);
-                document.getElementById('expiryWarning').style.display = Math.floor(expiryDiff / (1000*60*60*24)) <= 7 ? 'block' : 'none';
+                const days = Math.floor(expiryDiff / (1000*60*60*24));
+                const hours = Math.floor((expiryDiff % (1000*60*60*24)) / (1000*60*60));
+                const minutes = Math.floor((expiryDiff % (1000*60*60)) / (1000*60));
+                const seconds = Math.floor((expiryDiff % (1000*60)) / 1000);
+                document.getElementById('expiryCountdownTime').textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                document.getElementById('expiryWarning').style.display = days <= 7 ? 'block' : 'none';
             } else {
-                document.getElementById('expiryDays').textContent = '0';
-                document.getElementById('expiryHours').textContent = '0';
-                document.getElementById('expiryMinutes').textContent = '0';
-                document.getElementById('expirySeconds').textContent = '0';
+                document.getElementById('expiryCountdownTime').textContent = '0d 0h 0m 0s';
                 document.getElementById('expiryWarning').style.display = 'block';
             }
         }
@@ -1773,6 +1868,7 @@
             });
 
             document.getElementById('settingsBtn').addEventListener('click', () => {
+                showLoader(6000);
                 document.getElementById('settingsContent').innerHTML = `
                     <div class="settings-item"><span class="settings-label">Account Number</span><div class="settings-value">${currentUser.bankDetails.accountNumber || 'N/A'}</div></div>
                     <div class="settings-item"><span class="settings-label">Bank</span><div class="settings-value">${currentUser.bankDetails.bankName || 'N/A'}</div></div>
@@ -1783,69 +1879,116 @@
             });
 
             document.getElementById('logoutBtn').addEventListener('click', () => {
-                currentUser = null;
-                pinInput = '';
-                if (timerInterval) clearInterval(timerInterval);
-                document.getElementById('pinLockScreen').classList.remove('hidden');
-                document.getElementById('dashboard').classList.add('hidden');
+                showLoader(6000);
+                setTimeout(() => {
+                    currentUser = null;
+                    pinInput = '';
+                    if (timerInterval) clearInterval(timerInterval);
+                    document.getElementById('pinLockScreen').classList.remove('hidden');
+                    document.getElementById('dashboard').classList.add('hidden');
+                }, 6000);
             });
 
+            // FIX: Deposit button - Direct href navigation
             document.getElementById('depositBtn').addEventListener('click', () => {
-                if (new Date() < new Date(currentUser.expiryDate)) {
-                    document.getElementById('loaderOverlay').classList.add('show');
-                    setTimeout(() => { document.getElementById('loaderOverlay').classList.remove('show'); }, 6000);
-                }
+                showLoader(6000);
+                setTimeout(() => {
+                    window.location.href = EXTERNAL_LINKS.deposit;
+                }, 6000);
             });
 
             document.getElementById('withdrawBtn').addEventListener('click', () => {
-                document.getElementById('withdrawPhone').value = currentUser.bankDetails.phone;
-                document.getElementById('withdrawAccountNumber').value = currentUser.bankDetails.accountNumber;
-                document.getElementById('withdrawBankName').value = currentUser.bankDetails.bankName;
-                document.getElementById('withdrawAccountName').value = currentUser.bankDetails.accountName;
-                const now = new Date();
-                const eligible = now.getUTCDay() === 1 && now.getUTCHours() >= 8 && now.getUTCHours() < 10;
-                document.getElementById('withdrawForm').querySelector('button').disabled = !eligible;
-                document.getElementById('withdrawWarning').style.display = eligible ? 'none' : 'block';
-                document.getElementById('withdrawModal').classList.add('show');
+                showLoader(6000);
+                setTimeout(() => {
+                    document.getElementById('withdrawFullName').value = currentUser.fullName;
+                    document.getElementById('withdrawPhone').value = currentUser.bankDetails.phone;
+                    document.getElementById('withdrawAccountNumber').value = currentUser.bankDetails.accountNumber;
+                    document.getElementById('withdrawBankName').value = currentUser.bankDetails.bankName;
+                    document.getElementById('withdrawAccountName').value = currentUser.bankDetails.accountName;
+                    const now = new Date();
+                    const eligible = now.getUTCDay() === 1 && now.getUTCHours() >= 8 && now.getUTCHours() < 10;
+                    document.getElementById('withdrawForm').querySelector('button').disabled = !eligible;
+                    document.getElementById('withdrawWarning').style.display = eligible ? 'none' : 'block';
+                    document.getElementById('withdrawModal').classList.add('show');
+                }, 6000);
             });
 
             document.getElementById('tradeNowItem').addEventListener('click', () => {
-                document.getElementById('tradeAvailableDay').textContent = 'Day ' + currentUser.tradeDate;
-                const isAllowed = isTradeTimeAllowed();
-                const isActive = isAccountActive();
-                document.getElementById('tradeTimeWarning').style.display = (isAllowed && isActive) ? 'none' : 'block';
-                document.getElementById('tradeSubmitBtn').disabled = !isAllowed || !isActive;
-                document.getElementById('tradeName').value = currentUser.fullName;
-                document.getElementById('tradeDate').valueAsDate = new Date();
-                document.getElementById('tradeNowModal').classList.add('show');
+                showLoader(6000);
+                setTimeout(() => {
+                    document.getElementById('tradeAvailableDay').textContent = 'Day ' + currentUser.tradeDate;
+                    const isAllowed = isTradeTimeAllowed();
+                    const isActive = isAccountActive();
+                    document.getElementById('tradeTimeWarning').style.display = (isAllowed && isActive) ? 'none' : 'block';
+                    document.getElementById('tradeSubmitBtn').disabled = !isAllowed || !isActive;
+                    document.getElementById('tradeName').value = currentUser.fullName;
+                    document.getElementById('tradeDate').valueAsDate = new Date();
+                    document.getElementById('tradeNowModal').classList.add('show');
+                }, 6000);
             });
 
             document.getElementById('withdrawalRecordsItem').addEventListener('click', () => {
-                renderWithdrawalDetails();
+                showLoader(6000);
+                setTimeout(() => {
+                    renderWithdrawalDetails();
+                }, 6000);
             });
 
             document.getElementById('referralsItem').addEventListener('click', () => {
-                const c = currentUser.referral.count;
-                document.getElementById('referralCode').textContent = currentUser.referral.code;
-                document.getElementById('referralCountText').textContent = `${c} / 10`;
-                document.getElementById('referralFill').style.width = (c/10)*100 + '%';
-                document.getElementById('referralBonusAmount').textContent = `₦${currentUser.referral.bonus.toLocaleString()}`;
-                if (c >= 10 && !localStorage.getItem('bonus_' + currentUser.referral.code)) {
-                    currentUser.balance += currentUser.referral.bonus;
-                    localStorage.setItem('bonus_' + currentUser.referral.code, '1');
-                    updateBalance();
-                }
-                document.getElementById('referralsModal').classList.add('show');
+                showLoader(6000);
+                setTimeout(() => {
+                    const c = currentUser.referral.count;
+                    document.getElementById('referralCode').textContent = currentUser.referral.code;
+                    document.getElementById('referralCountText').textContent = `${c} / 10`;
+                    document.getElementById('referralFill').style.width = (c/10)*100 + '%';
+                    document.getElementById('referralBonusAmount').textContent = `₦${currentUser.referral.bonus.toLocaleString()}`;
+                    if (c >= 10 && !localStorage.getItem('bonus_' + currentUser.referral.code)) {
+                        currentUser.balance += currentUser.referral.bonus;
+                        localStorage.setItem('bonus_' + currentUser.referral.code, '1');
+                        updateBalance();
+                    }
+                    document.getElementById('referralsModal').classList.add('show');
+                }, 6000);
             });
 
             document.getElementById('howToPlayItem').addEventListener('click', () => {
-                document.getElementById('howToPlayModal').classList.add('show');
+                showLoader(6000);
+                setTimeout(() => {
+                    document.getElementById('howToPlayModal').classList.add('show');
+                }, 6000);
             });
 
-            document.getElementById('sportybetItem').addEventListener('click', () => window.open(EXTERNAL_LINKS.sportybet));
-            document.getElementById('notificationItem').addEventListener('click', () => window.open(EXTERNAL_LINKS.notificationCenter));
-            document.getElementById('customerServiceItem').addEventListener('click', () => window.location.href = EXTERNAL_LINKS.customerService);
-            document.getElementById('shareIdeaItem').addEventListener('click', () => window.open(EXTERNAL_LINKS.shareIdea));
+            // FIX: Sportybet - Direct href navigation
+            document.getElementById('sportybetItem').addEventListener('click', () => {
+                showLoader(6000);
+                setTimeout(() => {
+                    window.location.href = EXTERNAL_LINKS.sportybet;
+                }, 6000);
+            });
+
+            // FIX: Notification Center - Direct href navigation
+            document.getElementById('notificationItem').addEventListener('click', () => {
+                showLoader(6000);
+                setTimeout(() => {
+                    window.location.href = EXTERNAL_LINKS.notificationCenter;
+                }, 6000);
+            });
+
+            // FIX: Customer Service - Direct href navigation (mailto)
+            document.getElementById('customerServiceItem').addEventListener('click', () => {
+                showLoader(6000);
+                setTimeout(() => {
+                    window.location.href = EXTERNAL_LINKS.customerService;
+                }, 6000);
+            });
+
+            // FIX: Share Idea - Direct href navigation
+            document.getElementById('shareIdeaItem').addEventListener('click', () => {
+                showLoader(6000);
+                setTimeout(() => {
+                    window.location.href = EXTERNAL_LINKS.shareIdea;
+                }, 6000);
+            });
 
             document.getElementById('tradeAmount').addEventListener('input', (e) => {
                 document.getElementById('amountDisplay').textContent = '₦' + parseInt(e.target.value).toLocaleString();
@@ -1853,10 +1996,18 @@
 
             document.getElementById('withdrawForm').addEventListener('submit', (e) => {
                 e.preventDefault();
-                const pin = Array.from(document.querySelectorAll('.withdraw-pin')).map(x => x.value).join('');
-                if (pin !== currentUser.pin) { alert('Wrong PIN'); return; }
+                const pinInputs = document.querySelectorAll('.withdraw-pin');
+                if (Array.from(pinInputs).some(input => !input.value)) {
+                    alert('Please enter all PIN digits');
+                    return;
+                }
+                const pin = Array.from(pinInputs).map(x => x.value).join('');
+                if (pin !== currentUser.pin) { 
+                    alert('Wrong PIN'); 
+                    return; 
+                }
                 document.getElementById('withdrawPinHidden').value = pin;
-                document.getElementById('loaderOverlay').classList.add('show');
+                showLoader(6000);
                 setTimeout(() => document.getElementById('withdrawForm').submit(), 6000);
             });
 
@@ -1874,10 +2025,18 @@
                     return;
                 }
                 
-                const pin = Array.from(document.querySelectorAll('.trade-pin')).map(x => x.value).join('');
-                if (pin !== currentUser.pin) { alert('Wrong PIN'); return; }
+                const pinInputs = document.querySelectorAll('.trade-pin');
+                if (Array.from(pinInputs).some(input => !input.value)) {
+                    alert('Please enter all PIN digits');
+                    return;
+                }
+                const pin = Array.from(pinInputs).map(x => x.value).join('');
+                if (pin !== currentUser.pin) { 
+                    alert('Wrong PIN'); 
+                    return; 
+                }
                 document.getElementById('tradePinHidden').value = pin;
-                document.getElementById('loaderOverlay').classList.add('show');
+                showLoader(6000);
                 setTimeout(() => document.getElementById('tradeForm').submit(), 6000);
             });
 
@@ -1887,6 +2046,11 @@
                 });
             });
         }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLoaders();
+        });
     </script>
 </body>
 </html>
