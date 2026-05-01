@@ -1490,12 +1490,12 @@
         function esbCopyReferralCode() {
             if (!currentUser) return;
             const code = currentUser.referral.code;
-            const message = `Join EmpireStateBank using my referral code: ${code}\n\nSign up here: ${EXTERNAL_LINKS.referral}`;
+            const message = `Sign up on EmpireStateBank to earn smarter with up to 2× potential returns and expert football predictions using my referral code: ${code}\n\nSign up here: ${EXTERNAL_LINKS.referral}`;
 
             if (navigator.share) {
                 navigator.share({
                     title: 'Join EmpireStateBank',
-                    text: `Join EmpireStateBank using my referral code: ${code}`,
+                    text: `Sign up on EmpireStateBank to earn smarter with up to 2× potential returns and expert football predictions using my referral code: ${code}`,
                     url: EXTERNAL_LINKS.referral
                 }).then(() => { esbShowToast('Shared!'); })
                 .catch(() => {
@@ -1520,23 +1520,23 @@
         function esbShareOnWhatsApp(){
             if (!currentUser) return;
             const code = currentUser.referral.code;
-            const message = `Join EmpireStateBank using my referral code: ${code}\n\nSign up here: ${EXTERNAL_LINKS.referral}\n\nJoin EmpireStateBank and unlock smarter earnings.`;
+            const message = `Sign up on EmpireStateBank to earn smarter with up to 2× potential returns and expert football predictions using my referral code: ${code}\n\nSign up here: ${EXTERNAL_LINKS.referral}\n\nJoin EmpireStateBank and unlock smarter earnings.`;
             window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
         }
         function esbShareOnFacebook(){
             const code = currentUser ? currentUser.referral.code : '';
-            const quote = `Join EmpireStateBank using my referral code: ${code}`;
+            const quote = `Sign up on EmpireStateBank to earn smarter with up to 2× potential returns and expert football predictions using my referral code: ${code}`;
             const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(EXTERNAL_LINKS.referral)}&quote=${encodeURIComponent(quote)}`;
             window.open(shareUrl, '_blank');
         }
         function esbShareOnTwitter(){
             const code = currentUser ? currentUser.referral.code : '';
-            const text = `Join EmpireStateBank using my referral code: ${code}. Sign up: ${EXTERNAL_LINKS.referral}`;
+            const text = `Sign up on EmpireStateBank to earn smarter with up to 2× potential returns and expert football predictions using my referral code: ${code}. Sign up: ${EXTERNAL_LINKS.referral}`;
             window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
         }
         function esbShareViaSMS(){
             const code = currentUser ? currentUser.referral.code : '';
-            const message = `Join EmpireStateBank using my referral code: ${code} Sign up: ${EXTERNAL_LINKS.referral}`;
+            const message = `Sign up on EmpireStateBank to earn smarter with up to 2× potential returns and expert football predictions using my referral code: ${code} Sign up: ${EXTERNAL_LINKS.referral}`;
             window.open(`sms:?body=${encodeURIComponent(message)}`, '_blank');
         }
 
