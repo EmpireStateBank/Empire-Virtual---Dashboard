@@ -26,9 +26,16 @@
     .overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(7,22,45,0.95),rgba(7,22,45,0.98));display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s,visibility .3s}
     .overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
     .loader-box{display:flex;flex-direction:column;align-items:center;gap:12px}
-    .loader-img{width:120px;height:120px;background-size:contain;background-position:center;background-repeat:no-repeat;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,0.6);animation:pulse 1.6s infinite;object-fit:contain}
-    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
-    .loader-text{color:var(--muted);font-size:14px;text-align:center}
+    /* Rotating PNG */
+    .loader-img{width:96px;height:96px;border-radius:12px;background-size:contain;background-position:center;background-repeat:no-repeat;box-shadow:0 12px 30px rgba(0,0,0,0.6);object-fit:contain;display:block}
+    .loader-img.rotating{animation:spin-rotate 1.2s linear infinite}
+    @keyframes spin-rotate{to{transform:rotate(360deg)}}
+
+    /* ring spinner behind or below image */
+    .loader-ring{width:120px;height:120px;border-radius:50%;border:4px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.24);position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);animation:ring-spin 1s linear infinite;pointer-events:none}
+    @keyframes ring-spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+    .loader-text{color:var(--muted);font-size:14px;text-align:center;z-index:1}
 
     /* Header image on PIN view */
     .pin-header-img{width:100%;height:88px;border-radius:12px;background-size:cover;background-position:center;box-shadow:0 8px 22px rgba(0,0,0,0.6)}
@@ -148,12 +155,14 @@
 <body>
 
   <!-- GLOBAL OVERLAY LOADER -->
-  <div id="globalOverlay" class="overlay">
-    <div class="loader-box">
-      <!-- Use an <img> with an onerror fallback so missing file won't leave blank loader.
-           The fallback used below is a tiny transparent PNG data URI; change as needed. -->
-      <img id="globalLoaderImg" class="loader-img" src="assets/AddText_04-11-12.53.52.png" alt="Loading"
-           onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII='">
+  <div id="globalOverlay" class="overlay hidden" aria-hidden="true" role="status" aria-live="polite">
+    <div class="loader-box" style="position:relative;">
+      <!-- rotating ring behind -->
+      <div id="loaderRing" class="loader-ring" aria-hidden="true"></div>
+      <!-- Company PNG will be displayed, rotating -->
+      <!-- onerror fallback sets src to embedded default PNG so loader always visible -->
+      <img id="globalLoaderImg" class="loader-img" src="assets/AddText_04-11-12.53.52.png" alt="Company logo loading"
+           onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABW0lEQVR4nO3XwQnCQBBF0V2gk2gk2gjZBJqgk2gk2gjZBLqCXYk2gk2gk2Qf7k7cM8s7s7fL4c3z1Pv0d0wK5ZrLQAAK4A7AAq4A7gAq4A7gAq4A7gAq4A7gAq4A7gAp4F4c2sC3vJp5Z0gYg6k6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqh9AC4QGgB9x6pGAAAAAElFTkSuQmCC'">
       <div id="globalLoaderText" class="loader-text">Loading…</div>
     </div>
   </div>
@@ -569,6 +578,7 @@
       const overlay = document.getElementById('globalOverlay');
       const overlayImg = document.getElementById('globalLoaderImg');
       const overlayText = document.getElementById('globalLoaderText');
+      const loaderRing = document.getElementById('loaderRing');
       const notification = document.getElementById('notification');
       const successToast = document.getElementById('successToast');
 
@@ -689,15 +699,28 @@
 
       // show overlay: ALWAYS uses company image
       function showOverlay({text='Loading…'} = {}) {
-        // set <img> src so browser attempts load; onerror on the <img> will fallback if missing
-        if (overlayImg && overlayImg.tagName === 'IMG') {
-          overlayImg.src = COMPANY_IMG;
+        // Ensure the ring and img are visible and animate.
+        if(overlay){
+          overlay.classList.remove('hidden');
+          overlay.setAttribute('aria-hidden','false');
         }
-        overlayText.innerText = text;
-        overlay.classList.remove('hidden');
+        if(overlayImg){
+          // try primary asset first; onerror will fallback to embedded PNG
+          overlayImg.src = COMPANY_IMG;
+          // add rotating class
+          overlayImg.classList.add('rotating');
+        }
+        if(loaderRing) loaderRing.style.display = 'block';
+        if(overlayText) overlayText.innerText = text;
         return new Promise(resolve => {
           setTimeout(()=> {
-            overlay.classList.add('hidden');
+            // hide overlay after LOADER_MS
+            if(overlayImg) overlayImg.classList.remove('rotating');
+            if(loaderRing) loaderRing.style.display = 'none';
+            if(overlay){
+              overlay.classList.add('hidden');
+              overlay.setAttribute('aria-hidden','true');
+            }
             resolve();
           }, LOADER_MS);
         });
