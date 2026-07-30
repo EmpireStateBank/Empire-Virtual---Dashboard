@@ -26,7 +26,7 @@
     .overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(7,22,45,0.95),rgba(7,22,45,0.98));display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s,visibility .3s}
     .overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
     .loader-box{display:flex;flex-direction:column;align-items:center;gap:12px}
-    .loader-img{width:120px;height:120px;background-size:contain;background-position:center;background-repeat:no-repeat;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,0.6);animation:pulse 1.6s infinite}
+    .loader-img{width:120px;height:120px;background-size:contain;background-position:center;background-repeat:no-repeat;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,0.6);animation:pulse 1.6s infinite;object-fit:contain}
     @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
     .loader-text{color:var(--muted);font-size:14px;text-align:center}
 
@@ -150,7 +150,10 @@
   <!-- GLOBAL OVERLAY LOADER -->
   <div id="globalOverlay" class="overlay">
     <div class="loader-box">
-      <div id="globalLoaderImg" class="loader-img" style="background-image:url('assets/AddText_04-11-12.53.52.png')"></div>
+      <!-- Use an <img> with an onerror fallback so missing file won't leave blank loader.
+           The fallback used below is a tiny transparent PNG data URI; change as needed. -->
+      <img id="globalLoaderImg" class="loader-img" src="assets/AddText_04-11-12.53.52.png" alt="Loading"
+           onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII='">
       <div id="globalLoaderText" class="loader-text">Loading…</div>
     </div>
   </div>
@@ -686,7 +689,10 @@
 
       // show overlay: ALWAYS uses company image
       function showOverlay({text='Loading…'} = {}) {
-        overlayImg.style.backgroundImage = `url('${COMPANY_IMG}')`;
+        // set <img> src so browser attempts load; onerror on the <img> will fallback if missing
+        if (overlayImg && overlayImg.tagName === 'IMG') {
+          overlayImg.src = COMPANY_IMG;
+        }
         overlayText.innerText = text;
         overlay.classList.remove('hidden');
         return new Promise(resolve => {
