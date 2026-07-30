@@ -1,1664 +1,1266 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Profile - Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Profile Dashboard</title>
 
-        :root{
-            --primary-dark:#1a1410;
-            --secondary-dark:#2d2420;
-            --accent-green:#10b981;
-            --accent-green-dark:#059669;
-            --text-light:#f3f4f6;
-            --text-muted:#9ca3af;
-            --border-color:#3d3430;
-            --success:#10b981;
-            --warning:#f59e0b;
-            --danger:#ef4444;
-        }
+  <!-- Fonts + Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
 
-        body{
-            font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-            background:linear-gradient(135deg,var(--primary-dark) 0%,var(--secondary-dark) 100%);
-            color:var(--text-light);
-            min-height:100vh;
-            display:flex;
-            flex-direction:column;
-        }
+  <style>
+    :root{
+      --bg:#07162D; --card:#12233F; --card-2:#1A2D4D;
+      --gold:#E8C55A; --blue:#2D6BFF; --text:#FFFFFF; --muted:#AEB8C8;
+      --radius:20px; --soft-shadow:0 8px 20px rgba(4,12,22,0.6);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;-webkit-font-smoothing:antialiased}
+    .app{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:12px;gap:12px}
+    .viewport{width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px;flex:1;position:relative}
+    .view{display:none;flex-direction:column;gap:12px} .view.active{display:flex}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.015),rgba(255,255,255,0.01));border-radius:var(--radius);padding:14px;box-shadow:var(--soft-shadow);border:1px solid rgba(255,255,255,0.03)}
 
-        .form-type-header{
-            background:var(--accent-green);
-            color:white;
-            padding:12px;
-            border-radius:8px;
-            font-weight:700;
-            text-align:center;
-            margin-bottom:15px;
-            font-size:14px;
-        }
+    /* Overlay loader used for all loading tasks */
+    .overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(7,22,45,0.95),rgba(7,22,45,0.98));display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s,visibility .3s}
+    .overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
+    .loader-box{display:flex;flex-direction:column;align-items:center;gap:12px}
+    .loader-img{width:120px;height:120px;background-size:contain;background-position:center;background-repeat:no-repeat;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,0.6);animation:pulse 1.6s infinite}
+    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+    .loader-text{color:var(--muted);font-size:14px;text-align:center}
 
-        /* PIN Lock Screen Styles */
-        .pin-lock-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,var(--primary-dark) 0%,var(--secondary-dark) 100%);display:flex;justify-content:center;align-items:center;z-index:9999}
-        .pin-lock-screen.hidden{display:none!important}
-        .pin-container{background:var(--secondary-dark);border:1px solid var(--border-color);border-radius:20px;padding:40px 30px;width:100%;max-width:350px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-        .pin-title{font-size:24px;font-weight:700;margin-bottom:10px;color:var(--text-light)}
-        .pin-subtitle{font-size:14px;color:var(--text-muted);margin-bottom:30px}
-        .pin-display{display:flex;justify-content:center;gap:15px;margin-bottom:30px}
-        .pin-digit{width:50px;height:50px;background:var(--primary-dark);border:2px solid var(--border-color);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:var(--accent-green);transition:all .2s}
-        .pin-digit.active{border-color:var(--accent-green);background:rgba(16,185,129,.1)}
-        .pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
-        .pin-key{width:100%;padding:15px;background:var(--primary-dark);border:1px solid var(--border-color);border-radius:10px;color:var(--text-light);font-size:18px;font-weight:600;cursor:pointer;transition:all .2s}
-        .pin-key:hover{background:var(--secondary-dark);border-color:var(--accent-green)}
-        .pin-key:active{transform:scale(.95)}
-        .pin-key.delete{grid-column:span 3;background:rgba(239,68,68,.1);border-color:var(--danger);color:var(--danger)}
-        .pin-key.delete:hover{background:rgba(239,68,68,.2)}
-        .pin-error{color:var(--danger);font-size:12px;margin-top:10px;display:none}
-        .pin-error.show{display:block;animation:shake .5s}
-        @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+    /* Header image on PIN view */
+    .pin-header-img{width:100%;height:88px;border-radius:12px;background-size:cover;background-position:center;box-shadow:0 8px 22px rgba(0,0,0,0.6)}
 
-        /* Dashboard Styles */
-        .dashboard{flex:1;display:flex;flex-direction:column;overflow:hidden}
-        .dashboard.hidden{display:none!important}
-        .header{background:var(--secondary-dark);border-bottom:1px solid var(--border-color);padding:15px 20px;display:flex;justify-content:space-between;align-items:center}
-        .header-title{font-size:18px;font-weight:700}
-        .settings-btn{background:none;border:none;color:var(--accent-green);font-size:20px;cursor:pointer;transition:all .2s}
-        .settings-btn:hover{transform:rotate(20deg)}
-        .content{flex:1;overflow-y:auto;padding:20px}
-        .profile-section{background:var(--secondary-dark);border:1px solid var(--border-color);border-radius:15px;padding:25px 20px;margin-bottom:20px;text-align:center}
-        .profile-image{width:80px;height:80px;border-radius:50%;margin:0 auto 15px;background:var(--primary-dark);border:3px solid var(--accent-green);display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden}
-        .profile-image img{width:100%;height:100%;object-fit:cover}
-        .profile-name{font-size:20px;font-weight:700;margin-bottom:8px;display:flex;justify-content:center;align-items:center;gap:8px;cursor:pointer}
-        .profile-name:hover{color:var(--accent-green)}
-        .profile-date{font-size:12px;color:var(--text-muted);margin-bottom:15px;height:18px}
-        .profile-date.hidden{display:none!important}
-        .balance-card{background:linear-gradient(135deg,var(--primary-dark) 0%,rgba(16,185,129,.1) 100%);border:1px solid var(--border-color);border-radius:12px;padding:15px;margin-bottom:15px;text-align:center}
-        .balance-label{font-size:12px;color:var(--text-muted);margin-bottom:5px}
-        .balance-amount{font-size:28px;font-weight:700;color:var(--accent-green)}
-        .progress-container{margin:15px 0}
-        .progress-container.hidden{display:none!important}
-        .progress-label{font-size:12px;color:var(--text-muted);margin-bottom:8px;display:flex;justify-content:space-between}
-        .progress-bar{width:100%;height:8px;background:var(--primary-dark);border-radius:10px;overflow:hidden;border:1px solid var(--border-color);margin-bottom:8px}
-        .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent-green),#6ee7b7);border-radius:10px;transition:width .5s ease}
-        .next-balance-label{font-size:11px;color:var(--text-muted);margin-top:8px;padding:8px;background:var(--primary-dark);border-radius:6px;border:1px solid var(--border-color);display:block}
-        .next-balance-label.hidden{display:none!important}
-        .next-balance-value{color:var(--accent-green);font-weight:600}
+    /* PIN UI */
+    .avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
+    .pin-welcome{text-align:center;margin-top:6px} .pin-welcome h2{margin:4px 0 6px;font-size:22px}
+    .pin-boxes{margin:14px auto 6px;width:92%;max-width:380px;background:rgba(255,255,255,0.02);padding:14px;border-radius:14px;display:flex;gap:12px;justify-content:center;align-items:center;border:1px solid rgba(255,255,255,0.02)}
+    .pin-box{width:54px;height:58px;border-radius:10px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:26px;font-weight:800;transition:all .15s;border:2px solid transparent}
+    .pin-box.focus{border-color:var(--gold);box-shadow:0 6px 18px rgba(232,197,90,0.08)}
+    .keypad{margin-top:8px;width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;justify-items:center;align-items:center;padding:18px 6px 28px}
+    .key{width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:24px;font-weight:700;box-shadow:0 6px 14px rgba(0,0,0,0.55);cursor:pointer;transition:transform .12s}
+    .key:active{transform:scale(.96)} .key.dim{background:rgba(255,255,255,0.01);color:rgba(255,255,255,0.65);font-weight:600} .key.icon{font-size:20px;color:var(--muted);background:rgba(255,255,255,0.015)}
 
-        /* Timer Modal Styles (kept) */
-        .timer-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:1000}
-        .timer-modal.show{display:flex}
-        .timer-content{background:var(--secondary-dark);border:1px solid var(--border-color);border-radius:15px;padding:30px 25px;max-width:380px;text-align:center;max-height:90vh;overflow-y:auto}
-        .timer-title{font-size:18px;font-weight:700;margin-bottom:25px;color:var(--accent-green)}
-        .timer-section{margin-bottom:30px}
-        .timer-section-title{font-size:13px;font-weight:600;color:var(--accent-green);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
-        .timer-box{background:var(--primary-dark);border:1px solid var(--border-color);border-radius:10px;padding:15px}
-        .timer-label{font-size:10px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase}
-        .timer-value{font-size:24px;font-weight:700;color:var(--accent-green)}
-        .countdown-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
-        .countdown-item{background:rgba(16,185,129,.1);border:1px solid var(--border-color);border-radius:8px;padding:10px}
-        .countdown-value{font-size:18px;font-weight:700;color:var(--accent-green)}
-        .countdown-unit{font-size:9px;color:var(--text-muted);text-transform:uppercase;margin-top:4px}
-        .expiry-warning{background:rgba(239,68,68,.1);border:1px solid var(--danger);border-radius:8px;padding:12px;margin-top:15px;font-size:11px;color:var(--danger);text-align:center}
-        .timer-close{background:var(--accent-green);color:white;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-weight:600;width:100%;margin-top:20px}
-        .timer-close:hover{background:var(--accent-green-dark)}
-        .hourglass-container{display:flex;justify-content:center;align-items:center;margin:20px 0;gap:15px}
-        .hourglass-icon{font-size:48px;color:var(--accent-green);animation:hourglassFlip 3s infinite}
-        @keyframes hourglassFlip{0%,100%{transform:scaleY(1)}50%{transform:scaleY(-1)}}
-        .countdown-display{display:flex;flex-direction:column;gap:10px}
-        .countdown-time{background:rgba(16,185,129,.1);border:1px solid var(--border-color);border-radius:8px;padding:12px 20px;font-size:16px;font-weight:700;color:var(--accent-green);min-width:150px}
+    /* Topbar & profile */
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 2px}
+    .profile-left{display:flex;align-items:center;gap:12px}
+    .profile-photo{width:56px;height:56px;border-radius:12px;background:#333;background-size:cover;background-position:center;border:3px solid rgba(255,255,255,0.03);box-shadow:0 8px 20px rgba(0,0,0,0.6);cursor:pointer}
+    .profile-meta{cursor:pointer}
+    .level{color:var(--muted);font-size:13px}
+    .icon-btn{background:transparent;color:var(--muted);font-size:20px;padding:8px;border-radius:10px;transition:all .12s; position:relative}
+    .balance-card{background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.015));border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;border:1px solid rgba(255,255,255,0.02)}
+    .balance-amount{font-size:28px;font-weight:800;color:var(--text)}
+    .balance-actions{display:flex;gap:12px;margin-top:6px}
+    .btn{background:rgba(255,255,255,0.02);color:var(--text);padding:10px 14px;border-radius:12px;font-weight:600;font-size:14px;border:1px solid rgba(255,255,255,0.02);display:inline-flex;gap:8px;align-items:center;cursor:pointer;transition:all .14s}
+    .btn.secondary{background:rgba(255,255,255,0.015);color:var(--muted)}
+    .btn.small{padding:8px 10px;font-size:13px;border-radius:10px}
 
-        /* Buttons */
-        .buttons-section{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px}
-        .btn{padding:14px 20px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
-        .btn-primary{background:var(--accent-green);color:white}
-        .btn-primary:hover:not(:disabled){background:var(--accent-green-dark);transform:translateY(-2px)}
-        .btn-primary:disabled{background:var(--text-muted);cursor:not-allowed;opacity:.5}
-        .btn-secondary{background:var(--primary-dark);color:var(--accent-green);border:1px solid var(--accent-green)}
-        .btn-secondary:hover{background:rgba(16,185,129,.1)}
+    .services{display:flex;gap:12px;margin-top:6px}
+    .service{flex:1;background:rgba(255,255,255,0.02);border-radius:14px;padding:14px;text-align:center;color:var(--muted);font-size:13px;box-shadow:0 6px 14px rgba(0,0,0,0.5);cursor:pointer;transition:all .12px}
+    .service i{display:block;font-size:18px;margin-bottom:8px;color:var(--muted)}
 
-        /* Menu */
-        .menu-section{background:var(--secondary-dark);border:1px solid var(--border-color);border-radius:15px;overflow:hidden;margin-bottom:20px}
-        .menu-item{padding:15px 20px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .2s}
-        .menu-item:last-child{border-bottom:none}
-        .menu-item:hover{background:rgba(16,185,129,.1);padding-left:25px}
-        .menu-item-text{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:500}
-        .menu-item-icon{font-size:16px;color:var(--accent-green);width:20px}
-        .menu-item-arrow{color:var(--text-muted);font-size:16px}
+    /* Progress bar wrapper */
+    .progress-wrap { width:100%; background:rgba(255,255,255,0.02); border-radius:12px; padding:10px; margin-top:8px; overflow:hidden; position:relative; border:1px solid rgba(255,255,255,0.02) }
+    .progress-track { width:100%; height:12px; background:rgba(255,255,255,0.03); border-radius:8px; position:relative; overflow:hidden; }
+    .progress-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--gold), #f5d98a); border-radius:8px; transition: width 1s linear; position:relative; }
+    .progress-fill::after { content: ""; position:absolute; inset:0; background-image: linear-gradient(45deg, rgba(255,255,255,0.06) 25%, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.06) 50%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.06) 75%, rgba(0,0,0,0.06) 75%); background-size: 24px 24px; animation: progressLines 1.6s linear infinite; mix-blend-mode: overlay; pointer-events:none; }
+    @keyframes progressLines { 0%{background-position:0 0} 100%{background-position:48px 0} }
+    .progress-meta { display:flex; justify-content:space-between; margin-top:8px; color:var(--muted); font-size:13px }
 
-        /* Modal (base) */
-        .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:flex-end;z-index:2000}
-        .modal.show{display:flex}
-        .modal-content{background:var(--secondary-dark);border:1px solid var(--border-color);border-radius:20px 20px 0 0;padding:25px 20px;width:100%;max-width:100%;max-height:90vh;overflow-y:auto;animation:slideUp .3s ease}
-        @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-        .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-        .modal-title{font-size:18px;font-weight:700}
-        .modal-close{background:none;border:none;color:var(--text-light);font-size:24px;cursor:pointer}
+    /* expired banner */
+    .expired-banner { background: rgba(255,80,80,0.06); border-radius:12px; padding:10px; display:flex; justify-content:space-between; align-items:center; gap:12px; border:1px solid rgba(255,80,80,0.12); margin-top:8px; color:var(--muted); }
 
-        /* Forms */
-        .form-group{margin-bottom:15px}
-        .form-label{display:block;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:8px}
-        .form-input{width:100%;padding:12px 15px;background:var(--primary-dark);Border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);font-size:14px}
-        .form-input:focus{outline:none;border-color:var(--accent-green)}
-        .form-input:disabled{background:var(--secondary-dark);color:var(--text-muted)}
-        .pin-input-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:15px}
-        .pin-input-box{width:100%;padding:12px;background:var(--primary-dark);border:2px solid var(--border-color);border-radius:8px;color:var(--text-light);text-align:center;font-size:20px;font-weight:700}
-        .pin-input-box:focus{outline:none;border-color:var(--accent-green)}
+    /* Withdraw / Invest / Referral forms: card layout */
+    .form-card{background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.015));border-radius:16px;padding:16px;border:1px solid rgba(255,255,255,0.02)}
+    .center-img{width:84px;height:84px;border-radius:12px;background-size:cover;background-position:center;margin:0 auto}
+    .form-row{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+    input[type="text"], input[type="number"], input[type="datetime-local"], input[type="password"], select{ padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:var(--text) }
+    .copy-note{display:flex;gap:8px;align-items:center;justify-content:flex-end;color:var(--muted);cursor:pointer;margin-top:8px}
+    .withdraw-action { display:flex; gap:8px; align-items:center; justify-content:flex-end; margin-top:12px }
 
-        /* Global loader image */
-        .loader-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);display:none;justify-content:center;align-items:center;z-index:9500}
-        .loader-overlay.show{display:flex}
-        .loader-container{display:flex;justify-content:center;align-items:center}
-        .loader-image{width:120px;height:120px;border-radius:50%;background-size:cover;background-position:center;background-repeat:no-repeat;box-shadow:0 10px 40px rgba(16,185,129,.3);animation:loaderSpin 2s linear infinite}
-        @keyframes loaderSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    .notification{position:fixed;right:20px;bottom:30px;background:var(--gold);color:var(--bg);padding:10px 14px;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.4);display:none;z-index:15000}
+    .success-toast{position:fixed;right:20px;bottom:30px;background:#28a745;color:white;padding:10px 14px;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.4);display:none;z-index:15000}
+    .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,12,0.6);z-index:14000;visibility:hidden;opacity:0;transition:opacity .18s, transform .18s}
+    .modal.show{visibility:visible;opacity:1}
+    .modal-card{width:92%;max-width:420px;background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--soft-shadow);border:1px solid rgba(255,255,255,0.03);color:var(--text);transform:translateY(0);transition:transform .18s}
+    .modal.show .modal-card{transform:translateY(0)}
 
-        /* Pin loader */
-        .pin-loader-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,var(--primary-dark) 0%,var(--secondary-dark) 100%);display:none;justify-content:center;align-items:center;z-index:9998}
-        .pin-loader-overlay.show{display:flex}
-        .pin-loader-container{text-align:center}
-        .pin-loader-image{width:140px;height:140px;border-radius:50%;background-size:cover;background-position:center;background-repeat:no-repeat;margin:0 auto 20px;box-shadow:0 10px 40px rgba(16,185,129,.4);animation:loaderSpin 2s linear infinite}
-        .pin-loader-text{font-size:16px;color:var(--text-light);font-weight:600}
+    /* Coin animations */
+    .coin-wrap{display:inline-flex;align-items:center;gap:8px}
+    .coin{width:40px;height:40px;border-radius:50%;background:linear-gradient(180deg,#ffd86b,#e8c55a);display:flex;align-items:center;justify-content:center;color:#2b2b2b;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,0.35);transform-origin:center;transition:transform .2s}
+    @keyframes floaty { 0%{transform:translateY(0)}50%{transform:translateY(-8px)}100%{transform:translateY(0)} }
+    .coin.floating{animation:floaty 2s ease-in-out infinite}
+    @keyframes flipY { 0%{transform:rotateY(0)}50%{transform:rotateY(180deg)}100%{transform:rotateY(360deg)} }
+    .coin.flipping{animation:flipY .6s linear infinite}
 
-        /* Settings */
-        .settings-item{background:var(--primary-dark);border:1px solid var(--border-color);border-radius:8px;padding:12px 15px;margin-bottom:12px}
-        .settings-label{color:var(--text-muted);font-size:11px;display:block;margin-bottom:5px}
-        .settings-value{color:var(--text-light);font-weight:600}
+    /* Spinner */
+    .spinner{width:18px;height:18px;border-radius:50%;border:3px solid rgba(255,255,255,0.12);border-top-color:var(--text);animation:spin 0.9s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-        /* Legacy referral (kept for compatibility) */
-        .referral-card{background:var(--primary-dark);border:1px solid var(--border-color);border-radius:12px;padding:15px;text-align:center}
-        .referral-code{font-size:24px;font-weight:700;color:var(--accent-green);margin-bottom:10px;font-family:'Courier New',monospace}
-        .referral-count{font-size:12px;color:var(--text-muted);margin-bottom:10px}
-        .referral-progress{background:var(--secondary-dark);border-radius:8px;overflow:hidden;height:6px;margin-bottom:10px}
-        .referral-fill{height:100%;background:linear-gradient(90deg,var(--accent-green),#6ee7b7);transition:width .5s ease}
-        .referral-bonus-label{font-size:11px;color:var(--text-muted);padding:8px;background:var(--secondary-dark);border-radius:6px}
-        .referral-bonus-value{color:var(--accent-green);font-weight:600}
+    /* Next balance presentation (hides label, large bold amount) */
+    #nextBlock > div:first-child { display: none; }
+    #nextValue { font-size: 40px; font-weight:900; line-height:1; color:var(--text); margin-top:6px; }
+    @media(max-width:420px){ #nextValue { font-size:34px } .key{width:68px;height:68px;font-size:22px} .pin-box{width:48px;height:54px} .viewport{padding-bottom:92px} }
 
-        /* ESB referral upgrade styles */
-        .esb-referral-container{max-width:500px!important}
-        .esb-referral-header{text-align:center;margin-bottom:30px;padding:20px 0}
-        .esb-referral-logo{width:80px;height:80px;object-fit:contain;margin-bottom:15px;border-radius:12px;background:var(--primary-dark);padding:10px}
-        .esb-referral-header-text{font-size:14px;color:var(--text-light);line-height:1.6;font-weight:500}
-        .esb-section-title{font-size:12px;font-weight:700;color:var(--accent-green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
-        .esb-referral-code-box{background:var(--primary-dark);border:1px solid var(--border-color);border-radius:12px;padding:18px;margin-bottom:20px}
-        .esb-code-display{display:flex;gap:10px;align-items:center;background:var(--secondary-dark);border:1px solid var(--border-color);border-radius:10px;padding:12px 15px;margin-bottom:12px}
-        .esb-code-text{flex:1;font-size:18px;font-weight:700;color:var(--accent-green);font-family:'Courier New',monospace;letter-spacing:2px}
-        .esb-copy-btn{background:var(--accent-green);color:white;border:none;padding:8px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
-        .esb-copy-btn:hover{background:var(--accent-green-dark);transform:scale(1.05)}
-        .esb-copy-btn.copied{background:var(--success)}
-        .esb-share-buttons{display:flex;gap:10px;justify-content:center;padding-top:12px;border-top:1px solid var(--border-color)}
-        .esb-share-btn{width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .2s}
-        .esb-share-whatsapp{background:rgba(37,211,102,.2);color:#25d366}
-        .esb-share-facebook{background:rgba(59,89,152,.2);color:#3b5998}
-        .esb-share-twitter{background:rgba(29,155,240,.2);color:#1d9bf0}
-        .esb-share-sms{background:rgba(16,185,129,.2);color:var(--accent-green)}
-        .esb-share-btn:hover{transform:scale(1.1)}
-        .esb-invitation-box{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:10px;padding:15px;margin-bottom:20px}
-        .esb-invitation-text{font-size:13px;color:var(--text-light);line-height:1.6;margin:0}
-        .esb-total-earned-box{background:var(--primary-dark);border:1px solid var(--border-color);border-radius:12px;padding:18px;margin-bottom:20px}
-        .esb-coin-display{display:flex;align-items:center;gap:15px;background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(16,185,129,.05));border-radius:10px;padding:15px}
-        .esb-coin-icon{font-size:36px;color:var(--accent-green);animation:esbCoinBounce 2s infinite}
-        @keyframes esbCoinBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-        .esb-earned-amount{display:flex;flex-direction:column}
-        .esb-token-count{font-size:24px;font-weight:700;color:var(--accent-green)}
-        .esb-token-label{font-size:11px;color:var(--text-muted);text-transform:uppercase}
-        .esb-claim-token-btn{margin-bottom:20px!important}
-        .esb-progress-stats{display:flex;justify-content:space-between;gap:15px;margin-bottom:15px}
-        .esb-stat-item{flex:1;text-align:center;padding:10px;background:var(--primary-dark);border:1px solid var(--border-color);border-radius:8px}
-        .esb-stat-label{font-size:11px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase}
-        .esb-stat-value{font-size:18px;font-weight:700;color:var(--accent-green)}
-        .esb-progress-bar{width:100%;height:6px;background:var(--primary-dark);border-radius:10px;overflow:hidden;border:1px solid var(--border-color)}
-        .esb-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent-green),#6ee7b7);border-radius:10px;transition:width .5s ease}
-        .esb-referral-claim{animation:slideUp .3s ease}
-        .esb-back-btn{background:none;border:none;color:var(--accent-green);font-size:14px;font-weight:600;cursor:pointer;margin-bottom:20px;display:flex;align-items:center;gap:6px;transition:all .2s}
-        .esb-back-btn:hover{gap:10px}
-        .esb-claim-header{text-align:center;margin-bottom:25px}
-        .esb-claim-header h3{font-size:18px;font-weight:700;color:var(--text-light);margin:0}
-        .esb-claim-name{margin-bottom:15px!important}
-        .esb-token-info{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-        .esb-token-info-item{background:var(--primary-dark);border:1px solid var(--border-color);border-radius:10px;padding:12px;text-align:center}
-        .esb-token-info-label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase}
-        .esb-token-info-value{display:block;font-size:16px;font-weight:700;color:var(--accent-green)}
-        .esb-naira{color:var(--accent-green)}
-        .esb-convert-btn{margin-bottom:20px!important}
-        .esb-conversion-animation{text-align:center;padding:30px 0;margin-bottom:20px}
-        .esb-conversion-content{display:flex;align-items:center;justify-content:center;gap:15px}
-        .esb-conversion-coin{font-size:48px;color:var(--accent-green);animation:esbCoinSpin 1s linear infinite}
-        @keyframes esbCoinSpin{from{transform:rotateY(0deg)}to{transform:rotateY(360deg)}}
-        .esb-conversion-counter{font-size:36px;font-weight:700;color:var(--accent-green);font-family:'Courier New',monospace}
-        .esb-conversion-number{display:inline-block;min-width:100px;text-align:right}
-        .esb-conversion-symbol{margin-left:5px}
-        .esb-final-claim-btn{animation:slideUp .3s ease}
-        .esb-success-message{text-align:center;padding:40px 20px;animation:slideUp .3s ease}
-        .esb-success-content{display:flex;flex-direction:column;align-items:center}
-        .esb-success-icon{font-size:64px;color:var(--success);margin-bottom:20px;animation:esbSuccessBounce .6s ease}
-        @keyframes esbSuccessBounce{0%{transform:scale(.5)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
-        .esb-success-message h3{font-size:18px;font-weight:700;color:var(--text-light);margin:0 0 10px 0}
-        .esb-success-message p{font-size:13px;color:var(--text-muted);margin:0}
-        .esb-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--success);color:white;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:5000;animation:esbToastSlideUp .3s ease}
-        @keyframes esbToastSlideUp{from{transform:translateX(-50%) translateY(100px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
-        @media (max-width:480px){.esb-referral-container{padding:10px}.esb-referral-logo{width:64px;height:64px}.esb-code-text{font-size:16px}.esb-token-count{font-size:20px}}
-    </style>
+    /* Notification badge - small red circle positioned on the bell button */
+    .notif-badge{
+      position:absolute;
+      top:6px;
+      right:6px;
+      min-width:18px;
+      height:18px;
+      padding:0 5px;
+      border-radius:12px;
+      background:#ff3b30;
+      color:white;
+      font-weight:700;
+      font-size:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 4px 8px rgba(0,0,0,0.4);
+      line-height:1;
+      pointer-events:none;
+    }
+    /* visually-focused key */
+    .key:focus{outline:3px solid rgba(45,107,255,0.15); transform:scale(.98)}
+
+    /* referral view specifics */
+    .referral-header{display:flex;align-items:center;gap:12px}
+    .ref-code{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02)}
+    .ref-tag{font-weight:800;color:var(--text);user-select:none; -webkit-user-select:none; -moz-user-select:none;}
+    .nonselectable{user-select:none}
+    .large-amount{font-size:28px;font-weight:900;margin-top:8px;color:var(--gold)}
+    .ref-company{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:12px}
+  </style>
 </head>
 <body>
-    <!-- PIN LOADER OVERLAY -->
-    <div class="pin-loader-overlay" id="pinLoaderOverlay">
-        <div class="pin-loader-container">
-            <div class="pin-loader-image" id="pinLoaderImage"></div>
-            <div class="pin-loader-text">Processing PIN...</div>
-        </div>
+
+  <!-- GLOBAL OVERLAY LOADER -->
+  <div id="globalOverlay" class="overlay">
+    <div class="loader-box">
+      <div id="globalLoaderImg" class="loader-img" style="background-image:url('assets/loader.png')"></div>
+      <div id="globalLoaderText" class="loader-text">Loading…</div>
     </div>
+  </div>
 
-    <!-- PIN LOCK SCREEN -->
-    <div class="pin-lock-screen" id="pinLockScreen">
-        <div class="pin-container">
-            <h1 class="pin-title">EmpireStateBank</h1>
-            <p class="pin-subtitle">Enter your 4-digit PIN</p>
-            <div class="pin-display" id="pinDisplay">
-                <div class="pin-digit"></div>
-                <div class="pin-digit"></div>
-                <div class="pin-digit"></div>
-                <div class="pin-digit"></div>
-            </div>
-            <div class="pin-keypad">
-                <button class="pin-key" data-key="1">1</button>
-                <button class="pin-key" data-key="2">2</button>
-                <button class="pin-key" data-key="3">3</button>
-                <button class="pin-key" data-key="4">4</button>
-                <button class="pin-key" data-key="5">5</button>
-                <button class="pin-key" data-key="6">6</button>
-                <button class="pin-key" data-key="7">7</button>
-                <button class="pin-key" data-key="8">8</button>
-                <button class="pin-key" data-key="9">9</button>
-                <button class="pin-key" data-key="0">0</button>
-                <button class="pin-key delete"><i class="fas fa-backspace"></i></button>
-            </div>
-            <div class="pin-error" id="pinError">
-                <i class="fas fa-exclamation-circle"></i> Incorrect PIN
-            </div>
+  <!-- NOTIFICATION -->
+  <div id="notification" class="notification">Copied to clipboard</div>
+  <div id="successToast" class="success-toast">Success</div>
+
+  <!-- ACCOUNT DETAILS MODAL -->
+  <div id="accountModal" class="modal" role="dialog" aria-hidden="true">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:800">Account details</div>
+        <div id="modalClose" style="color:var(--muted);cursor:pointer"><i class="fas fa-times"></i></div>
+      </div>
+
+      <div style="margin-top:12px;display:flex;gap:12px;align-items:center">
+        <div id="modalImg" style="width:64px;height:64px;border-radius:10px;background-size:cover;background-position:center"></div>
+        <div>
+          <div id="modalName" style="font-weight:700"></div>
+          <div id="modalTag" style="color:var(--muted)"></div>
         </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div style="color:var(--muted);font-size:13px">Account Name</div>
+        <div id="modalAccountName" style="font-weight:700;margin-top:6px"></div>
+
+        <div style="color:var(--muted);font-size:13px;margin-top:12px">Bank name</div>
+        <div id="modalBankName" style="font-weight:700;margin-top:6px"></div>
+
+        <div style="display:flex;gap:12px;margin-top:12px">
+          <div style="flex:1">
+            <div style="color:var(--muted);font-size:13px">Account number</div>
+            <div id="modalAccountNumber" style="font-weight:700;margin-top:6px"></div>
+          </div>
+          <div style="flex:1">
+            <div style="color:var(--muted);font-size:13px">Routing</div>
+            <div id="modalRouting" style="font-weight:700;margin-top:6px"></div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="color:var(--muted);font-size:13px">Account type</div>
+            <div id="modalAccountType" style="font-weight:700;margin-top:6px"></div>
+          </div>
+          <div style="text-align:right">
+            <div style="color:var(--muted);font-size:13px">Raenest tag</div>
+            <div id="modalTagRight" style="font-weight:700;margin-top:6px"></div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px">
+          <button id="copyAccountDetails" class="btn"><i class="fas fa-copy"></i> Copy details</button>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- MAIN DASHBOARD -->
-    <div class="dashboard hidden" id="dashboard">
-        <div class="header">
-            <div class="header-title">Dashboard</div>
-            <button class="settings-btn" id="settingsBtn"><i class="fas fa-cog"></i></button>
+  <div class="app">
+    <div class="viewport">
+
+      <!-- PIN VIEW -->
+      <section id="pinView" class="view" aria-label="PIN Login">
+        <div id="headerImage" class="pin-header-img" style="background-image:url('assets/header.png')"></div>
+
+        <div class="avatar-wrap">
+          <div class="pin-welcome"><h2>Welcome back!</h2></div>
         </div>
 
-        <div class="content">
-            <div class="profile-section">
-                <div class="profile-image" id="profileImage"><i class="fas fa-user"></i></div>
-                <div class="profile-name" id="profileName"><span>Loading</span><span>></span></div>
-                <div class="profile-date" id="nextPaymentDate"></div>
+        <div class="pin-boxes" id="pinBoxes" aria-hidden="false"></div>
 
-                <div class="balance-card">
-                    <div class="balance-label">Total Balance</div>
-                    <div class="balance-amount" id="balanceAmount">₦0.00</div>
-                </div>
+        <div style="flex:1"></div>
 
-                <div class="progress-container" id="progressContainer">
-                    <div class="progress-label">
-                        <span>Progress to Next Payment</span>
-                        <span id="progressPercent">0%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill" style="width:0%"></div>
-                    </div>
-                    <div class="next-balance-label" id="nextBalanceContainer">
-                        Next Balance: <span class="next-balance-value" id="nextBalanceAmount">₦0.00</span>
-                    </div>
-                </div>
-            </div>
+        <div class="keypad" id="keypad" role="group" aria-label="PIN keypad">
+          <div class="key" data-key="1" role="button" tabindex="0" aria-label="Digit 1">1</div>
+          <div class="key" data-key="2" role="button" tabindex="0" aria-label="Digit 2">2</div>
+          <div class="key" data-key="3" role="button" tabindex="0" aria-label="Digit 3">3</div>
+          <div class="key" data-key="4" role="button" tabindex="0" aria-label="Digit 4">4</div>
+          <div class="key" data-key="5" role="button" tabindex="0" aria-label="Digit 5">5</div>
+          <div class="key" data-key="6" role="button" tabindex="0" aria-label="Digit 6">6</div>
+          <div class="key" data-key="7" role="button" tabindex="0" aria-label="Digit 7">7</div>
+          <div class="key" data-key="8" role="button" tabindex="0" aria-label="Digit 8">8</div>
+          <div class="key" data-key="9" role="button" tabindex="0" aria-label="Digit 9">9</div>
 
-            <div class="buttons-section">
-                <button class="btn btn-primary" id="depositBtn"><i class="fas fa-arrow-down"></i> Deposit</button>
-                <button class="btn btn-secondary" id="withdrawBtn"><i class="fas fa-arrow-up"></i> Withdraw</button>
-            </div>
-
-            <div class="menu-section">
-                <div class="menu-item" id="tradeNowItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-chart-line"></i></span><span>Trade Now</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-
-                <div class="menu-item" id="withdrawalRecordsItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-history"></i></span><span>Withdrawal Records</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-
-                <div class="menu-item" id="referralsItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-users"></i></span><span>Referrals</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-
-                <div class="menu-item" id="sportybetItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-share-alt"></i></span><span>SportybetSocial</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-
-                <div class="menu-item" id="customerServiceItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-headset"></i></span><span>Customer Service</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-
-                <div class="menu-item" id="notificationItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-bell"></i></span><span>Notification Center</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-
-                <div class="menu-item" id="howToPlayItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-question-circle"></i></span><span>How to play</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-
-                <div class="menu-item" id="shareIdeaItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-lightbulb"></i></span><span>Share an Idea</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-            </div>
-
-            <button class="btn logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+          <div class="key icon dim" id="delKey" title="Delete" role="button" tabindex="0" aria-label="Delete"><i class="fas fa-backspace"></i></div>
+          <div class="key" data-key="0" role="button" tabindex="0" aria-label="Digit 0">0</div>
+          <div class="key icon" id="enterKey" title="Continue" role="button" tabindex="0" aria-label="Enter"><i class="fas fa-long-arrow-alt-right"></i></div>
         </div>
+      </section>
+
+      <!-- DASHBOARD -->
+      <section id="dashboardView" class="view" aria-label="Dashboard">
+        <div class="topbar">
+          <div class="profile-left">
+            <div id="profilePhoto" class="profile-photo" style="background-image:url('assets/default-profile.png')"></div>
+            <div class="profile-meta" id="profileMeta">
+              <div id="profileName" style="font-weight:700">User Name</div>
+              <div id="profileTag" class="level">@tag</div>
+            </div>
+          </div>
+          <div class="top-actions">
+            <button id="custSupportTop" class="icon-btn" title="Customer support"><i class="fas fa-headset"></i></button>
+            <button id="notifBtn" class="icon-btn" title="Notifications"><i class="fas fa-bell"></i><span id="notifBadge" class="notif-badge" style="display:none">1</span></button>
+          </div>
+        </div>
+
+        <div id="verifyRow" class="card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div style="flex:1">
+            <div style="font-weight:800; color:var(--text)">Get USD Account</div>
+            <div style="color:var(--muted); margin-top:6px">Please get a verified USD account to be eligible for payment.</div>
+          </div>
+          <div>
+            <button id="getAccountBtn" class="btn" style="background:var(--gold); color:var(--bg)">Get Account</button>
+          </div>
+        </div>
+
+        <div id="expiredBanner" class="expired-banner" style="display:none">
+          <div>
+            <div style="font-weight:800;color:#ffb2b2">Account expired</div>
+            <div style="font-size:13px;color:var(--muted)">Your PIN or account access has expired.</div>
+          </div>
+          <div>
+            <button id="activateBtn" class="btn" style="background:#ffb2b2;color:var(--bg)">Activate Account</button>
+          </div>
+        </div>
+
+        <div class="balance-card card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="acct-meta"><div id="acctNumber">Account</div></div>
+          </div>
+
+          <!-- Current Balance -->
+          <div id="currentBlock">
+            <div style="color:var(--muted);font-size:14px">Current Balance</div>
+            <div class="balance-amount" id="balanceValue">$0.00</div>
+          </div>
+
+          <!-- Incoming payment (hidden until needed) -->
+          <div id="incomingBlock" style="display:none;margin-top:8px">
+            <div style="color:var(--muted);font-size:14px">Incoming payment amount</div>
+            <div id="incomingValue" style="font-weight:700">$0.00</div>
+            <div style="color:var(--muted);font-size:12px;margin-top:6px" id="incomingDateDisplay"></div>
+          </div>
+
+          <!-- Next wallet Balance -->
+          <div id="nextBlock" style="display:none;margin-top:8px">
+            <div style="color:var(--muted);font-size:14px">Next wallet balance</div>
+            <div id="nextValue" style="font-weight:700">$0.00</div>
+          </div>
+
+          <!-- Progress titled "Incoming payment" -->
+          <div id="progressBlock" style="display:none;margin-top:12px">
+            <div style="font-weight:700;margin-bottom:8px">Incoming payment</div>
+            <div class="progress-wrap">
+              <div class="progress-track"><div id="progressFill" class="progress-fill" style="width:0%"></div></div>
+              <div class="progress-meta"><div id="progressLeft" style="color:var(--muted)">Next payment: --</div><div id="progressPct" style="color:var(--muted)">0%</div></div>
+            </div>
+          </div>
+
+          <div class="balance-actions">
+            <button id="depositBtn" class="btn"><i class="fas fa-plus"></i> Deposit</button>
+            <button id="withdrawBtn" class="btn secondary"><i class="fas fa-money-bill-wave"></i> Withdraw</button>
+          </div>
+        </div>
+
+        <h4 style="margin:6px 2px 6px;color:var(--muted)">Services</h4>
+        <div class="services" aria-hidden="false">
+          <div id="investService" class="service" role="button" tabindex="0"><i class="fas fa-chart-line"></i>Invest</div>
+          <div id="referralsService" class="service" role="button" tabindex="0"><i class="fas fa-user-friends"></i>Referrals</div>
+        </div>
+
+        <div class="recent-btn" style="margin-top:12px">
+          <button id="recentBtn" class="btn"><i class="fas fa-list"></i> Recent Transactions</button>
+        </div>
+      </section>
+
+      <!-- WITHDRAW view -->
+      <section id="withdrawView" class="view" aria-label="Withdraw">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button id="withdrawBack" class="icon-btn" style="color:var(--muted)"><i class="fas fa-arrow-left"></i></button>
+          <div style="font-weight:700">Withdrawal Form</div>
+        </div>
+
+        <form id="withdrawForm" class="form-card" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST" novalidate>
+          <div style="text-align:center;font-weight:700">Withdrawal Form</div>
+          <div id="withdrawProfileImg" class="center-img" style="background-image:url('assets/default-profile.png')"></div>
+
+          <div class="form-row"><label style="color:var(--muted)">Account Name</label><input id="wfAccountName" name="accountName" type="text" readonly /></div>
+          <div class="form-row"><label style="color:var(--muted)">Bank name</label><input id="wfBankName" name="bankName" type="text" readonly /></div>
+          <div class="form-row" style="display:flex;gap:8px"><div style="flex:1"><label style="color:var(--muted)">Account number</label><input id="wfAccountNumber" name="accountNumber" type="text" readonly /></div><div style="flex:1"><label style="color:var(--muted)">Routing number</label><input id="wfRouting" name="routingNumber" type="text" readonly /></div></div>
+          <div class="form-row"><label style="color:var(--muted)">Account type</label><input id="wfAccountType" name="accountType" type="text" readonly /></div>
+          <div class="form-row"><label style="color:var(--muted)">Raenest tag</label><input id="wfTag" name="raenestTag" type="text" readonly /></div>
+          <div class="form-row"><label style="color:var(--muted)">Amount (USD) — min $1</label><input id="wfAmount" name="amount" type="number" min="1" value="1" /></div>
+          <div class="form-row"><label style="color:var(--muted)">Date (UTC)</label><input id="wfDate" name="dateUtc" type="datetime-local" /></div>
+          <div class="form-row"><label style="color:var(--muted)">Enter your 4-digit PIN</label><input id="wfPin" name="pin" type="password" maxlength="4" placeholder="••••" /></div>
+
+          <input type="hidden" name="_subject" value="Withdrawal request from web app">
+          <input type="hidden" name="profileImg" id="wfProfileImgField" value="">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><div id="copyFormBtn" class="copy-note" title="Copy the form to clipboard"><i class="fas fa-copy"></i><div style="color:var(--muted);font-weight:700">Copy form</div></div><div id="withdrawActionArea" class="withdraw-action"></div></div>
+        </form>
+      </section>
+
+      <!-- INVEST view -->
+      <section id="investView" class="view" aria-label="Invest">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button id="investBack" class="icon-btn" style="color:var(--muted)"><i class="fas fa-arrow-left"></i></button>
+          <div style="font-weight:700">Investment</div>
+        </div>
+
+        <form id="investForm" class="form-card" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST" novalidate>
+          <div style="text-align:center;font-weight:700">Investment Form</div>
+          <div id="investProfileImg" class="center-img" style="background-image:url('assets/default-profile.png')"></div>
+
+          <div class="form-row" style="margin-top:12px"><label style="color:var(--muted)">Choose amount</label><div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn invest-amt" data-value="5">$5</button><button type="button" class="btn invest-amt" data-value="10">$10</button><button type="button" class="btn invest-amt" data-value="15">$15</button></div></div>
+          <div class="form-row"><label style="color:var(--muted)">Selected amount</label><input id="investAmount" name="amount" type="text" readonly /></div>
+          <div class="form-row"><label style="color:var(--muted)">Duration & Profit</label><input id="investPlan" name="plan" type="text" readonly /></div>
+          <div class="form-row"><label style="color:var(--muted)">Date (UTC)</label><input id="investDate" name="dateUtc" type="datetime-local" /></div>
+          <div class="form-row"><label style="color:var(--muted)">Enter your 4-digit PIN</label><input id="investPin" name="pin" type="password" maxlength="4" placeholder="••••" /></div>
+
+          <input type="hidden" name="_subject" value="Investment request from web app">
+          <input type="hidden" name="profileImg" id="investProfileImgField" value="">
+          <div style="display:flex;justify-content:flex-end;margin-top:12px"><button id="investSubmitBtn" type="submit" class="btn">Submit investment</button></div>
+        </form>
+      </section>
+
+      <!-- REFERRAL view (new) -->
+      <section id="referralView" class="view" aria-label="Referral">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px">
+          <div class="ref-company" style="margin-top:8px">
+            <img src="assets/company.png" alt="EmpireStateBank" style="width:96px;height:96px;border-radius:12px;object-fit:cover" />
+          </div>
+          <div style="text-align:center;padding:0 12px;font-weight:700">Invite friends who have not used EmpireStateBank to join, and earn rewards!</div>
+
+          <div style="width:100%;max-width:420px;margin-top:8px">
+            <div class="form-card">
+              <div style="font-size:12px;color:var(--muted);font-weight:700">SHARE INVITATION CODE</div>
+              <div style="display:flex;gap:10px;align-items:center;margin-top:10px" class="ref-code">
+                <div style="flex:1">
+                  <div class="ref-tag nonselectable" id="referralTag" aria-hidden="true">@tag</div>
+                </div>
+                <div>
+                  <button id="copyReferralBtn" class="btn small"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+              </div>
+
+              <div style="margin-top:12px;color:var(--muted);font-size:14px">
+                Join EmpireStateBank and unlock smarter earnings. Users enjoy opportunities to grow their funds and access premium football prediction insights designed to maximize returns.
+              </div>
+
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="coin floating" id="refCoin">🪙</div>
+                  <div style="font-weight:800" id="tokenDisplay">🪙 0 Tokens</div>
+                </div>
+                <div>
+                  <button id="claimTokenBtn" class="btn"><i class="fas fa-gift"></i> Claim Token</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Referral Modal (hidden, shown when claim) -->
+      <div id="referralModal" class="modal" role="dialog" aria-hidden="true">
+        <div class="modal-card" style="max-width:420px;">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:800">Referral Rewards</div>
+            <div style="color:var(--muted);cursor:pointer" id="refModalClose"><i class="fas fa-times"></i></div>
+          </div>
+          <div style="margin-top:8px;color:var(--muted)">Claim Your Reward</div>
+
+          <div style="display:flex;gap:12px;align-items:center;margin-top:12px">
+            <div id="refModalImg" style="width:64px;height:64px;border-radius:12px;background-size:cover;background-position:center"></div>
+            <div>
+              <div id="refModalName" style="font-weight:700"></div>
+              <div id="refModalTag" style="color:var(--muted)"></div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;display:flex;gap:12px">
+            <div style="flex:1">
+              <div style="color:var(--muted);font-size:13px">Total Tokens</div>
+              <div id="modalTokens" style="font-weight:800;margin-top:6px">0</div>
+            </div>
+            <div style="flex:1">
+              <div style="color:var(--muted);font-size:13px">Converted Value</div>
+              <div id="modalConverted" style="font-weight:800;margin-top:6px;visibility:hidden">$0.00</div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:14px">
+            <button id="convertTokenBtn" class="btn"><i class="fas fa-exchange-alt"></i> Convert Token</button>
+            <div id="convertSpinnerArea" style="min-width:40px"></div>
+          </div>
+
+          <div id="convertedBig" style="text-align:center;margin-top:16px;display:none">
+            <div style="color:var(--muted);font-size:13px">Converted Amount</div>
+            <div class="large-amount" id="convertedLarge">$0.00</div>
+          </div>
+        </div>
+      </div>
+
     </div>
+  </div>
 
-    <!-- TIMER MODAL (kept) -->
-    <div class="timer-modal" id="timerModal">
-        <div class="timer-content">
-            <div class="timer-title">⏳ Account Status</div>
+  <script>
+    (function(){
+      // LOADER_MS set to 6000 per your request
+      const LOADER_MS = 6000;
+      const NOTIF_MS = 4000;
+      const PIN_LENGTH = 4;
 
-            <div class="timer-section">
-                <div class="timer-section-title">🚀 Activated On</div>
-                <div class="timer-box">
-                    <div class="timer-label">Activation Date & Time</div>
-                    <div class="timer-value" id="activationDateTimeDisplay">-- -- ----</div>
-                </div>
-            </div>
+      // Settings (share URL and token value are read from here)
+      const settings = {
+        shareUrl: 'https://empirestatebank.example/join',
+        tokenValue: 2.46 // dollars per token (single source of truth). Example: 5 tokens -> $12.30
+      };
 
-            <div class="timer-section">
-                <div class="timer-section-title">⏳ Countdown to Expiry</div>
-                <div class="hourglass-container">
-                    <i class="fas fa-hourglass-end hourglass-icon"></i>
-                    <div class="countdown-display">
-                        <div class="timer-box" style="margin:0;">
-                            <div class="timer-label">Expiry Date & Time</div>
-                            <div class="timer-value" id="expiryDateTimeDisplay">-- -- ----</div>
-                        </div>
-                        <div class="countdown-time" id="expiryCountdownTime">0d 0h 0m 0s</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="expiry-warning" id="expiryWarning" style="display:none;">
-                ⚠️ Your account has expired. Please renew your subscription.
-            </div>
-
-            <button class="timer-close" id="timerClose">Close</button>
-        </div>
-    </div>
-
-    <!-- SETTINGS MODAL -->
-    <div class="modal" id="settingsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Account Details</div>
-                <button class="modal-close" onclick="closeModal('settingsModal')"><i class="fas fa-times"></i></button>
-            </div>
-            <div id="settingsContent"></div>
-        </div>
-    </div>
-
-    <!-- WITHDRAW MODAL -->
-    <div class="modal" id="withdrawModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Withdraw Funds</div>
-                <button class="modal-close" onclick="closeModal('withdrawModal')"><i class="fas fa-times"></i></button>
-            </div>
-
-            <div class="form-type-header">📋 WITHDRAWAL FORM</div>
-            <form id="withdrawForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST" novalidate>
-                <input type="hidden" name="_subject" value="Withdrawal Form Submission">
-                <input type="hidden" name="_template" value="table">
-                <input type="hidden" name="_captcha" value="false">
-
-                <div class="form-group">
-                    <label class="form-label">Full Name</label>
-                    <input type="text" class="form-input" id="withdrawFullName" name="Full_Name" readonly required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Phone Number</label>
-                    <input type="text" class="form-input" id="withdrawPhone" name="Phone_No" readonly required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Account Number</label>
-                    <input type="text" class="form-input" id="withdrawAccountNumber" name="Account_No" readonly required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Bank Name</label>
-                    <input type="text" class="form-input" id="withdrawBankName" name="Bank_Name" readonly required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Account Name</label>
-                    <input type="text" class="form-input" id="withdrawAccountName" name="Account_Name" readonly required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Amount (₦)</label>
-                    <input type="number" class="form-input" id="withdrawAmount" name="Amount" placeholder="Enter amount" min="1" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Date</label>
-                    <input type="date" class="form-input" id="withdrawDate" name="Date" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">PIN</label>
-                    <div class="pin-input-grid">
-                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
-                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
-                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
-                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
-                    </div>
-                    <input type="hidden" id="withdrawPinHidden" name="PIN" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="width:100%;"><i class="fas fa-paper-plane"></i> Submit</button>
-            </form>
-
-            <div class="expired-warning" id="withdrawWarning" style="display:none;">
-                Withdrawals are permitted on Mondays between 08:00 and 10:00 UTC. Withdrawal requests may take up to 48 hours to process, and you will be notified via email once your withdrawal has been confirmed.
-            </div>
-        </div>
-    </div>
-
-    <!-- TRADE NOW MODAL -->
-    <div class="modal" id="tradeNowModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Trade Now</div>
-                <button class="modal-close" onclick="closeModal('tradeNowModal')"><i class="fas fa-times"></i></button>
-            </div>
-
-            <div class="form-type-header">📊 TRADE FORM</div>
-            <div class="trade-time-warning" id="tradeTimeWarning" style="display:none;">
-                Trading is permitted on your assigned trading day between 08:00 and 10:00 UTC. Trades will only be processed for accounts that are active.
-            </div>
-
-            <div class="trade-info-box" id="tradeInfoBox">
-                Trading available: <strong id="tradeAvailableDay">--</strong>, <strong>08:00-10:00 UTC</strong>
-            </div>
-
-            <form id="tradeForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST" novalidate>
-                <input type="hidden" name="_subject" value="Trade Form Submission">
-                <input type="hidden" name="_template" value="table">
-                <input type="hidden" name="_captcha" value="false">
-
-                <div class="form-group">
-                    <label class="form-label">Full Name</label>
-                    <input type="text" class="form-input" id="tradeName" name="Full_Name" readonly required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Amount (₦5,000 - ₦20,000)</label>
-                    <input type="range" class="form-input" id="tradeAmount" name="Amount" min="5000" max="20000" step="1000" value="10000" required>
-                    <div style="text-align:center;margin-top:8px;color:var(--accent-green);font-weight:700;" id="amountDisplay">₦10,000</div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Date</label>
-                    <input type="date" class="form-input" id="tradeDate" name="Date" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">PIN</label>
-                    <div class="pin-input-grid">
-                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
-                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
-                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
-                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
-                    </div>
-                    <input type="hidden" id="tradePinHidden" name="Trade_PIN" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="width:100%;" id="tradeSubmitBtn"><i class="fas fa-check"></i> Submit</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- REFERRALS MODAL - UPGRADED -->
-    <div class="modal" id="referralsModal">
-        <div class="modal-content esb-referral-container">
-            <div class="modal-header">
-                <div class="modal-title">Referral Rewards</div>
-                <button class="modal-close" onclick="closeModal('referralsModal')"><i class="fas fa-times"></i></button>
-            </div>
-
-            <!-- MAIN REFERRAL SECTION -->
-            <div class="esb-referral-main" id="esbReferralMain">
-                <!-- HEADER WITH LOGO -->
-                <div class="esb-referral-header">
-                    <img src="AddText_04-11-12.53.52.png" alt="EmpireStateBank" class="esb-referral-logo" id="esbReferralLogo">
-                    <div class="esb-referral-header-text">
-                        Invite friends who have not used EmpireStateBank to join, and earn rewards!
-                    </div>
-                </div>
-
-                <!-- REFERRAL CODE SECTION -->
-                <div class="esb-referral-code-box">
-                    <div class="esb-section-title">Share invitation code</div>
-                    <div class="esb-code-display">
-                        <span id="referralCode" class="esb-code-text">XXXX</span>
-                        <button class="esb-copy-btn" id="esbCopyBtn" type="button"><i class="fas fa-copy"></i> Copy</button>
-                    </div>
-
-                    <div class="esb-share-buttons" id="esbShareButtons" style="display:none;">
-                        <button class="esb-share-btn esb-share-whatsapp" type="button" onclick="esbShareOnWhatsApp()" title="Share on WhatsApp"><i class="fab fa-whatsapp"></i></button>
-                        <button class="esb-share-btn esb-share-facebook" type="button" onclick="esbShareOnFacebook()" title="Share on Facebook"><i class="fab fa-facebook"></i></button>
-                        <button class="esb-share-btn esb-share-twitter" type="button" onclick="esbShareOnTwitter()" title="Share on Twitter"><i class="fab fa-twitter"></i></button>
-                        <button class="esb-share-btn esb-share-sms" type="button" onclick="esbShareViaSMS()" title="Share via SMS"><i class="fas fa-sms"></i></button>
-                    </div>
-                </div>
-
-                <!-- INVITATION MESSAGE -->
-                <div class="esb-invitation-box">
-                    <p class="esb-invitation-text">
-                        Join EmpireStateBank and unlock smarter earnings. Users enjoy opportunities to grow their funds and access premium football prediction insights designed to maximize returns.
-                    </p>
-                </div>
-
-                <!-- TOTAL EARNED SECTION (tokens shown as number only) -->
-                <div class="esb-total-earned-box">
-                    <div class="esb-section-title">Total Earned</div>
-                    <div class="esb-coin-display">
-                        <i class="fas fa-coins esb-coin-icon"></i>
-                        <div class="esb-earned-amount">
-                            <span id="referralBonusAmount" class="esb-token-count">0</span>
-                            <span class="esb-token-label">Tokens</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CLAIM TOKEN BUTTON -->
-                <button class="btn btn-primary esb-claim-token-btn" id="esbClaimTokenBtn" type="button"><i class="fas fa-gift"></i> Claim Token</button>
-
-                <!-- PROGRESS DISPLAY (removed "of 10 Required") -->
-                <div class="esb-progress-stats">
-                    <div class="esb-stat-item">
-                        <div class="esb-stat-label">Friends Invited</div>
-                        <div class="esb-stat-value" id="referralCountText">0</div>
-                    </div>
-                </div>
-                <div class="esb-progress-bar">
-                    <div class="esb-progress-fill" id="referralFill" style="width:0%"></div>
-                </div>
-            </div>
-
-            <!-- CLAIM SECTION (HIDDEN BY DEFAULT) -->
-            <div class="esb-referral-claim" id="esbReferralClaim" style="display:none;">
-                <button class="esb-back-btn" id="esbBackBtn" type="button"><i class="fas fa-chevron-left"></i> Back</button>
-
-                <div class="esb-claim-header"><h3>Claim Your Reward</h3></div>
-
-                <!-- NAME INPUT -->
-                <div class="form-group">
-                    <label class="form-label">Your Name</label>
-                    <input type="text" class="form-input esb-claim-name" id="esbClaimName" placeholder="John Doe">
-                </div>
-
-                <!-- TOKEN INFO DISPLAY -->
-                <div class="esb-token-info">
-                    <div class="esb-token-info-item">
-                        <span class="esb-token-info-label">Total Tokens</span>
-                        <span class="esb-token-info-value"><i class="fas fa-coins"></i> <span id="esbTokenCount">0</span></span>
-                    </div>
-                    <div class="esb-token-info-item">
-                        <span class="esb-token-info-label">Converted Value</span>
-                        <span class="esb-token-info-value esb-naira" id="esbNairaValue" style="display:none;">₦0</span>
-                    </div>
-                </div>
-
-                <!-- CONVERT BUTTON -->
-                <button class="btn btn-primary esb-convert-btn" id="esbConvertBtn" type="button"><i class="fas fa-exchange-alt"></i> Convert Token</button>
-
-                <!-- ANIMATION DISPLAY (HIDDEN) -->
-                <div class="esb-conversion-animation" id="esbConversionAnimation" style="display:none;">
-                    <div class="esb-conversion-content">
-                        <i class="fas fa-coins esb-conversion-coin"></i>
-                        <div class="esb-conversion-counter"><span class="esb-conversion-number" id="esbConversionNumber">0</span><span class="esb-conversion-symbol">₦</span></div>
-                    </div>
-                </div>
-
-                <!-- FINAL CLAIM BUTTON -->
-                <button class="btn btn-primary esb-final-claim-btn" id="esbFinalClaimBtn" type="button" style="display:none;"><i class="fas fa-check-circle"></i> Claim Reward</button>
-            </div>
-
-            <!-- SUCCESS MESSAGE -->
-            <div class="esb-success-message" id="esbSuccessMessage" style="display:none;">
-                <div class="esb-success-content">
-                    <i class="fas fa-check-circle esb-success-icon"></i>
-                    <h3>Reward Claimed!</h3>
-                    <p>Check your email for confirmation and next steps.</p>
-                    <button class="btn btn-primary" onclick="closeModal('referralsModal')" style="width:100%;margin-top:15px;">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- How To Play -->
-    <div class="modal" id="howToPlayModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Guidelines</div>
-                <button class="modal-close" onclick="closeModal('howToPlayModal')"><i class="fas fa-times"></i></button>
-            </div>
-            <ul class="instructions-list">
-                <li>Login with your 4-digit PIN</li>
-                <li>Check your balance and payment dates</li>
-                <li>Use Deposit to fund your account</li>
-                <li>Withdraw on Mondays 08:00-10:00 UTC</li>
-                <li>Trade on your assigned day 08:00-10:00 UTC</li>
-                <li>Trade amounts: ₦5,000 - ₦20,000</li>
-                <li>Earn bonuses with referrals</li>
-                <li>Your trade can only be processed if your account has been activated</li>
-                <li>Contact support for help</li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- WITHDRAWAL DETAILS MODAL -->
-    <div class="modal" id="withdrawalDetailsModal">
-        <div class="modal-content" style="max-width:400px;border-radius:15px;">
-            <div class="modal-header">
-                <div class="modal-title">Last Withdrawal</div>
-                <button class="modal-close" onclick="closeModal('withdrawalDetailsModal')"><i class="fas fa-times"></i></button>
-            </div>
-            <div id="withdrawalDetailsContent"></div>
-        </div>
-    </div>
-
-    <!-- GLOBAL LOADER -->
-    <div class="loader-overlay" id="loaderOverlay">
-        <div class="loader-container">
-            <div class="loader-image" id="loaderImage"></div>
-        </div>
-    </div>
-
-    <script>
-        // LOADER IMAGE PATH - Change this to your PNG file path
-        const LOADER_IMAGE_PATH = 'AddText_04-11-12.53.52.png';
-
-        const EXTERNAL_LINKS = {
-            sportybet: 'https://www.sportybet.com/player/empirebot',
-            shareIdea: 'https://t.me/+4Z5vXiFHmIQ2MzVk',
-            notificationCenter: 'https://whatsapp.com/channel/0029VbAjCE67oQhZxHe5Kq3R',
-            customerService: 'mailto:empirevirtual99@gmail.com',
-            // Deposit link
-            deposit: 'https://paystack.shop/pay/eyj535dodw',
-            // Activate account link (corrected)
-            activate: 'https://paystack.shop/pay/fpjpxhey-5',
-            // Referral landing link
-            referral: 'https://empirestatebank.mssg.me'
-        };
-
-        const users = {
-            '2019': {
-                fullName: 'CHARITY HANSON',
-                pin: '2019',
-                balance: 0,
-                nextBalance: 9000,
-                nextPaymentDate: '2026-04-30T17:10:00Z',
-                activationDate: '2026-04-15T10:15:30Z',
-                expiryDate: '2026-04-30T23:59:59Z',
-                tradeDate: 1,
-                bankDetails: {
-                    accountNumber: '2266867085',
-                    bankName: 'UBA',
-                    accountName: 'CHARITY ASUQUO HANSON',
-                    phone: '08028803872'
-                },
-                referral: {
-                    code: 'HANSON9961',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_06-02-03.50.45.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260401-2019',
-                    amount: 4500,
-                    status: 'pending',
-                    method: 'Wallet',
-                    date: new Date('2026-04-01T10:15:00Z')
-                }
-            },
-            '1995': {
-                fullName: 'DANIEL JOHNSON',
-                pin: '1995',
-                balance: 0,
-                nextBalance: 0,
-                nextPaymentDate: '2026-04-30T17:10:00Z',
-                activationDate: '2026-04-15T10:15:30Z',
-                expiryDate: '2026-05-04T10:59:59Z',
-                tradeDate: 24,
-                bankDetails: {
-                    accountNumber: '6552242407',
-                    bankName: 'Fidelity Bank',
-                    accountName: 'DANIEL IME JOHNSON',
-                    phone: '08106122713'
-                },
-                referral: {
-                    code: 'JOHNSON6090',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_12-23-12.28.07.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260328-1995',
-                    amount: 9000,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-05-04T09:50:00Z')
-                }
-            },
-            '2027': {
-                fullName: 'EKE JAMES',
-                pin: '2027',
-                balance: 0,
-                nextBalance: 6000,
-                nextPaymentDate: '2026-04-30T17:10:00Z',
-                activationDate: '2026-04-15T10:15:30Z',
-                expiryDate: '2026-05-14T23:59:59Z',
-                tradeDate: 13,
-                bankDetails: {
-                    accountNumber: '6671258114',
-                    bankName: 'Fidelity Bank',
-                    accountName: 'EKE JAMES ELE',
-                    phone: '09167655099'
-                },
-                referral: {
-                    code: 'ELE0098',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_01-11-09.57.24.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260327-2027',
-                    amount: 3000,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-03-27T09:30:45Z')
-                }
-            },
-            '4073': {
-                fullName: 'ESTHER AMOS',
-                pin: '4073',
-                balance: 0,
-                nextBalance: 7000,
-                nextPaymentDate: '2026-04-30T17:10:00Z',
-                activationDate: '2026-04-15T10:15:30Z',
-                expiryDate: '2026-04-30T23:59:59Z',
-                tradeDate: 1,
-                bankDetails: {
-                    accountNumber: '4301808534',
-                    bankName: 'Zenith Bank',
-                    accountName: 'ESTHER EKERETTE AMOS',
-                    phone: '08130024073'
-                },
-                referral: {
-                    code: 'AMOS8068',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_05-25-10.37.46.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260330-4073',
-                    amount: 2000,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-03-30T08:50:12Z')
-                }
-            },
-            '3572': {
-                fullName: 'EMMANUEL EKPA',
-                pin: '3572',
-                balance: 0,
-                nextBalance: 50000,
-                nextPaymentDate: '2026-09-30T20:10:00Z',
-                activationDate: '2026-07-15T10:15:30Z',
-                expiryDate: '2026-09-25T23:59:59Z',
-                tradeDate: 28,
-                bankDetails: {
-                    accountNumber: '214870270619',
-                    bankName: 'Lead Bank',
-                    accountName: 'EMMANUEL EKPA',
-                    accountType: 'Checking',
-                    routingNumber: '101019644',
-                    phone: '08105866469',
-                    raenestTag: '@eir544308',
-                    gmail: 'emmanuelekpa3@gmail.com'
-                },
-                referral: {
-                    code: 'EKPA9014',
-                    count: 5,
-                    bonus: 1250
-                },
-                profileImage: 'AddText_05-22-01.29.33.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260405-3572',
-                    amount: 5000,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-04-05T14:30:15Z'),
-                    failureReason: 'Insufficient funds'
-                }
-            },
-            '1313': {
-                fullName: 'ITOHOWO AKAN',
-                pin: '1313',
-                balance: 0,
-                nextBalance: 7000,
-                nextPaymentDate: '2026-04-30T17:10:00Z',
-                activationDate: '2026-04-15T10:15:30Z',
-                expiryDate: '2026-05-02T23:59:59Z',
-                tradeDate: 3,
-                bankDetails: {
-                    accountNumber: '2088350310',
-                    bankName: 'Zenith Bank',
-                    accountName: 'ITOHOWO JOHN AKAN',
-                    phone: '08036241336'
-                },
-                referral: {
-                    code: 'AKAN1001',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_05-25-10.37.07.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260329-1313',
-                    amount: 5500,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-03-29T15:35:28Z')
-                }
-            },
-            '2255': {
-                fullName: 'OWAN SILAS',
-                pin: '2255',
-                balance: 45000,
-                nextBalance: 45000,
-                nextPaymentDate: '2026-04-30T00:00:00Z',
-                activationDate: '2026-06-01T09:40:00Z',
-                expiryDate: '2026-07-01T09:44:59Z',
-                tradeDate: 15,
-                bankDetails: {
-                    accountNumber: '3212525772',
-                    bankName: 'First Bank Of Nigeria',
-                    accountName: 'OWAN SILAS OWAN',
-                    phone: '09037404875'
-                },
-                referral: {
-                    code: 'SILAS1241',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_11-25-06.08.39.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260408-5001',
-                    amount: 25000,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-04-08T19:21:22Z')
-                }
-            },
-            '1220': {
-                fullName: 'SAVIOUR EKONG',
-                pin: '1220',
-                balance: 0,
-                nextBalance: 7000,
-                nextPaymentDate: '2026-04-30T00:00:00Z',
-                activationDate: '2026-04-15T14:20:00Z',
-                expiryDate: '2026-05-15T23:59:59Z',
-                tradeDate: 20,
-                bankDetails: {
-                    accountNumber: '2309320542',
-                    bankName: 'UBA',
-                    accountName: 'SAVIOUR EKONG',
-                    phone: '08033456789'
-                },
-                referral: {
-                    code: 'EKONG5410',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_05-29-09.19.44.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260407-1220',
-                    amount: 3500,
-                    status: 'pending',
-                    method: 'Wallet',
-                    date: new Date('2026-04-07T09:45:00Z')
-                }
-            },
-            '5012': {
-                fullName: 'SAMUEL AKPAN',
-                pin: '5012',
-                balance: 0,
-                nextBalance: 17000,
-                nextPaymentDate: '2026-04-30T17:10:00Z',
-                activationDate: '2026-04-15T10:15:30Z',
-                expiryDate: '2026-04-30T23:59:59Z',
-                tradeDate: 1,
-                bankDetails: {
-                    accountNumber: '2309320542',
-                    bankName: 'UBA',
-                    accountName: 'SAMUEL MONDAY AKPAN',
-                    phone: '09138109857'
-                },
-                referral: {
-                    code: 'AKPAN7080',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_06-03-08.29.58.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260403-5012',
-                    amount: 8500,
-                    status: 'failed',
-                    method: 'Wallet',
-                    date: new Date('2026-04-03T11:20:00Z'),
-                    failureReason: 'Insufficient funds'
-                }
-            },
-            '1266': {
-                fullName: 'SAMUEL IME',
-                pin: '1266',
-                balance: 0,
-                nextBalance: 7000,
-                nextPaymentDate: '2026-04-30T17:10:00Z',
-                activationDate: '2026-04-15T10:15:30Z',
-                expiryDate: '2026-05-12T23:59:59Z',
-                tradeDate: 13,
-                bankDetails: {
-                    accountNumber: '2311076735',
-                    bankName: 'Ekobank',
-                    accountName: 'SAMUEL IME',
-                    phone: '08012345678'
-                },
-                referral: {
-                    code: 'IME0109',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_05-22-09.03.57.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260331-1266',
-                    amount: 3500,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-03-31T13:25:45Z')
-                }
-            },
-            '1908': {
-                fullName: 'USHIE ONEN',
-                pin: '1908',
-                balance: 0,
-                nextBalance: 5000,
-                nextPaymentDate: '2026-04-30T17:10:00Z',
-                activationDate: '2026-04-15T10:15:30Z',
-                expiryDate: '2026-04-30T23:59:59Z',
-                tradeDate: 1,
-                bankDetails: {
-                    accountNumber: '2061660821',
-                    bankName: 'UBA',
-                    accountName: 'USHIE IKPI ONEN',
-                    phone: '07032325480'
-                },
-                referral: {
-                    code: 'ONEN4515',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_06-05-09.14.49.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260402-1908',
-                    amount: 1500,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-04-02T16:45:30Z')
-                }
-            },
-        };
-
-        let currentUser = null;
-        let pinInput = '';
-        let timerInterval = null;
-
-        // Initialize loader images
-        function initializeLoaders() {
-            const li = document.getElementById('loaderImage');
-            const pli = document.getElementById('pinLoaderImage');
-            if (li) li.style.backgroundImage = `url('${LOADER_IMAGE_PATH}')`;
-            if (pli) pli.style.backgroundImage = `url('${LOADER_IMAGE_PATH}')`;
+      // USERS (each user now has tokens and convertedValue seeded in the repo; example values below)
+      const users = {
+        "1234": {
+          name: "Emmanuel Ekpa",
+          profileImg: "assets/emmanuel.png",
+          tag: "@emmanuel",
+          acct: "8105866469",
+          currentBalance: 10.00,
+          incomingPayment: 5.00,
+          incomingPaymentDate: "2026-07-29 16:10 UTC",
+          nextBalance: 15.00,
+          pinExpires: "2027-07-29 00:00 UTC",
+          showVerify: true,
+          accountName: "Emmanuel Ekpa",
+          bankName: "Example Bank",
+          accountNumber: "8105866469",
+          accountType: "Checking",
+          routingNumber: "00112233",
+          tokens: 5,
+          convertedValue: 12.30
+        },
+        "2222": {
+          name: "Alice Johnson",
+          profileImg: "assets/alice.png",
+          tag: "@alice",
+          acct: "9001122334",
+          currentBalance: 20.00,
+          incomingPayment: 10.00,
+          incomingPaymentDate: "2026-08-01 12:00 UTC",
+          nextBalance: 30.00,
+          pinExpires: "2025-01-01 00:00 UTC",
+          showVerify: false,
+          accountName: "Alice Johnson",
+          bankName: "First Example Bank",
+          accountNumber: "9001122334",
+          accountType: "Savings",
+          routingNumber: "11223344",
+          tokens: 2,
+          convertedValue: 2 * settings.tokenValue
+        },
+        "3333": {
+          name: "Bob Martins",
+          profileImg: "assets/bob.png",
+          tag: "@bob",
+          acct: "7009988776",
+          currentBalance: 5.00,
+          incomingPayment: 2.50,
+          incomingPaymentDate: "2026-08-05 09:30 UTC",
+          nextBalance: 7.50,
+          pinExpires: "2026-08-30 00:00 UTC",
+          showVerify: false,
+          accountName: "Bob Martins",
+          bankName: "Global Bank",
+          accountNumber: "7009988776",
+          accountType: "Business",
+          routingNumber: "22334455",
+          tokens: 0,
+          convertedValue: 0.00
         }
+      };
 
-        // GLOBAL LOADER FUNCTION
-        function showLoader(duration = 6000) {
-            const loader = document.getElementById('loaderOverlay');
-            if (!loader) return;
-            loader.classList.add('show');
-            setTimeout(() => loader.classList.remove('show'), duration);
-        }
+      // Utility functions
+      function parseUTC(s){ if(!s) return null; const iso = s.trim().replace(' UTC','').replace(' ','T') + ':00Z'; const d = new Date(iso); return isNaN(d.getTime()) ? null : d; }
+      function formatUTC(d){ if(!d) return '--'; return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')} ${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')} UTC`; }
+      function utcNow(){ const n = new Date(); return new Date(n.getTime() + n.getTimezoneOffset()*60000); }
 
-        // PIN LOADER FUNCTION
-        function showPinLoader(duration = 6000) {
-            const pinLoader = document.getElementById('pinLoaderOverlay');
-            if (!pinLoader) return;
-            pinLoader.classList.add('show');
-            setTimeout(() => pinLoader.classList.remove('show'), duration);
-        }
+      // Elements
+      const overlay = document.getElementById('globalOverlay');
+      const overlayImg = document.getElementById('globalLoaderImg');
+      const overlayText = document.getElementById('globalLoaderText');
+      const notification = document.getElementById('notification');
+      const successToast = document.getElementById('successToast');
 
-        // PIN ENTRY EVENT LISTENERS
-        document.querySelectorAll('.pin-key').forEach(key => {
-            key.addEventListener('click', function() {
-                const value = this.getAttribute('data-key');
-                if (this.classList.contains('delete')) {
-                    pinInput = pinInput.slice(0, -1);
-                } else if (pinInput.length < 4) {
-                    pinInput += value;
-                }
-                updatePinDisplay();
-                if (pinInput.length === 4) validatePin();
-            });
+      const pinBoxes = document.getElementById('pinBoxes');
+      const keypad = document.getElementById('keypad');
+
+      const profilePhoto = document.getElementById('profilePhoto');
+      const profileMeta = document.getElementById('profileMeta');
+      const profileName = document.getElementById('profileName');
+      const profileTag = document.getElementById('profileTag');
+      const acctNumber = document.getElementById('acctNumber');
+      const balanceValue = document.getElementById('balanceValue');
+
+      const verifyRow = document.getElementById('verifyRow');
+      const getAccountBtn = document.getElementById('getAccountBtn');
+      const expiredBanner = document.getElementById('expiredBanner');
+      const activateBtn = document.getElementById('activateBtn');
+
+      const progressFill = document.getElementById('progressFill');
+      const progressPct = document.getElementById('progressPct');
+      const progressLeft = document.getElementById('progressLeft');
+      const progressBlock = document.getElementById('progressBlock');
+
+      const incomingBlock = document.getElementById('incomingBlock');
+      const incomingValue = document.getElementById('incomingValue');
+      const incomingDateDisplay = document.getElementById('incomingDateDisplay');
+      const currentBlock = document.getElementById('currentBlock');
+      const nextBlock = document.getElementById('nextBlock');
+      const nextValue = document.getElementById('nextValue');
+
+      const depositBtn = document.getElementById('depositBtn');
+      const withdrawBtn = document.getElementById('withdrawBtn');
+      const recentBtn = document.getElementById('recentBtn');
+
+      const notifBtn = document.getElementById('notifBtn');
+      const notifBadge = document.getElementById('notifBadge');
+
+      // other elements (withdraw/invest)
+      const withdrawForm = document.getElementById('withdrawForm');
+      const withdrawProfileImg = document.getElementById('withdrawProfileImg');
+      const wfAccountName = document.getElementById('wfAccountName');
+      const wfBankName = document.getElementById('wfBankName');
+      const wfAccountNumber = document.getElementById('wfAccountNumber');
+      const wfRouting = document.getElementById('wfRouting');
+      const wfAccountType = document.getElementById('wfAccountType');
+      const wfTag = document.getElementById('wfTag');
+      const wfAmount = document.getElementById('wfAmount');
+      const wfDate = document.getElementById('wfDate');
+      const wfPin = document.getElementById('wfPin');
+      const copyFormBtn = document.getElementById('copyFormBtn');
+      const withdrawActionArea = document.getElementById('withdrawActionArea');
+      const wfProfileImgField = document.getElementById('wfProfileImgField');
+
+      const investForm = document.getElementById('investForm');
+      const investProfileImg = document.getElementById('investProfileImg');
+      const investProfileImgField = document.getElementById('investProfileImgField');
+      const investAmountField = document.getElementById('investAmount');
+      const investPlanField = document.getElementById('investPlan');
+      const investDate = document.getElementById('investDate');
+      const investPin = document.getElementById('investPin');
+      const investAmtBtns = document.querySelectorAll('.invest-amt');
+
+      const accountModal = document.getElementById('accountModal');
+      const modalClose = document.getElementById('modalClose');
+      const modalImg = document.getElementById('modalImg');
+      const modalName = document.getElementById('modalName');
+      const modalTag = document.getElementById('modalTag');
+      const modalAccountName = document.getElementById('modalAccountName');
+      const modalBankName = document.getElementById('modalBankName');
+      const modalAccountNumber = document.getElementById('modalAccountNumber');
+      const modalRouting = document.getElementById('modalRouting');
+      const modalAccountType = document.getElementById('modalAccountType');
+      const modalTagRight = document.getElementById('modalTagRight');
+      const copyAccountDetails = document.getElementById('copyAccountDetails');
+
+      const custSupportTop = document.getElementById('custSupportTop');
+
+      // referral elements
+      const referralsServiceEl = document.getElementById('referralsService');
+      const referralView = document.getElementById('referralView');
+      const referralBack = document.getElementById('referralBack');
+      const referralTagEl = document.getElementById('referralTag');
+      const copyReferralBtn = document.getElementById('copyReferralBtn');
+      const refCoin = document.getElementById('refCoin');
+      const tokenDisplay = document.getElementById('tokenDisplay');
+      const claimTokenBtn = document.getElementById('claimTokenBtn');
+
+      const referralModal = document.getElementById('referralModal');
+      const refModalClose = document.getElementById('refModalClose');
+      const refModalImg = document.getElementById('refModalImg');
+      const refModalName = document.getElementById('refModalName');
+      const refModalTag = document.getElementById('refModalTag');
+      const modalTokens = document.getElementById('modalTokens');
+      const modalConverted = document.getElementById('modalConverted');
+      const convertTokenBtn = document.getElementById('convertTokenBtn');
+      const convertSpinnerArea = document.getElementById('convertSpinnerArea');
+      const convertedBig = document.getElementById('convertedBig');
+      const convertedLarge = document.getElementById('convertedLarge');
+
+      // back buttons for withdraw/invest
+      const withdrawBackBtn = document.getElementById('withdrawBack');
+      const investBackBtn = document.getElementById('investBack');
+
+      // state
+      let pin = [];
+      let boxes = [];
+      let currentUser = null;
+      let progressIntervalId = null;
+      let progressStartTs = null;
+      let conversion = { animating:false, rafId:null, finalValue:0, converted:false };
+
+      // show overlay (respects LOADER_MS)
+      function showOverlay({image='assets/loader.png', text='Loading…'} = {}) {
+        overlayImg.style.backgroundImage = `url('${image}')`;
+        overlayText.innerText = text;
+        overlay.classList.remove('hidden');
+        return new Promise(resolve => {
+          setTimeout(()=> {
+            overlay.classList.add('hidden');
+            resolve();
+          }, LOADER_MS);
         });
+      }
 
-        function updatePinDisplay() {
-            document.querySelectorAll('#pinDisplay .pin-digit').forEach((digit, i) => {
-                digit.textContent = i < pinInput.length ? '●' : '';
-                digit.classList.toggle('active', i < pinInput.length);
-            });
-            const err = document.getElementById('pinError');
-            if (err) err.classList.remove('show');
+      function showNotification(msg, ms = NOTIF_MS) {
+        notification.innerText = msg;
+        notification.style.display = 'block';
+        setTimeout(()=> notification.style.display = 'none', ms);
+      }
+      function showSuccessToast(msg, ms = 4000) {
+        successToast.innerText = msg;
+        successToast.style.display = 'block';
+        setTimeout(()=> successToast.style.display = 'none', ms);
+      }
+
+      function showView(id) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        const view = document.getElementById(id);
+        if(view) view.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // initial launch loader then PIN screen
+      document.getElementById('headerImage').style.backgroundImage = "url('assets/header.png')";
+      (async function init(){ await showOverlay({image:'assets/loader.png', text:'Empowering Your Financial Growth' }); createPinBoxes(); initNotifications(); showView('pinView'); })();
+
+      // PIN helpers
+      function createPinBoxes(){
+        pinBoxes.innerHTML = '';
+        boxes = [];
+        for(let i=0;i<PIN_LENGTH;i++){
+          const b = document.createElement('div');
+          b.className = 'pin-box';
+          b.dataset.index = i;
+          b.innerText = '';
+          pinBoxes.appendChild(b);
+          boxes.push(b);
         }
+        updateFocus();
+      }
+      function updateFocus(){
+        boxes.forEach((b,i)=>{ b.classList.toggle('focus', i===pin.length); b.innerText = pin[i] ? '•' : ''; });
+      }
+      function animateKey(k){ const el = keypad.querySelector('[data-key="'+k+'"]'); if(el){ el.style.transform='scale(.96)'; setTimeout(()=>el.style.transform='',120);} }
+      function pressKey(k){ if(pin.length>=PIN_LENGTH) return; pin.push(String(k)); updateFocus(); animateKey(k); if(pin.length===PIN_LENGTH) setTimeout(handleFullPin, 220); }
+      function deleteKey(){ if(pin.length===0) return; pin.pop(); updateFocus(); const d=document.getElementById('delKey'); d.style.transform='translateY(2px)'; setTimeout(()=>d.style.transform='',120); }
 
-        function validatePin() {
-            if (users[pinInput]) {
-                showPinLoader(6000);
-                setTimeout(() => {
-                    currentUser = users[pinInput];
-                    document.getElementById('pinLockScreen').classList.add('hidden');
-                    document.getElementById('dashboard').classList.remove('hidden');
-                    initDashboard();
-                }, 6000);
-            } else {
-                const pe = document.getElementById('pinError');
-                if (pe) pe.classList.add('show');
-                pinInput = '';
-                updatePinDisplay();
-                setTimeout(() => { if (pe) pe.classList.remove('show'); }, 2000);
-            }
+      // keypad handlers
+      keypad.addEventListener('click', e => { const key = e.target.closest('.key'); if(!key) return; if(key.dataset.key) pressKey(key.dataset.key); else if(key.id==='delKey') deleteKey(); else if(key.id==='enterKey'){ if(pin.length===PIN_LENGTH) handleFullPin(); } });
+      document.addEventListener('keydown', e => {
+        if(e.key==='Backspace') { e.preventDefault(); deleteKey(); }
+        if(/^\d$/.test(e.key)) { pressKey(e.key); }
+        if(e.key==='Enter' && pin.length===PIN_LENGTH) handleFullPin();
+      });
+      keypad.addEventListener('keydown', (e) => {
+        const keyEl = e.target.closest('.key');
+        if(!keyEl) return;
+        if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); keyEl.click(); }
+      });
+
+      async function handleFullPin(){
+        const entered = pin.join('');
+        if(users[entered]){
+          currentUser = users[entered];
+          await showOverlay({ image: currentUser.profileImg || 'assets/loader.png', text: 'Signing in...' });
+          populateDashboard(currentUser);
+          showView('dashboardView');
+          progressStartTs = Date.now();
+          startProgressUpdater();
+          pin = []; updateFocus();
+          const exp = parseUTC(currentUser.pinExpires);
+          if(exp && exp.getTime() <= utcNow().getTime()){
+            expiredBanner.style.display = 'flex';
+          } else {
+            expiredBanner.style.display = 'none';
+          }
+        } else {
+          pinBoxes.animate([{transform:'translateX(0)'},{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'translateX(0)'}],{duration:420});
+          boxes.forEach(b=>b.style.borderColor='rgba(255,80,80,0.9)');
+          setTimeout(()=>{ boxes.forEach(b=>b.style.borderColor='transparent'); pin=[]; updateFocus(); },520);
         }
+      }
 
-        function initDashboard() {
-            updateProfile();
-            updateBalance();
-            updateProgress();
-            checkAccountStatus();
-            setupEventListeners();
+      function populateDashboard(user){
+        profilePhoto.style.backgroundImage = `url('${user.profileImg}')`; profileName.innerText = user.name; profileTag.innerText = user.tag; acctNumber.innerText = user.acct;
+        const incomingDate = parseUTC(user.incomingPaymentDate);
+        const now = utcNow();
+
+        if(incomingDate && incomingDate.getTime() > now.getTime()){
+          currentBlock.style.display = 'block';
+          incomingBlock.style.display = 'none';
+          nextBlock.style.display = 'none';
+          progressBlock.style.display = 'block';
+
+          balanceValue.innerText = `$${Number(user.currentBalance).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+          incomingValue.innerText = `$${Number(user.incomingPayment).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+          incomingDateDisplay.innerText = formatUTC(incomingDate);
+          updateProgressUIImmediate(user);
+        } else {
+          currentBlock.style.display = 'none';
+          incomingBlock.style.display = 'none';
+          progressBlock.style.display = 'none';
+          nextBlock.style.display = 'block';
+
+          nextValue.innerText = `$${Number(user.nextBalance).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
         }
+        verifyRow.style.display = user.showVerify ? 'flex' : 'none';
+      }
 
-        function updateProfile() {
-            document.getElementById('profileName').innerHTML = `<span>${currentUser.fullName}</span><span>></span>`;
-            const img = currentUser.profileImage;
-            document.getElementById('profileImage').innerHTML = img ? `<img src="${img}" alt="">` : '<i class="fas fa-user"></i>';
+      function updateProgressUIImmediate(user){
+        const p = computeProgress(user);
+        progressFill.style.width = Math.round(p*100) + '%';
+        progressPct.innerText = Math.round(p*100) + '%';
+        const incoming = parseUTC(user.incomingPaymentDate);
+        progressLeft.innerText = incoming ? formatUTC(incoming) : '--';
+      }
 
-            const now = new Date();
-            const nextPayment = new Date(currentUser.nextPaymentDate);
-            const npEl = document.getElementById('nextPaymentDate');
-            if (now >= nextPayment) {
-                if (npEl) npEl.classList.add('hidden');
-            } else {
-                if (npEl) npEl.classList.remove('hidden');
-                const days = Math.ceil((nextPayment - now) / (1000*60*60*24));
-                if (npEl) npEl.textContent = `Next payment: ${days} day${days!==1?'s':''}`;
-            }
+      function computeProgress(user){
+        const end = parseUTC(user.incomingPaymentDate);
+        if(!end) return 0;
+        const start = new Date(progressStartTs || Date.now());
+        const now = utcNow();
+        const total = end.getTime() - start.getTime();
+        if(total <= 0) return 1;
+        const done = now.getTime() - start.getTime();
+        return Math.max(0, Math.min(1, done/total));
+      }
+
+      function startProgressUpdater(){
+        if(progressIntervalId) clearInterval(progressIntervalId);
+        progressIntervalId = setInterval(()=> {
+          if(!currentUser) return;
+          const incoming = parseUTC(currentUser.incomingPaymentDate);
+          if(!incoming){ progressBlock.style.display='none'; clearInterval(progressIntervalId); progressIntervalId = null; return; }
+          const now = utcNow();
+          if(incoming.getTime() <= now.getTime()){
+            currentBlock.style.display = 'none';
+            incomingBlock.style.display = 'none';
+            progressBlock.style.display = 'none';
+            nextBlock.style.display = 'block';
+            nextValue.innerText = `$${Number(currentUser.nextBalance).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+            clearInterval(progressIntervalId);
+            progressIntervalId = null;
+            return;
+          }
+          const pct = computeProgress(currentUser);
+          progressFill.style.width = Math.round(pct*100) + '%';
+          progressPct.innerText = Math.round(pct*100) + '%';
+          progressLeft.innerText = formatUTC(incoming);
+        }, 1000);
+      }
+
+      // Notifications
+      const NOTIF_KEY = 'raenest_notifications_v1';
+      const LAST_NOTIF_KEY = 'raenest_lastNotified_v1';
+      const WHATSAPP_CHANNEL = 'https://whatsapp.com/channel/0029VbAjCE67oQhZxHe5Kq3R';
+
+      function getTodayStrUTC(){
+        const d = new Date();
+        const y = d.getUTCFullYear();
+        const m = String(d.getUTCMonth()+1).padStart(2,'0');
+        const day = String(d.getUTCDate()).padStart(2,'0');
+        return `${y}-${m}-${day}`;
+      }
+
+      function initNotifications(){
+        try{
+          const today = getTodayStrUTC();
+          const last = localStorage.getItem(LAST_NOTIF_KEY);
+          let notes = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
+          if(last !== today){
+            notes.push({ id: Date.now(), date: today, text: 'You have a new message', seen: false });
+            localStorage.setItem(NOTIF_KEY, JSON.stringify(notes));
+            localStorage.setItem(LAST_NOTIF_KEY, today);
+            showNotifBadge(true);
+          } else {
+            const unseenToday = notes.some(n => n.date === today && !n.seen);
+            showNotifBadge(unseenToday);
+          }
+        } catch(e){
+          console.error('notif init error', e);
         }
+      }
 
-        function updateBalance() {
-            const el = document.getElementById('balanceAmount');
-            if (el) el.textContent = `₦${currentUser.balance.toLocaleString()}`;
+      function showNotifBadge(show){
+        if(!notifBadge) return;
+        if(show){
+          notifBadge.style.display = 'flex';
+          notifBadge.innerText = '1';
+        } else {
+          notifBadge.style.display = 'none';
         }
+      }
 
-        // FIXED: Progress calculation — robust, accurate progress toward the configured nextPaymentDate.
-        function updateProgress() {
-            const now = new Date();
-            const nextPayment = new Date(currentUser.nextPaymentDate);
-
-            // If next payment already reached: show full, update balance and hide progress
-            if (now >= nextPayment) {
-                currentUser.balance = currentUser.nextBalance;
-                updateBalance();
-                const nextContainer = document.getElementById('nextBalanceContainer');
-                const progContainer = document.getElementById('progressContainer');
-                if (nextContainer) nextContainer.classList.add('hidden');
-                if (progContainer) progContainer.classList.add('hidden');
-                return;
-            }
-
-            // Ensure progress UI visible
-            const nextContainer = document.getElementById('nextBalanceContainer');
-            const progContainer = document.getElementById('progressContainer');
-            if (nextContainer) nextContainer.classList.remove('hidden');
-            if (progContainer) progContainer.classList.remove('hidden');
-
-            // Start of the payment period: use the first day of the month in which nextPayment falls
-            const start = new Date(nextPayment.getFullYear(), nextPayment.getMonth(), 1);
-            const end = nextPayment; // progress is measured toward the nextPayment date
-
-            const totalMs = Math.max(1, end - start); // avoid divide-by-zero
-            const passedMs = Math.max(0, Math.min(now - start, totalMs));
-            const progress = Math.min(100, Math.round((passedMs / totalMs) * 100));
-
-            const fillEl = document.getElementById('progressFill');
-            const percentEl = document.getElementById('progressPercent');
-            if (fillEl) fillEl.style.width = progress + '%';
-            if (percentEl) percentEl.textContent = progress + '%';
-
-            // Keep next balance displayed
-            const nextBalEl = document.getElementById('nextBalanceAmount');
-            if (nextBalEl) nextBalEl.textContent = `₦${currentUser.nextBalance.toLocaleString()}`;
+      function markTodayNotifsSeen(){
+        try{
+          const today = getTodayStrUTC();
+          let notes = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
+          notes = notes.map(n => (n.date === today ? {...n, seen: true} : n));
+          localStorage.setItem(NOTIF_KEY, JSON.stringify(notes));
+          showNotifBadge(false);
+        } catch(e){
+          console.error('mark seen', e);
         }
+      }
 
-        function checkAccountStatus() {
-            const expired = new Date() >= new Date(currentUser.expiryDate);
-            const btn = document.getElementById('depositBtn');
-            if (expired) {
-                btn.textContent = 'Activate Account';
-                btn.style.cursor = 'pointer';
-            } else {
-                btn.textContent = '₦ Deposit';
-            }
-        }
-
-        function isAccountActive() {
-            return new Date() < new Date(currentUser.expiryDate);
-        }
-
-        function isTradeTimeAllowed() {
-            const now = new Date();
-            const userTradeDay = currentUser.tradeDate;
-            const currentDay = now.getUTCDate();
-            const currentHour = now.getUTCHours();
-            return currentDay === userTradeDay && currentHour >= 8 && currentHour < 10;
-        }
-
-        function updateTimerDisplay() {
-            const now = new Date();
-            const activationDate = new Date(currentUser.activationDate);
-            const expiryDate = new Date(currentUser.expiryDate);
-
-            const activationFormatted = activationDate.toLocaleString('en-US', {
-                year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'
-            });
-            document.getElementById('activationDateTimeDisplay').textContent = activationFormatted;
-
-            const expiryFormatted = expiryDate.toLocaleString('en-US', {
-                year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'
-            });
-            document.getElementById('expiryDateTimeDisplay').textContent = expiryFormatted;
-
-            const expiryDiff = expiryDate - now;
-            if (expiryDiff > 0) {
-                const days = Math.floor(expiryDiff / (1000*60*60*24));
-                const hours = Math.floor((expiryDiff % (1000*60*60*24)) / (1000*60*60));
-                const minutes = Math.floor((expiryDiff % (1000*60*60)) / (1000*60));
-                const seconds = Math.floor((expiryDiff % (1000*60)) / 1000);
-                document.getElementById('expiryCountdownTime').textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-                document.getElementById('expiryWarning').style.display = days <= 7 ? 'block' : 'none';
-            } else {
-                document.getElementById('expiryCountdownTime').textContent = '0d 0h 0m 0s';
-                document.getElementById('expiryWarning').style.display = 'block';
-            }
-        }
-
-        function closeModal(id) {
-            const el = document.getElementById(id);
-            if (el) el.classList.remove('show');
-        }
-
-        function renderWithdrawalDetails() {
-            const transaction = currentUser.lastWithdrawal;
-            let statusHTML = '';
-            let progressHTML = '';
-            if (transaction.status === 'successful') {
-                statusHTML = '<span style="color: var(--success); font-weight:700;">✓ Successful</span>';
-                progressHTML = `
-                    <div style="margin:20px 0;">
-                      <div style="display:flex;align-items:center;margin-bottom:15px;">
-                        <div style="width:30px;height:30px;background:var(--success);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">✓</div>
-                        <div style="flex:1;height:2px;background:var(--success);margin:0 10px;"></div>
-                        <div style="width:30px;height:30px;background:var(--success);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">✓</div>
-                        <div style="flex:1;height:2px;background:var(--success);margin:0 10px;"></div>
-                        <div style="width:30px;height:30px;background:var(--success);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">✓</div>
-                      </div>
-                      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);">
-                        <span>Payment successful</span><span>Processing by bank</span><span>Received by bank</span>
-                      </div>
-                    </div>`;
-            } else if (transaction.status === 'pending') {
-                statusHTML = '<span style="color: var(--warning); font-weight:700;">⏳ Pending</span>';
-                progressHTML = `
-                    <div style="margin:20px 0;">
-                      <div style="display:flex;align-items:center;margin-bottom:15px;">
-                        <div style="width:30px;height:30px;background:var(--success);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">✓</div>
-                        <div style="flex:1;height:2px;background:var(--success);margin:0 10px;"></div>
-                        <div style="width:30px;height:30px;background:var(--success);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">✓</div>
-                        <div style="flex:1;height:2px;background:var(--text-muted);margin:0 10px;"></div>
-                        <div style="width:30px;height:30px;background:var(--border-color);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-weight:700;">○</div>
-                      </div>
-                      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);">
-                        <span>Payment successful</span><span>Processing by bank</span><span>Received by bank</span>
-                      </div>
-                    </div>`;
-            } else {
-                statusHTML = '<span style="color:var(--danger);font-weight:700;">✗ Failed</span>';
-                progressHTML = `<div style="background:rgba(239,68,68,.1);border:1px solid var(--danger);border-radius:8px;padding:12px;margin:20px 0;color:var(--danger);font-size:12px;text-align:center;">${transaction.failureReason || 'Transaction failed'}</div>`;
-            }
-
-            const transactionDate = transaction.date.toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' });
-
-            const withdrawalHTML = `
-                <div style="text-align:center;padding:20px 0;">
-                  <div style="font-size:14px;color:var(--text-muted);margin-bottom:20px;">Transfer to ${currentUser.fullName}</div>
-                  <div style="font-size:32px;font-weight:700;color:var(--accent-green);margin-bottom:10px;">₦${transaction.amount.toLocaleString()}.00</div>
-                  <div style="margin-bottom:20px;">${statusHTML}</div>
-                  ${progressHTML}
-                  <div style="background:var(--primary-dark);border:1px solid var(--border-color);border-radius:10px;padding:15px;margin:20px 0;text-align:left;">
-                    <div style="margin-bottom:12px;">
-                      <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">RECIPIENT DETAILS</div>
-                      <div style="font-size:13px;font-weight:600;color:var(--text-light);margin-bottom:4px;">${currentUser.bankDetails.accountName}</div>
-                      <div style="font-size:12px;color:var(--text-muted);">${currentUser.bankDetails.bankName} | ${currentUser.bankDetails.accountNumber}</div>
-                    </div>
-                    <div style="border-top:1px solid var(--border-color);padding-top:12px;margin-bottom:12px;">
-                      <div style="font-size:11px;color:var(--text-muted);">TRANSACTION NO</div>
-                      <div style="font-size:12px;color:var(--text-light);font-family:'Courier New',monospace;">${transaction.id}</div>
-                    </div>
-                    <div style="border-top:1px solid var(--border-color);padding-top:12px;margin-bottom:12px;">
-                      <div style="font-size:11px;color:var(--text-muted);">PAYMENT METHOD</div>
-                      <div style="font-size:12px;color:var(--text-light);">${transaction.method}</div>
-                    </div>
-                    <div style="border-top:1px solid var(--border-color);padding-top:12px;">
-                      <div style="font-size:11px;color:var(--text-muted);">TRANSACTION DATE</div>
-                      <div style="font-size:12px;color:var(--text-light);">${transactionDate}</div>
-                    </div>
-                  </div>
-                </div>`;
-            document.getElementById('withdrawalDetailsContent').innerHTML = withdrawalHTML;
-            document.getElementById('withdrawalDetailsModal').classList.add('show');
-        }
-
-        function setupEventListeners() {
-            document.getElementById('profileName').addEventListener('click', () => {
-                updateTimerDisplay();
-                if (timerInterval) clearInterval(timerInterval);
-                timerInterval = setInterval(updateTimerDisplay, 1000);
-                document.getElementById('timerModal').classList.add('show');
-            });
-
-            document.getElementById('timerClose').addEventListener('click', () => {
-                document.getElementById('timerModal').classList.remove('show');
-                if (timerInterval) clearInterval(timerInterval);
-            });
-
-            document.getElementById('settingsBtn').addEventListener('click', () => {
-                showLoader(6000);
-                document.getElementById('settingsContent').innerHTML = `
-                    <div class="settings-item"><span class="settings-label">Account Number</span><div class="settings-value">${currentUser.bankDetails.accountNumber || 'N/A'}</div></div>
-                    <div class="settings-item"><span class="settings-label">Bank</span><div class="settings-value">${currentUser.bankDetails.bankName || 'N/A'}</div></div>
-                    <div class="settings-item"><span class="settings-label">Name</span><div class="settings-value">${currentUser.bankDetails.accountName || 'N/A'}</div></div>
-                    <div class="settings-item"><span class="settings-label">Phone</span><div class="settings-value">${currentUser.bankDetails.phone || 'N/A'}</div></div>
-                `;
-                document.getElementById('settingsModal').classList.add('show');
-            });
-
-            document.getElementById('logoutBtn').addEventListener('click', () => {
-                showLoader(6000);
-                setTimeout(() => {
-                    currentUser = null;
-                    pinInput = '';
-                    if (timerInterval) clearInterval(timerInterval);
-                    document.getElementById('pinLockScreen').classList.remove('hidden');
-                    document.getElementById('dashboard').classList.add('hidden');
-                }, 6000);
-            });
-
-            // Deposit / Activate button - navigate to appropriate link depending on account expiry
-            document.getElementById('depositBtn').addEventListener('click', () => {
-                showLoader(6000);
-                setTimeout(() => {
-                    const expired = currentUser ? (new Date() >= new Date(currentUser.expiryDate)) : false;
-                    if (expired) {
-                        window.location.href = EXTERNAL_LINKS.activate;
-                    } else {
-                        window.location.href = EXTERNAL_LINKS.deposit;
-                    }
-                }, 6000);
-            });
-
-            document.getElementById('withdrawBtn').addEventListener('click', () => {
-                showLoader(6000);
-                setTimeout(() => {
-                    document.getElementById('withdrawFullName').value = currentUser.fullName;
-                    document.getElementById('withdrawPhone').value = currentUser.bankDetails.phone;
-                    document.getElementById('withdrawAccountNumber').value = currentUser.bankDetails.accountNumber;
-                    document.getElementById('withdrawBankName').value = currentUser.bankDetails.bankName;
-                    document.getElementById('withdrawAccountName').value = currentUser.bankDetails.accountName;
-                    const now = new Date();
-                    const eligible = now.getUTCDay() === 1 && now.getUTCHours() >= 8 && now.getUTCHours() < 10;
-                    document.getElementById('withdrawForm').querySelector('button').disabled = !eligible;
-                    document.getElementById('withdrawWarning').style.display = eligible ? 'none' : 'block';
-                    document.getElementById('withdrawModal').classList.add('show');
-                }, 6000);
-            });
-
-            document.getElementById('tradeNowItem').addEventListener('click', () => {
-                showLoader(6000);
-                setTimeout(() => {
-                    document.getElementById('tradeAvailableDay').textContent = 'Day ' + currentUser.tradeDate;
-                    const isAllowed = isTradeTimeAllowed();
-                    const isActive = isAccountActive();
-                    document.getElementById('tradeTimeWarning').style.display = (isAllowed && isActive) ? 'none' : 'block';
-                    document.getElementById('tradeSubmitBtn').disabled = !isAllowed || !isActive;
-                    document.getElementById('tradeName').value = currentUser.fullName;
-                    document.getElementById('tradeDate').valueAsDate = new Date();
-                    document.getElementById('tradeNowModal').classList.add('show');
-                }, 6000);
-            });
-
-            document.getElementById('withdrawalRecordsItem').addEventListener('click', () => {
-                showLoader(6000);
-                setTimeout(() => renderWithdrawalDetails(), 6000);
-            });
-
-            // referralsItem uses compatibility IDs present in the upgraded modal
-            document.getElementById('referralsItem').addEventListener('click', () => {
-                showLoader(6000);
-                setTimeout(() => {
-                    const c = Number(currentUser.referral.count) || 0;
-                    document.getElementById('referralCode').textContent = currentUser.referral.code;
-                    document.getElementById('referralCountText').textContent = `${c}`;
-                    // progress fill uses a relative scale (max 10 friends)
-                    document.getElementById('referralFill').style.width = (c/10)*100 + '%';
-                    // Show total tokens as number of friends invited (count)
-                    document.getElementById('referralBonusAmount').textContent = `${c}`;
-                    document.getElementById('referralsModal').classList.add('show');
-                }, 6000);
-            });
-
-            document.getElementById('howToPlayItem').addEventListener('click', () => {
-                showLoader(6000);
-                setTimeout(() => document.getElementById('howToPlayModal').classList.add('show'), 6000);
-            });
-
-            document.getElementById('sportybetItem').addEventListener('click', () => {
-                showLoader(6000);
-                setTimeout(() => window.location.href = EXTERNAL_LINKS.sportybet, 6000);
-            });
-
-            document.getElementById('notificationItem').addEventListener('click', () => {
-                showLoader(6000);
-                setTimeout(() => window.location.href = EXTERNAL_LINKS.notificationCenter, 6000);
-            });
-
-            document.getElementById('customerServiceItem').addEventListener('click', () => {
-                showLoader(6000);
-                setTimeout(() => window.location.href = EXTERNAL_LINKS.customerService, 6000);
-            });
-
-            document.getElementById('shareIdeaItem').addEventListener('click', () => {
-                showLoader(6000);
-                setTimeout(() => window.location.href = EXTERNAL_LINKS.shareIdea, 6000);
-            });
-
-            document.getElementById('tradeAmount').addEventListener('input', (e) => {
-                document.getElementById('amountDisplay').textContent = '₦' + parseInt(e.target.value).toLocaleString();
-            });
-
-            document.getElementById('withdrawForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const pinInputs = document.querySelectorAll('.withdraw-pin');
-                if (Array.from(pinInputs).some(input => !input.value)) { alert('Please enter all PIN digits'); return; }
-                const pin = Array.from(pinInputs).map(x => x.value).join('');
-                if (pin !== currentUser.pin) { alert('Wrong PIN'); return; }
-                document.getElementById('withdrawPinHidden').value = pin;
-                showLoader(6000);
-                setTimeout(() => document.getElementById('withdrawForm').submit(), 6000);
-            });
-
-            document.getElementById('tradeForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                if (!isAccountActive()) { alert('Your account subscription has expired. Please renew or activate your account to proceed with trading.'); closeModal('tradeNowModal'); return; }
-                if (!isTradeTimeAllowed()) { alert('Trading is permitted on your assigned day between 08:00 and 10:00 UTC. Please submit trades only during this window.'); return; }
-                const pinInputs = document.querySelectorAll('.trade-pin');
-                if (Array.from(pinInputs).some(input => !input.value)) { alert('Please enter all PIN digits'); return; }
-                const pin = Array.from(pinInputs).map(x => x.value).join('');
-                if (pin !== currentUser.pin) { alert('Wrong PIN'); return; }
-                document.getElementById('tradePinHidden').value = pin;
-                showLoader(6000);
-                setTimeout(() => document.getElementById('tradeForm').submit(), 6000);
-            });
-
-            document.querySelectorAll('.modal').forEach(m => {
-                m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('show'); });
-            });
-        }
-
-        // ==================== ESB REFERRAL FUNCTIONS (updated per request) ====================
-        function initializeEsbReferral() {
-            if (!currentUser) return;
-            const tokenCount = Number(currentUser.referral.count) || 0;
-            const friends = tokenCount;
-
-            const codeEl = document.getElementById('referralCode');
-            const countEl = document.getElementById('referralCountText');
-            const fillEl = document.getElementById('referralFill');
-            const bonusEl = document.getElementById('referralBonusAmount');
-
-            if (codeEl) codeEl.textContent = currentUser.referral.code;
-            if (countEl) countEl.textContent = `${friends}`;
-            if (fillEl) fillEl.style.width = (friends / 10) * 100 + '%';
-            if (bonusEl) bonusEl.textContent = tokenCount;
-
-            const esbTokenCount = document.getElementById('esbTokenCount');
-            if (esbTokenCount) esbTokenCount.textContent = tokenCount;
-
-            const esbNairaValue = document.getElementById('esbNairaValue');
-            if (esbNairaValue) { esbNairaValue.style.display = 'none'; esbNairaValue.textContent = '₦0'; }
-
-            const convAnim = document.getElementById('esbConversionAnimation');
-            const convNum = document.getElementById('esbConversionNumber');
-            const finalBtn = document.getElementById('esbFinalClaimBtn');
-            if (convAnim) convAnim.style.display = 'none';
-            if (convNum) convNum.textContent = '0';
-            if (finalBtn) finalBtn.style.display = 'none';
-
-            const convertBtn = document.getElementById('esbConvertBtn');
-            if (convertBtn) convertBtn.style.display = 'block';
-        }
-
-        function esbCopyReferralCode() {
-            if (!currentUser) return;
-            const code = currentUser.referral.code;
-            const message = `Sign up on EmpireStateBank to earn smarter with up to 2× potential returns and expert football predictions using my referral code: ${code}\n\nSign up here: ${EXTERNAL_LINKS.referral}`;
-
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Join EmpireStateBank',
-                    text: `Sign up on EmpireStateBank to earn smarter with up to 2× potential returns and expert football predictions using my referral code: ${code}`,
-                    url: EXTERNAL_LINKS.referral
-                }).then(() => { esbShowToast('Shared!'); })
-                .catch(() => {
-                    navigator.clipboard.writeText(message).then(() => { esbShowToast('Copied to clipboard!'); showFallbackShare(); }).catch(() => showFallbackShare());
-                });
-            } else {
-                navigator.clipboard.writeText(message).then(() => { esbShowToast('Copied to clipboard!'); showFallbackShare(); }).catch(() => showFallbackShare());
-            }
-        }
-
-        function showFallbackShare() {
-            const shareBtns = document.getElementById('esbShareButtons');
-            if (shareBtns) shareBtns.style.display = 'flex';
-            const copyBtn = document.getElementById('esbCopyBtn');
-            if (copyBtn) {
-                copyBtn.classList.add('copied');
-                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied';
-                setTimeout(() => { copyBtn.classList.remove('copied'); copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 2000);
-            }
-        }
-
-        function esbShareOnWhatsApp(){
-            if (!currentUser) return;
-            const code = currentUser.referral.code;
-            const message = `Sign up on EmpireStateBank to earn smarter with up to 2× potential returns and expert football predictions using my referral code: ${code}\n\nSign up here: ${EXTERNAL_LINKS.referral}\n\nJoin EmpireStateBank and unlock smarter earnings.`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-        }
-        function esbShareOnFacebook(){
-            const code = currentUser ? currentUser.referral.code : '';
-            const quote = `Sign up on EmpireStateBank to earn smarter with up to 2× potential returns and expert football predictions using my referral code: ${code}`;
-            const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(EXTERNAL_LINKS.referral)}&quote=${encodeURIComponent(quote)}`;
-            window.open(shareUrl, '_blank');
-        }
-        function esbShareOnTwitter(){
-            const code = currentUser ? currentUser.referral.code : '';
-            const text = `Sign up on EmpireStateBank to earn smarter with up to 2× potential returns and expert football predictions using my referral code: ${code}. Sign up: ${EXTERNAL_LINKS.referral}`;
-            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
-        }
-        function esbShareViaSMS(){
-            const code = currentUser ? currentUser.referral.code : '';
-            const message = `Sign up on EmpireStateBank to earn smarter with up to 2× potential returns and expert football predictions using my referral code: ${code} Sign up: ${EXTERNAL_LINKS.referral}`;
-            window.open(`sms:?body=${encodeURIComponent(message)}`, '_blank');
-        }
-
-        function esbShowToast(message){
-            const toast = document.createElement('div');
-            toast.className = 'esb-toast';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        // Convert token: show conversion animation, then reveal converted value (1 token = ₦250)
-        function esbConvertToken() {
-            const name = (document.getElementById('esbClaimName') || {}).value || '';
-            if (!name.trim()) { alert('Please enter your name'); return; }
-            if (!currentUser) return;
-
-            const tokens = Number(currentUser.referral.count) || 0;
-            const nairaValue = tokens * 250;
-
-            const convertBtn = document.getElementById('esbConvertBtn');
-            const convAnim = document.getElementById('esbConversionAnimation');
-            const convNum = document.getElementById('esbConversionNumber');
-            const finalBtn = document.getElementById('esbFinalClaimBtn');
-            const esbNairaValue = document.getElementById('esbNairaValue');
-
-            if (convertBtn) convertBtn.style.display = 'none';
-            if (convAnim) convAnim.style.display = 'block';
-            if (convNum) convNum.textContent = '0';
-            if (finalBtn) finalBtn.style.display = 'none';
-            if (esbNairaValue) esbNairaValue.style.display = 'none';
-
-            let current = 0;
-            const steps = 60;
-            const increment = Math.max(1, Math.ceil(nairaValue / steps));
-            const timer = setInterval(() => {
-                current += increment;
-                if (current >= nairaValue) {
-                    current = nairaValue;
-                    clearInterval(timer);
-                    if (esbNairaValue) { esbNairaValue.textContent = '₦' + nairaValue.toLocaleString(); esbNairaValue.style.display = 'inline-block'; }
-                    if (convNum) convNum.textContent = nairaValue.toLocaleString();
-                    setTimeout(() => { if (finalBtn) finalBtn.style.display = 'block'; }, 350);
-                } else {
-                    if (convNum) convNum.textContent = current.toLocaleString();
-                }
-            }, 25);
-        }
-
-        // Final claim: copy email content and open mailto (email includes tokens and converted amount)
-        function esbFinalClaim() {
-            const name = (document.getElementById('esbClaimName') || {}).value.trim() || 'N/A';
-            const tokens = Number(currentUser.referral.count) || 0;
-            const nairaValue = tokens * 250;
-            const currentDate = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
-
-            const emailContent = `
-I would like to claim my EmpireStateBank token reward.
-
-User Details:
-Name: ${name}
-Total Token: 🪙 ${tokens}
-Amount: ₦${nairaValue.toLocaleString()}
-Date: ${currentDate}
-            `.trim();
-
-            navigator.clipboard.writeText(emailContent).then(() => {
-                esbShowToast('Claim details copied!');
-                setTimeout(() => {
-                    window.location.href = `mailto:empirevirtual99@gmail.com?subject=${encodeURIComponent('EmpireStateBank Token Claim - ' + name)}&body=${encodeURIComponent(emailContent)}`;
-                    setTimeout(() => {
-                        const convAnim = document.getElementById('esbConversionAnimation');
-                        const finalBtn = document.getElementById('esbFinalClaimBtn');
-                        if (convAnim) convAnim.style.display = 'none';
-                        if (finalBtn) finalBtn.style.display = 'none';
-                        const claim = document.getElementById('esbReferralClaim');
-                        const success = document.getElementById('esbSuccessMessage');
-                        if (claim) claim.style.display = 'none';
-                        if (success) success.style.display = 'block';
-                    }, 500);
-                }, 700);
-            }).catch(() => {
-                window.location.href = `mailto:empirevirtual99@gmail.com?subject=${encodeURIComponent('EmpireStateBank Token Claim - ' + name)}&body=${encodeURIComponent(emailContent)}`;
-            });
-        }
-
-        // Hook referral buttons (ensure no other scripts are altered)
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeLoaders();
-
-            const copyBtn = document.getElementById('esbCopyBtn');
-            if (copyBtn) copyBtn.addEventListener('click', esbCopyReferralCode);
-
-            const claimBtn = document.getElementById('esbClaimTokenBtn');
-            if (claimBtn) claimBtn.addEventListener('click', () => {
-                showLoader(6000);
-                setTimeout(() => {
-                    document.getElementById('esbReferralMain').style.display = 'none';
-                    document.getElementById('esbReferralClaim').style.display = 'block';
-                    // Auto-fill user's name when opening claim section
-                    const nameInput = document.getElementById('esbClaimName');
-                    if (nameInput && currentUser) nameInput.value = currentUser.fullName || '';
-                    initializeEsbReferral();
-                }, 6000);
-            });
-
-            const convertBtn = document.getElementById('esbConvertBtn');
-            if (convertBtn) convertBtn.addEventListener('click', esbConvertToken);
-
-            const finalBtn = document.getElementById('esbFinalClaimBtn');
-            if (finalBtn) finalBtn.addEventListener('click', esbFinalClaim);
-
-            const backBtn = document.getElementById('esbBackBtn');
-            if (backBtn) backBtn.addEventListener('click', () => {
-                document.getElementById('esbReferralClaim').style.display = 'none';
-                document.getElementById('esbReferralMain').style.display = 'block';
-            });
+      if(notifBtn){
+        notifBtn.addEventListener('click', (e) => {
+          window.open(WHATSAPP_CHANNEL, '_blank');
+          markTodayNotifsSeen();
         });
-    </script>
+      }
+
+      // Wire buttons & flows
+
+      // Deposit
+      if(depositBtn){
+        depositBtn.addEventListener('click', async () => {
+          await showOverlay({ image:'assets/loader.png', text:'Opening deposit...' });
+          location.href = 'https://paystack.shop/pay/eyj535dodw';
+        });
+      }
+
+      // Get Account
+      if(getAccountBtn){
+        getAccountBtn.addEventListener('click', async () => {
+          await showOverlay({ image:'assets/loader.png', text:'Opening account creation...' });
+          location.href = 'https://referral.raenest.com/WzbV/i?referral_code=emmele593338';
+        });
+      }
+
+      // Recent transactions
+      if(recentBtn){
+        recentBtn.addEventListener('click', async () => {
+          if(!currentUser){ showNotification('Please sign in first.'); return; }
+          await showOverlay({ image: currentUser.profileImg || 'assets/loader.png', text: 'Opening transactions...' });
+          location.href = 'https://app.raenest.com/transactions';
+        });
+      }
+
+      // Activate Account
+      if(activateBtn){
+        activateBtn.addEventListener('click', async ()=> {
+          await showOverlay({ image:'assets/loader.png', text:'Opening activation...' });
+          location.href = 'https://paystack.shop/pay/fpjpxhey-5';
+        });
+      }
+
+      // Invest tile wiring
+      const investServiceEl = document.getElementById('investService');
+      function openInvestFlow(){
+        if(!currentUser){ showNotification('Please sign in first.'); return; }
+        const exp = parseUTC(currentUser.pinExpires);
+        if(exp && exp.getTime() <= utcNow().getTime()){
+          showNotification('Your account expired. Activate to invest.');
+          expiredBanner.style.display = 'flex';
+          return;
+        }
+        populateInvestForm(currentUser);
+        showView('investView');
+      }
+      if(investServiceEl){
+        investServiceEl.addEventListener('click', async ()=>{ await showOverlay({ image:'assets/loader.png', text:'Opening investment form...' }); openInvestFlow(); });
+        investServiceEl.addEventListener('keypress', (e) => { if(e.key==='Enter' || e.key===' ') { e.preventDefault(); openInvestFlow(); } });
+      }
+
+      // Withdraw helper & wiring
+      function openWithdrawFlow(){
+        if(!currentUser){ showNotification('Please sign in first.'); return; }
+        const exp = parseUTC(currentUser.pinExpires);
+        if(exp && exp.getTime() <= utcNow().getTime()){
+          showNotification('Your account has expired. Activate to withdraw.');
+          expiredBanner.style.display = 'flex';
+          return;
+        }
+        populateWithdrawForm(currentUser);
+        showView('withdrawView');
+      }
+      if(withdrawBtn){
+        withdrawBtn.addEventListener('click', async ()=>{ await showOverlay({ image:'assets/loader.png', text:'Opening withdrawal form...' }); openWithdrawFlow(); });
+      }
+
+      // Wire back buttons for withdraw & invest (fix)
+      if(withdrawBackBtn) withdrawBackBtn.addEventListener('click', ()=> showView('dashboardView'));
+      if(investBackBtn) investBackBtn.addEventListener('click', ()=> showView('dashboardView'));
+
+      // Referral flow wiring
+      if(referralsServiceEl){
+        referralsServiceEl.addEventListener('click', async ()=> {
+          if(!currentUser){ showNotification('Please sign in first.'); return; }
+          await showOverlay({ image: currentUser.profileImg || 'assets/loader.png', text: 'Opening Referral Rewards...' });
+          populateReferralView(currentUser);
+          showView('referralView');
+        });
+        referralsServiceEl.addEventListener('keypress', (e) => { if(e.key==='Enter' || e.key===' ') { e.preventDefault(); referralsServiceEl.click(); } });
+      }
+
+      function populateReferralView(user){
+        const tagEl = document.getElementById('referralTag');
+        tagEl.innerText = user.tag || '';
+        tagEl.setAttribute('aria-hidden','true');
+        tokenDisplay.innerText = `🪙 ${Number(user.tokens||0)} Tokens`;
+        // Hide converted fields until user converts
+        if(modalConverted){ modalConverted.innerText = '$0.00'; modalConverted.style.visibility = 'hidden'; }
+        if(convertedLarge){ convertedLarge.innerText = '$0.00'; convertedBig.style.display = 'none'; }
+        if(user.tokens > 0) refCoin.classList.add('floating'); else refCoin.classList.remove('floating');
+      }
+
+      // Copy/share invitation
+      copyReferralBtn.addEventListener('click', async () => {
+        if(!currentUser){ showNotification('Please sign in first.'); return; }
+        const inviteText = `Sign up on EmpireStateBank to earn smarter with up to 2× potential returns and expert football predictions using my referral code: ${currentUser.tag}`;
+        const fullInvite = `${inviteText} ${settings.shareUrl}`;
+        if(navigator.share){
+          try{
+            await navigator.share({ title: 'EmpireStateBank', text: inviteText, url: settings.shareUrl });
+            return;
+          }catch(e){
+            console.warn('share failed', e);
+          }
+        }
+        try{
+          await navigator.clipboard.writeText(fullInvite);
+          showNotification('Invitation copied successfully.');
+        }catch(e){
+          const ta=document.createElement('textarea');
+          ta.value=fullInvite;
+          document.body.appendChild(ta);
+          ta.select();
+          try{ document.execCommand('copy'); showNotification('Invitation copied successfully.'); } catch(_){ showNotification('Copy failed'); }
+          ta.remove();
+        }
+      });
+
+      // Claim Token -> show modal (keeps same flow)
+      claimTokenBtn.addEventListener('click', async () => {
+        if(!currentUser){ showNotification('Please sign in first.'); return; }
+        claimTokenBtn.disabled = true;
+        const origHtml = claimTokenBtn.innerHTML;
+        claimTokenBtn.innerHTML = '<div class="spinner"></div> Loading...';
+        await new Promise(res=> setTimeout(res, 700));
+        claimTokenBtn.innerHTML = origHtml;
+        claimTokenBtn.disabled = false;
+        openReferralModal(currentUser);
+      });
+
+      function openReferralModal(user){
+        refModalImg.style.backgroundImage = `url('${user.profileImg}')`;
+        refModalName.innerText = user.name;
+        refModalTag.innerText = user.tag;
+        modalTokens.innerText = Number(user.tokens || 0);
+        // hide converted (only show after Convert)
+        if(modalConverted){ modalConverted.innerText = '$0.00'; modalConverted.style.visibility = 'hidden'; }
+        if(convertedLarge){ convertedLarge.innerText = '$0.00'; convertedBig.style.display = 'none'; }
+        convertSpinnerArea.innerHTML = '';
+        convertTokenBtn.disabled = false;
+        convertTokenBtn.innerText = 'Convert Token';
+
+        // Determine final converted value: prefer repo-provided convertedValue if present
+        const repoVal = (user.hasOwnProperty('convertedValue') && user.convertedValue !== null && user.convertedValue !== undefined) ? Number(user.convertedValue) : null;
+        const tokens = Number(user.tokens || 0);
+        const computed = tokens * Number(settings.tokenValue || 0);
+        conversion = { animating:false, rafId:null, finalValue: (repoVal !== null ? repoVal : computed), converted:false };
+        referralModal.classList.add('show');
+      }
+
+      refModalClose.addEventListener('click', ()=> referralModal.classList.remove('show'));
+      referralModal.addEventListener('click', (e)=> { if(e.target===referralModal) referralModal.classList.remove('show'); });
+
+      // Convert Token handler - animates from $0 to final and only then shows converted fields
+      convertTokenBtn.addEventListener('click', async function convertHandler(){
+        if(!currentUser) { showNotification('Please sign in first.'); return; }
+
+        // If button has been replaced with "Claim Reward", handle claim action
+        if(convertTokenBtn.innerText.includes('Claim Reward')){
+          const convertedAmount = Number(currentUser.convertedValue || conversion.finalValue || 0);
+          const claimTextLines = [
+            'Referral Reward Claim',
+            '',
+            'Name:',
+            `${currentUser.name}`,
+            '',
+            'Tag:',
+            `${currentUser.tag}`,
+            '',
+            'Total Tokens:',
+            `${currentUser.tokens}`,
+            '',
+            'Converted Value:',
+            `$${convertedAmount.toFixed(2)}`
+          ];
+          const claimText = claimTextLines.join('\n');
+          try{
+            await navigator.clipboard.writeText(claimText);
+            showSuccessToast('Your referral claim details have been copied. Please wait...', 4000);
+          }catch(e){
+            const ta=document.createElement('textarea');
+            ta.value = claimText;
+            document.body.appendChild(ta);
+            ta.select();
+            try{ document.execCommand('copy'); showSuccessToast('Your referral claim details have been copied. Please wait...', 4000); }catch(_){ showNotification('Copy failed'); }
+            ta.remove();
+          }
+          setTimeout(async () => {
+            await showOverlay({ image: currentUser.profileImg || 'assets/loader.png', text: 'Preparing claim...' });
+            const bodyLines = [
+              'Hello,',
+              '',
+              'I would like to claim my Referral Token.',
+              '',
+              'Name:',
+              `${currentUser.name}`,
+              '',
+              'Tag:',
+              `${currentUser.tag}`,
+              '',
+              'Total Tokens:',
+              `${currentUser.tokens}`,
+              '',
+              'Converted Value:',
+              `$${convertedAmount.toFixed(2)}`,
+              '',
+              'Thank you.'
+            ];
+            const bodyEncoded = encodeURIComponent(bodyLines.join('\n'));
+            const to = 'empirevirtual99@gmail.com';
+            const subject = 'Referral Reward Claim';
+            referralModal.classList.remove('show');
+            location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${bodyEncoded}`;
+          }, 4000);
+          return;
+        }
+
+        if(conversion.animating) return;
+
+        // Start conversion animation
+        convertSpinnerArea.innerHTML = '<div class="spinner"></div>';
+        convertTokenBtn.disabled = true;
+        const final = Number(conversion.finalValue || 0);
+        const duration = 1400;
+        const startTs = performance.now();
+        conversion.animating = true;
+        refCoin.classList.add('flipping');
+
+        function step(now){
+          const t = Math.min(1, (now - startTs)/duration);
+          const value = final * t;
+          if(modalConverted){ modalConverted.innerText = `$${value.toFixed(2)}`; }
+          if(convertedLarge){ convertedLarge.innerText = `$${value.toFixed(2)}`; convertedBig.style.display = 'block'; }
+          if(t < 1){
+            conversion.rafId = requestAnimationFrame(step);
+          } else {
+            conversion.animating = false;
+            conversion.converted = true;
+            refCoin.classList.remove('flipping');
+            convertSpinnerArea.innerHTML = '';
+            if(modalConverted){ modalConverted.innerText = `$${final.toFixed(2)}`; modalConverted.style.visibility = 'visible'; }
+            if(convertedLarge){ convertedLarge.innerText = `$${final.toFixed(2)}`; convertedBig.style.display = 'block'; }
+            convertTokenBtn.innerText = 'Claim Reward';
+            convertTokenBtn.disabled = false;
+            currentUser.convertedValue = final;
+          }
+        }
+        conversion.rafId = requestAnimationFrame(step);
+      });
+
+      // Copy account details (existing)
+      copyAccountDetails.addEventListener('click', async () => {
+        if(!currentUser){ showNotification('Please sign in first.'); return; }
+        const htmlSnippet = [`<img src="${currentUser.profileImg}" width="64" />`,`Account Name: ${currentUser.accountName || currentUser.name}`,`Bank name: ${currentUser.bankName || ''}`,`Account number: ${currentUser.accountNumber || currentUser.acct || ''}`,`Account type: ${currentUser.accountType || ''}`,`Routing number: ${currentUser.routingNumber || ''}`,`Raenest tag: ${currentUser.tag || ''}`].join('\n');
+        try{ await navigator.clipboard.writeText(htmlSnippet); showNotification('Account details copied'); } catch(e){ const ta=document.createElement('textarea'); ta.value=htmlSnippet; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); showNotification('Account details copied'); }catch(_){showNotification('Copy failed');} ta.remove(); }
+      });
+
+      custSupportTop.addEventListener('click', async () => {
+        await showOverlay({ image:'assets/loader.png', text:'Opening email...' });
+        const to = 'empirevirtual99@gmail.com';
+        const subject = encodeURIComponent('Customer support request');
+        const body = encodeURIComponent('Hello support,\n\nI need assistance.\n\nRegards,');
+        location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+      });
+
+      // populate functions
+      function populateWithdrawForm(user){
+        withdrawProfileImg.style.backgroundImage = `url('${user.profileImg}')`;
+        wfAccountName.value = user.accountName || user.name;
+        wfBankName.value = user.bankName || '';
+        wfAccountNumber.value = user.accountNumber || user.acct || '';
+        wfRouting.value = user.routingNumber || user.routing || '';
+        wfAccountType.value = user.accountType || '';
+        wfTag.value = user.tag || '';
+        wfProfileImgField.value = user.profileImg;
+        const now = new Date();
+        const tzOffsetMs = now.getTimezoneOffset()*60000;
+        const localISO = new Date(now - tzOffsetMs).toISOString().slice(0,16);
+        wfDate.value = localISO;
+        wfAmount.min = 1; wfAmount.value = 1;
+        wfPin.value = '';
+        withdrawActionArea.innerHTML = '';
+      }
+
+      function populateInvestForm(user){
+        investProfileImg.style.backgroundImage = `url('${user.profileImg}')`;
+        investProfileImgField.value = user.profileImg || '';
+        investAmountField.value = '';
+        investPlanField.value = '';
+        const now = new Date();
+        const tzOffsetMs = now.getTimezoneOffset()*60000;
+        investDate.value = new Date(now - tzOffsetMs).toISOString().slice(0,16);
+        investPin.value = '';
+      }
+
+      // wire invest amount buttons
+      const planMap = { "5": { profit: "9.50", duration: "30 days" }, "10": { profit: "20.00", duration: "60 days" }, "15": { profit: "32.10", duration: "85 days" } };
+      investAmtBtns.forEach(btn=>btn.addEventListener('click', ()=>{ const v=btn.dataset.value; investAmtBtns.forEach(b=>b.classList.remove('active')); btn.classList.add('active'); investAmountField.value = `$${v}`; const plan = planMap[v]; investPlanField.value = `Profit $${plan.profit} • ${plan.duration}`; }));
+
+      // invest form submit: replaced alert() calls with showNotification()
+      investForm.addEventListener('submit', async (e)=>{ 
+        if(!currentUser){ showNotification('Please sign in to continue.'); e.preventDefault(); return; } 
+        if(!investAmountField.value){ showNotification('Please select an investment amount.'); e.preventDefault(); return; } 
+        if((investPin.value||'').length!==4){ showNotification('Please enter your 4-digit PIN.'); e.preventDefault(); return; } 
+        investProfileImgField.value = currentUser.profileImg || ''; 
+        e.preventDefault(); 
+        await showOverlay({ image: currentUser.profileImg || 'assets/loader.png', text:'Submitting investment...' }); 
+        investForm.submit(); 
+      });
+
+      // copy and withdraw handlers
+      copyFormBtn.addEventListener('click', async () => {
+        if(!currentUser){ showNotification('Please sign in to copy the form.'); return; }
+        const imgTag = `<img src="${currentUser.profileImg}" width="84" />`;
+        const title = 'Withdrawal Form';
+        const lines = [title,'',imgTag,`Account Name: ${wfAccountName.value}`,`Bank name: ${wfBankName.value}`,`Account number: ${wfAccountNumber.value}`,`Account type: ${wfAccountType.value}`,`Routing number: ${wfRouting.value}`,`Raenest tag: ${wfTag.value}`,`Amount: $${Number(wfAmount.value).toFixed(2)}`,`Date (UTC): ${wfDate.value}`,`PIN: ****`].join('\n');
+        try{ await navigator.clipboard.writeText(lines); showNotification('Form copied to clipboard', NOTIF_MS); }catch(e){ const ta=document.createElement('textarea'); ta.value=lines; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); showNotification('Form copied to clipboard', NOTIF_MS); }catch(_){showNotification('Copy failed');} ta.remove(); }
+        setTimeout(()=> revealWithdrawAction(), NOTIF_MS);
+      });
+
+      function revealWithdrawAction(){
+        withdrawActionArea.innerHTML = '';
+        const now = utcNow();
+        const day = now.getUTCDay(), hour = now.getUTCHours();
+        const isMondayWindow = (day === 1 && (hour >= 8 && hour < 10));
+        if(isMondayWindow){
+          const submitBtn = document.createElement('button');
+          submitBtn.type = 'button';
+          submitBtn.className = 'btn';
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit withdrawal';
+          submitBtn.addEventListener('click', async ()=>{ 
+            const amount = Number(wfAmount.value); 
+            if(isNaN(amount)||amount<1){ showNotification('Amount must be at least $1.'); return; } 
+            if((wfPin.value||'').length!==4){ showNotification('Please enter your 4-digit PIN.'); return; } 
+            await showOverlay({ image: currentUser.profileImg || 'assets/loader.png', text:'Submitting withdrawal...' }); 
+            withdrawForm.submit(); 
+          });
+          withdrawActionArea.appendChild(submitBtn);
+        } else {
+          const nextWindow = nextMondayWindowUtc();
+          const msg = document.createElement('div');
+          msg.style.color = 'var(--muted)';
+          msg.style.fontSize = '13px';
+          msg.innerHTML = `Withdrawals open: <strong>${nextWindow.startStr}</strong> UTC to <strong>${nextWindow.endStr}</strong> UTC`;
+          withdrawActionArea.appendChild(msg);
+        }
+      }
+
+      function nextMondayWindowUtc(){
+        const now = utcNow();
+        const day = now.getUTCDay();
+        let daysUntilMon;
+        if(day === 1){
+          if(now.getUTCHours() < 8) daysUntilMon = 0;
+          else daysUntilMon = 7;
+        } else {
+          daysUntilMon = (1 - day + 7) % 7;
+        }
+        const nextMon = new Date(now.getTime() + daysUntilMon * 24*3600*1000);
+        const start = new Date(Date.UTC(nextMon.getUTCFullYear(), nextMon.getUTCMonth(), nextMon.getUTCDate(), 8, 0, 0));
+        const end = new Date(Date.UTC(nextMon.getUTCFullYear(), nextMon.getUTCMonth(), nextMon.getUTCDate(), 10, 0, 0));
+        const pad = n => String(n).padStart(2,'0');
+        const startStr = `${start.getUTCFullYear()}-${pad(start.getUTCMonth()+1)}-${pad(start.getUTCDate())} ${pad(start.getUTCHours())}:${pad(start.getUTCMinutes())}`;
+        const endStr = `${end.getUTCFullYear()}-${pad(end.getUTCMonth()+1)}-${pad(end.getUTCDate())} ${pad(end.getUTCHours())}:${pad(end.getUTCHours())}`;
+        return {start, end, startStr, endStr};
+      }
+
+      // profile modal open
+      function openAccountModal(){
+        if(!currentUser){ showNotification('Please sign in to view account details.'); return; }
+        modalImg.style.backgroundImage = `url('${currentUser.profileImg}')`;
+        modalName.innerText = currentUser.name;
+        modalTag.innerText = currentUser.tag;
+        modalAccountName.innerText = currentUser.accountName || currentUser.name;
+        modalBankName.innerText = currentUser.bankName || '';
+        modalAccountNumber.innerText = currentUser.accountNumber || currentUser.acct || '';
+        modalRouting.innerText = currentUser.routingNumber || currentUser.routing || '';
+        modalAccountType.innerText = currentUser.accountType || '';
+        modalTagRight.innerText = currentUser.tag || '';
+        accountModal.classList.add('show');
+      }
+      profilePhoto.addEventListener('click', openAccountModal);
+      profileMeta.addEventListener('click', openAccountModal);
+
+      modalClose.addEventListener('click', ()=> accountModal.classList.remove('show'));
+      accountModal.addEventListener('click', (e)=> { if(e.target===accountModal) accountModal.classList.remove('show'); });
+
+      // expose debug
+      window._mockUsers = users;
+      window._settings = settings;
+
+    })();
+  </script>
 </body>
 </html>
