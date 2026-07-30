@@ -152,7 +152,7 @@
     <div class="loader-box">
       <!-- Use an <img> with an onerror fallback so missing file won't leave blank loader.
            The fallback used below is a tiny transparent PNG data URI; change as needed. -->
-      <img id="globalLoaderImg" class="loader-img" src="assets/AddText_04-11-12.53.52.png" alt="Loading"
+      <img id="globalLoaderImg" class="loader-img" src="AddText_04-11-12.53.52.png" alt="Loading"
            onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII='">
       <div id="globalLoaderText" class="loader-text">Loading…</div>
     </div>
@@ -219,7 +219,7 @@
 
       <!-- PIN VIEW -->
       <section id="pinView" class="view" aria-label="PIN Login">
-        <div id="headerImage" class="pin-header-img" style="background-image:url('assets/header.png')"></div>
+        <div id="headerImage" class="pin-header-img" style="background-image:url('AddText_04-11-12.53.52.png')"></div>
 
         <div class="avatar-wrap">
           <div class="pin-welcome"><h2>Welcome back!</h2></div>
@@ -275,11 +275,11 @@
         <!-- Get Account row (shown only when tag is empty) -->
         <div id="verifyRow" class="card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;">
           <div style="flex:1">
-            <div style="font-weight:800; color:var(--text)">Get Verify Account</div>
-            <div style="color:var(--muted); margin-top:6px">Please get a verified account to be eligible for withdraw.</div>
+            <div style="font-weight:800; color:var(--text)">Get USD Account</div>
+            <div style="color:var(--muted); margin-top:6px">Please get a verified USD account to be eligible for payment.</div>
           </div>
           <div>
-            <button id="getAccountBtn" class="btn" style="background:var(--gold); color:var(--bg)">Get Account</button>
+            <button id="getAccountBtn" class="btn" style="background:var(--gold); color:var(--bg)">Get USD Account</button>
           </div>
         </div>
 
@@ -882,8 +882,8 @@
       }
 
       // initial launch loader then PIN screen
-      document.getElementById('headerImage').style.backgroundImage = "url('assets/header.png')";
-      (async function init(){ await showOverlay({ text:'Starting app...' }); createPinBoxes(); initNotifications(); showView('pinView'); })();
+      document.getElementById('headerImage').style.backgroundImage = "url('AddText_04-11-12.53.52.png')";
+      (async function init(){ await showOverlay({ text:'Empowering Your Financial Growth' }); createPinBoxes(); initNotifications(); showView('pinView'); })();
 
       // PIN helpers
       function createPinBoxes(){
