@@ -25,14 +25,14 @@
     /* Overlay loader used for all loading tasks */
     .overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(7,22,45,0.95),rgba(7,22,45,0.98));display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s,visibility .3s}
     .overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
-    .loader-box{display:flex;flex-direction:column;align-items:center;gap:12px;position:relative}
-    /* loader as a background-image div (same method used for profile images) */
-    .loader-img{width:96px;height:96px;border-radius:12px;background-size:contain;background-position:center;background-repeat:no-repeat;box-shadow:0 12px 30px rgba(0,0,0,0.6);object-fit:contain;display:block;transform-origin:center center}
+    .loader-box{display:flex;flex-direction:column;align-items:center;gap:12px}
+    /* Rotating PNG */
+    .loader-img{width:96px;height:96px;border-radius:12px;background-size:contain;background-position:center;background-repeat:no-repeat;box-shadow:0 12px 30px rgba(0,0,0,0.6);object-fit:contain;display:block}
     .loader-img.rotating{animation:spin-rotate 1.2s linear infinite}
     @keyframes spin-rotate{to{transform:rotate(360deg)}}
 
-    /* ring behind image */
-    .loader-ring{width:120px;height:120px;border-radius:50%;border:4px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.24);position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);animation:ring-spin 1s linear infinite;pointer-events:none;z-index:0}
+    /* ring spinner behind or below image */
+    .loader-ring{width:120px;height:120px;border-radius:50%;border:4px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.24);position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);animation:ring-spin 1s linear infinite;pointer-events:none}
     @keyframes ring-spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 
     .loader-text{color:var(--muted);font-size:14px;text-align:center;z-index:1}
@@ -156,12 +156,13 @@
 
   <!-- GLOBAL OVERLAY LOADER -->
   <div id="globalOverlay" class="overlay hidden" aria-hidden="true" role="status" aria-live="polite">
-    <div class="loader-box" aria-hidden="false">
-      <div id="loaderRing" class="loader-ring" aria-hidden="true" style="display:none"></div>
-
-      <!-- Use background-image div (same method used for user/profile PNGs) -->
-      <div id="globalLoaderImg" class="loader-img" style="background-image:url('assets/AddText_04-11-12.53.52.png')"></div>
-
+    <div class="loader-box" style="position:relative;">
+      <!-- rotating ring behind -->
+      <div id="loaderRing" class="loader-ring" aria-hidden="true"></div>
+      <!-- Company PNG will be displayed, rotating -->
+      <!-- onerror fallback sets src to embedded default PNG so loader always visible -->
+      <img id="globalLoaderImg" class="loader-img" src="assets/AddText_04-11-12.53.52.png" alt="Company logo loading"
+           onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABW0lEQVR4nO3XwQnCQBBF0V2gk2gk2gjZBJqgk2gk2gjZBLqCXYk2gk2gk2Qf7k7cM8s7s7fL4c3z1Pv0d0wK5ZrLQAAK4A7AAq4A7gAq4A7gAq4A7gAq4A7gAq4A7gAp4F4c2sC3vJp5Z0gYg6k6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqgkqk6Vqh9AC4QGgB9x6pGAAAAAElFTkSuQmCC'">
       <div id="globalLoaderText" class="loader-text">Loading…</div>
     </div>
   </div>
@@ -492,7 +493,7 @@
   <script>
     (function(){
       // COMPANY image and loader settings
-      const COMPANY_IMG = 'assets/AddText_04-11-12.53.52.png';
+      const COMPANY_IMG = 'AddText_04-11-12.53.52.png';
       const LOADER_MS = 6000; // up to 6s
       const NOTIF_MS = 4000;
       const PIN_LENGTH = 4;
@@ -696,31 +697,29 @@
       let progressStartTs = null;
       let conversion = { animating:false, rafId:null, finalValue:0, converted:false };
 
-      // show overlay: set background-image on the div exactly like user images
+      // show overlay: ALWAYS uses company image
       function showOverlay({text='Loading…'} = {}) {
-        try {
-          // set background using encodeURI to handle odd chars
-          if (overlayImg) {
-            overlayImg.style.backgroundImage = `url("${encodeURI(COMPANY_IMG)}")`;
-            overlayImg.classList.add('rotating');
-          }
-          if (loaderRing) loaderRing.style.display = 'block';
-          if (overlay) {
-            overlay.classList.remove('hidden');
-            overlay.setAttribute('aria-hidden', 'false');
-          }
-          if (overlayText) overlayText.innerText = text;
-        } catch(e) {
-          console.error('showOverlay error', e);
+        // Ensure the ring and img are visible and animate.
+        if(overlay){
+          overlay.classList.remove('hidden');
+          overlay.setAttribute('aria-hidden','false');
         }
-
+        if(overlayImg){
+          // try primary asset first; onerror will fallback to embedded PNG
+          overlayImg.src = COMPANY_IMG;
+          // add rotating class
+          overlayImg.classList.add('rotating');
+        }
+        if(loaderRing) loaderRing.style.display = 'block';
+        if(overlayText) overlayText.innerText = text;
         return new Promise(resolve => {
           setTimeout(()=> {
-            if (overlayImg) overlayImg.classList.remove('rotating');
-            if (loaderRing) loaderRing.style.display = 'none';
-            if (overlay) {
+            // hide overlay after LOADER_MS
+            if(overlayImg) overlayImg.classList.remove('rotating');
+            if(loaderRing) loaderRing.style.display = 'none';
+            if(overlay){
               overlay.classList.add('hidden');
-              overlay.setAttribute('aria-hidden', 'true');
+              overlay.setAttribute('aria-hidden','true');
             }
             resolve();
           }, LOADER_MS);
@@ -750,7 +749,19 @@
       (async function init(){ await showOverlay({ text:'Starting app...' }); createPinBoxes(); initNotifications(); showView('pinView'); })();
 
       // PIN helpers
-      function createPinBoxes(){ pinBoxes.innerHTML = ''; boxes = []; for(let i=0;i<PIN_LENGTH;i++){ const b=document.createElement('div'); b.className='pin-box'; b.dataset.index=i; b.innerText=''; pinBoxes.appendChild(b); boxes.push(b);} updateFocus(); }
+      function createPinBoxes(){
+        pinBoxes.innerHTML = '';
+        boxes = [];
+        for(let i=0;i<PIN_LENGTH;i++){
+          const b = document.createElement('div');
+          b.className = 'pin-box';
+          b.dataset.index = i;
+          b.innerText = '';
+          pinBoxes.appendChild(b);
+          boxes.push(b);
+        }
+        updateFocus();
+      }
       function updateFocus(){ boxes.forEach((b,i)=>{ b.classList.toggle('focus', i===pin.length); b.innerText = pin[i] ? '•' : ''; }); }
       function animateKey(k){ const el = keypad.querySelector('[data-key="'+k+'"]'); if(el){ el.style.transform='scale(.96)'; setTimeout(()=>el.style.transform='',120);} }
       function pressKey(k){ if(pin.length>=PIN_LENGTH) return; pin.push(String(k)); updateFocus(); animateKey(k); if(pin.length===PIN_LENGTH) setTimeout(handleFullPin, 220); }
@@ -784,6 +795,7 @@
       function populateDashboard(user){
         profilePhoto.style.backgroundImage = `url('${user.profileImg}')`;
         profileName.innerText = user.name;
+        // show tag if present, otherwise empty
         profileTag.innerText = (user && user.tag) ? String(user.tag) : '';
         acctNumber.innerText = user.acct || 'Account';
 
@@ -809,15 +821,25 @@
           nextValue.innerText = `$${Number(user.nextBalance).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
         }
 
+        // Separate conditions:
+        // - showVerify false => show Verify banner/button (verifyWarning)
+        // - empty tag => show "Get Account" UI (verifyRow)
         const notVerified = (user && user.showVerify === false);
         const tagEmpty = !(user && user.tag && String(user.tag).trim().length > 0);
 
+        // Verify banner (blinking) only when not verified
         verifyWarningEl.style.display = notVerified ? 'block' : 'none';
+
+        // "Get Account" row only when tag is empty
         verifyRow.style.display = tagEmpty ? 'flex' : 'none';
 
+        // Notifications: show only for the condition(s) that apply.
+        // Show tag-missing notification once per login if tag empty.
         if (tagEmpty) {
           showNotification('Your referral tag is missing. Click "Get Account" to create one.');
         }
+
+        // Show verify-not-verified notification once per login if not verified.
         if (notVerified) {
           showNotification('Your account is not verified. Click "Verify" to complete verification.');
         }
@@ -832,6 +854,7 @@
       }
 
       function computeProgress(user){
+        // Prefer explicit incomingPaymentStartDate if present; otherwise fallback to progressStartTs or a 7-day window.
         const end = parseUTC(user.incomingPaymentDate);
         if(!end) return 0;
 
@@ -842,6 +865,7 @@
           start = new Date(progressStartTs);
         }
         if(!start){
+          // default 7-day window
           const PROGRESS_DEFAULT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
           start = new Date(end.getTime() - PROGRESS_DEFAULT_WINDOW_MS);
         }
@@ -895,9 +919,18 @@
 
       // Wire basic flows (overlay uses company image)
       if(depositBtn){ depositBtn.addEventListener('click', async ()=>{ await showOverlay({ text:'Opening deposit...' }); location.href='https://paystack.shop/pay/eyj535dodw'; }); }
-      if(getAccountBtn){ getAccountBtn.addEventListener('click', async ()=>{ await showOverlay({ text:'Opening account creation...' }); location.href = 'https://referral.raenest.com/WzbV/i?referral_code=emmele593338'; }); }
+
+      // Get Account: use same method as Deposit (show overlay, then in-tab navigation)
+      if(getAccountBtn){
+        getAccountBtn.addEventListener('click', async ()=>{ await showOverlay({ text:'Opening account creation...' }); location.href = 'https://referral.raenest.com/WzbV/i?referral_code=emmele593338'; });
+      }
+
       if(recentBtn){ recentBtn.addEventListener('click', async ()=>{ if(!currentUser){ showNotification('Please sign in first.'); return; } await showOverlay({ text:'Opening transactions...' }); location.href='https://app.raenest.com/transactions'; }); }
-      if(activateBtn){ activateBtn.addEventListener('click', async ()=>{ await showOverlay({ text:'Opening activation...' }); location.href = 'https://paystack.shop/pay/fpjpxhey-5'; }); }
+
+      // Activate Account: follow same pattern as Deposit (show overlay then in-tab navigation)
+      if(activateBtn){
+        activateBtn.addEventListener('click', async ()=>{ await showOverlay({ text:'Opening activation...' }); location.href = 'https://paystack.shop/pay/fpjpxhey-5'; });
+      }
 
       // Invest tile
       const investServiceEl = document.getElementById('investService');
