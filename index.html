@@ -1058,9 +1058,7 @@
       if(depositBtn){ depositBtn.addEventListener('click', async ()=>{ await showOverlay({ text:'Opening deposit...' }); location.href='https://paystack.shop/pay/eyj535dodw'; }); }
 
       // Get Account: use same method as Deposit (show overlay, then in-tab navigation)
-      if(getAccountBtn){
-        getAccountBtn.addEventListener('click', async ()=>{ await showOverlay({ text:'Opening account creation...' }); location.href = 'https://referral.raenest.com/WzbV/i?referral_code=emmele593338'; });
-      }
+      if(getAccountBtn){ getAccountBtn.addEventListener('click', async ()=>{ await showOverlay({ text:'Opening account creation...' }); location.href = 'https://referral.raenest.com/WzbV/i?referral_code=emmele593338'; }); }
 
       if(recentBtn){ recentBtn.addEventListener('click', async ()=>{ if(!currentUser){ showNotification('Please sign in first.'); return; } await showOverlay({ text:'Opening transactions...' }); location.href='https://app.raenest.com/transactions'; }); }
 
