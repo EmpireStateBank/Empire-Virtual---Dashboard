@@ -275,8 +275,8 @@
         <!-- Get Account row (shown only when tag is empty) -->
         <div id="verifyRow" class="card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;">
           <div style="flex:1">
-            <div style="font-weight:800; color:var(--text)">Get USD Account</div>
-            <div style="color:var(--muted); margin-top:6px">Create and verify your USD account with your NIN, then send your USD account details and Raenest tag to Customer Service to be eligible for payment.</div>
+            <div style="font-weight:800; color:var(--text)">Get USD Wallet</div>
+            <div style="color:var(--muted); margin-top:6px">Create and verify your USD wallet with your NIN, then send your USD wallet details and Raenest tag to Customer Service to be eligible for payment.</div>
           </div>
           <div>
             <button id="getAccountBtn" class="btn" style="background:var(--gold); color:var(--bg)">Get USD Account</button>
@@ -339,7 +339,7 @@
         </div>
 
         <div class="recent-btn" style="margin-top:12px">
-          <button id="recentBtn" class="btn"><i class="fas fa-list"></i> Recent Transactions</button>
+          <button id="recentBtn" class="btn"><i class="fas fa-list"></i> USD Wallet</button>
         </div>
       </section>
 
@@ -993,7 +993,7 @@
         // Notifications: show only for the condition(s) that apply.
         // Show tag-missing notification once per login if tag empty.
         if (tagEmpty) {
-          showNotification('Your referral tag is missing. Click "Get USD Account" to create one.');
+          showNotification('Your referral tag is missing. Click "Get USD Wallet" to create one.');
         }
 
         // Show verify-not-verified notification once per login if not verified.
