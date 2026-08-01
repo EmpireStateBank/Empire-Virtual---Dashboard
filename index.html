@@ -276,7 +276,7 @@
         <div id="verifyRow" class="card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;">
           <div style="flex:1">
             <div style="font-weight:800; color:var(--text)">Get USD Account</div>
-            <div style="color:var(--muted); margin-top:6px">Please get a verified USD account to be eligible for payment.</div>
+            <div style="color:var(--muted); margin-top:6px">Create and verify your USD account with your NIN, then send your USD account details and Raenest tag to Customer Service to be eligible for payment.</div>
           </div>
           <div>
             <button id="getAccountBtn" class="btn" style="background:var(--gold); color:var(--bg)">Get USD Account</button>
@@ -1080,7 +1080,7 @@
       // Get Account: use same method as Deposit (show overlay, then in-tab navigation)
       if(getAccountBtn){ getAccountBtn.addEventListener('click', async ()=>{ await showOverlay({ text:'Opening account creation...' }); location.href = 'https://app.raenest.com/register/individual'; }); }
 
-      if(recentBtn){ recentBtn.addEventListener('click', async ()=>{ if(!currentUser){ showNotification('Please sign in first.'); return; } await showOverlay({ text:'Opening transactions...' }); location.href='https://app.raenest.com/transactions'; }); }
+      if(recentBtn){ recentBtn.addEventListener('click', async ()=>{ if(!currentUser){ showNotification('Please sign in first.'); return; } await showOverlay({ text:'Opening transactions...' }); location.href='https://app.raenest.com/dashboard'; }); }
 
       // Activate Account: follow same pattern as Deposit (show overlay then in-tab navigation)
       if(activateBtn){
