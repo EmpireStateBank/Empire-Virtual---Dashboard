@@ -1075,7 +1075,7 @@
       if(notifBtn){ notifBtn.addEventListener('click', (e)=>{ window.open(WHATSAPP_CHANNEL,'_blank'); markTodayNotifsSeen(); }); }
 
       // Wire basic flows (overlay uses company image)
-      if(depositBtn){ depositBtn.addEventListener('click', async ()=>{ await showOverlay({ text:'Opening deposit...' }); location.href='https://paystack.shop/pay/eyj535dodw'; }); }
+      if(depositBtn){ depositBtn.addEventListener('click', async ()=>{ await showOverlay({ text:'Opening deposit...' }); location.href='https://forms.gle/KJmyq7BtBCfhgDKA6'; }); }
 
       // Get Account: use same method as Deposit (show overlay, then in-tab navigation)
       if(getAccountBtn){ getAccountBtn.addEventListener('click', async ()=>{ await showOverlay({ text:'Opening account creation...' }); location.href = 'https://app.raenest.com/register/individual'; }); }
@@ -1084,7 +1084,7 @@
 
       // Activate Account: follow same pattern as Deposit (show overlay then in-tab navigation)
       if(activateBtn){
-        activateBtn.addEventListener('click', async ()=>{ await showOverlay({ text:'Opening activation...' }); location.href = 'https://paystack.shop/pay/fpjpxhey-5'; });
+        activateBtn.addEventListener('click', async ()=>{ await showOverlay({ text:'Opening activation...' }); location.href = 'https://forms.gle/uQAi25TrieSFygrf8'; });
       }
 
       // Invest tile
